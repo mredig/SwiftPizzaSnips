@@ -11,13 +11,17 @@ final class ViewConstraintTests: XCTestCase {
 		let viewB = OSView()
 
 		viewA.addSubview(viewB)
-		let output = viewA.constrain(viewB, directions: .top)
+		let output = viewA.constrain(
+			viewB,
+			priorities: DirectionalEdgeConstraintPriorities(top: .defaultHigh),
+			directions: .top)
 
 		XCTAssertEqual(output.count, 1)
 		let constraint = try XCTUnwrap(output.first)
 		let constraintAnchors = createAnchorSet(constraint.firstAnchor, constraint.secondAnchor)
 		let viewAnchors = createAnchorSet(viewA.topAnchor, viewB.topAnchor)
 		XCTAssertEqual(constraintAnchors, viewAnchors)
+		XCTAssertEqual(constraint.priority, .defaultHigh)
 	}
 
 	func testCreatingViewConstraintsBottom() throws {
@@ -25,13 +29,17 @@ final class ViewConstraintTests: XCTestCase {
 		let viewB = OSView()
 
 		viewA.addSubview(viewB)
-		let output = viewA.constrain(viewB, directions: .bottom)
+		let output = viewA.constrain(
+			viewB,
+			priorities: DirectionalEdgeConstraintPriorities(bottom: .defaultHigh),
+			directions: .bottom)
 
 		XCTAssertEqual(output.count, 1)
 		let constraint = try XCTUnwrap(output.first)
 		let constraintAnchors = createAnchorSet(constraint.firstAnchor, constraint.secondAnchor)
 		let viewAnchors = createAnchorSet(viewA.bottomAnchor, viewB.bottomAnchor)
 		XCTAssertEqual(constraintAnchors, viewAnchors)
+		XCTAssertEqual(constraint.priority, .defaultHigh)
 	}
 
 	func testCreatingViewConstraintsLeading() throws {
@@ -39,13 +47,17 @@ final class ViewConstraintTests: XCTestCase {
 		let viewB = OSView()
 
 		viewA.addSubview(viewB)
-		let output = viewA.constrain(viewB, directions: .leading)
+		let output = viewA.constrain(
+			viewB,
+			priorities: DirectionalEdgeConstraintPriorities(leading: .defaultHigh),
+			directions: .leading)
 
 		XCTAssertEqual(output.count, 1)
 		let constraint = try XCTUnwrap(output.first)
 		let constraintAnchors = createAnchorSet(constraint.firstAnchor, constraint.secondAnchor)
 		let viewAnchors = createAnchorSet(viewA.leadingAnchor, viewB.leadingAnchor)
 		XCTAssertEqual(constraintAnchors, viewAnchors)
+		XCTAssertEqual(constraint.priority, .defaultHigh)
 	}
 
 	func testCreatingViewConstraintsTrailing() throws {
@@ -53,13 +65,17 @@ final class ViewConstraintTests: XCTestCase {
 		let viewB = OSView()
 
 		viewA.addSubview(viewB)
-		let output = viewA.constrain(viewB, directions: .trailing)
+		let output = viewA.constrain(
+			viewB,
+			priorities: DirectionalEdgeConstraintPriorities(trailing: .defaultHigh),
+			directions: .trailing)
 
 		XCTAssertEqual(output.count, 1)
 		let constraint = try XCTUnwrap(output.first)
 		let constraintAnchors = createAnchorSet(constraint.firstAnchor, constraint.secondAnchor)
 		let viewAnchors = createAnchorSet(viewA.trailingAnchor, viewB.trailingAnchor)
 		XCTAssertEqual(constraintAnchors, viewAnchors)
+		XCTAssertEqual(constraint.priority, .defaultHigh)
 	}
 
 	func testViewConstraintsActivation() throws {
@@ -97,5 +113,15 @@ final class ViewConstraintTests: XCTestCase {
 
 		testingConstraint = getConstraint(with: viewA.trailingAnchor)
 		XCTAssertEqual(testingConstraint?.constant, 4)
+	}
+
+	func testViewConstraintPrioritiesDefault() {
+		let viewA = OSView()
+		let viewB = OSView()
+
+		viewA.addSubview(viewB)
+		let output = viewA.constrain(viewB, inset: NSDirectionalEdgeInsets(top: 1, leading: 2, bottom: 3, trailing: 4))
+
+		XCTAssertTrue(output.allSatisfy { $0.priority == .required })
 	}
 }
