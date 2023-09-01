@@ -4,7 +4,7 @@ import Combine
 
 final class CombineTests: XCTestCase {
 
-	@available(macOS 15.0, *)
+	@available(macOS 15.0, iOS 13.0, *)
 	func testBag() {
 		var bag: Bag = []
 
