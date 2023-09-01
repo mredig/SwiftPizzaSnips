@@ -21,16 +21,12 @@ public extension OSView {
 		_ childView: OSView,
 		inset: NSDirectionalEdgeInsets = .zero,
 		priorities: DirectionalEdgeConstraintPriorities = .required,
-		directions: DirectionalToggle = .all,
-		activate: Bool = false) -> [NSLayoutConstraint] {
+		directions: DirectionalToggle = .all) -> [NSLayoutConstraint] {
 			assert(childView.isSubviewOf(self), "\(childView) is not a subview of \(self). Cannot create constraints.")
 
 			childView.translatesAutoresizingMaskIntoConstraints = false
 
 			var constraints: [NSLayoutConstraint] = []
-			defer {
-				if activate { NSLayoutConstraint.activate(constraints) }
-			}
 
 			if directions.top == .create {
 				constraints += [
@@ -72,6 +68,10 @@ public extension OSView {
 		}
 		return false
 	}
+}
+
+public extension Array where Element == NSLayoutConstraint {
+	func activate() { NSLayoutConstraint.activate(self) }
 }
 
 @available(macOS 10.15, *)

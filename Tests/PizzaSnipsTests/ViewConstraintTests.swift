@@ -62,7 +62,7 @@ final class ViewConstraintTests: XCTestCase {
 		XCTAssertEqual(constraintAnchors, viewAnchors)
 	}
 
-	func testViewConstraintsNotActivated() throws {
+	func testViewConstraintsActivation() throws {
 		let viewA = OSView()
 		let viewB = OSView()
 
@@ -70,15 +70,7 @@ final class ViewConstraintTests: XCTestCase {
 		let output = viewA.constrain(viewB)
 
 		XCTAssertTrue(output.allSatisfy { $0.isActive == false })
-	}
-
-	func testViewConstraintsActivated() throws {
-		let viewA = OSView()
-		let viewB = OSView()
-
-		viewA.addSubview(viewB)
-		let output = viewA.constrain(viewB, activate: true)
-
+		output.activate()
 		XCTAssertTrue(output.allSatisfy(\.isActive))
 	}
 
