@@ -1,5 +1,5 @@
 import XCTest
-@testable import PizzaSnips
+@testable import SwiftPizzaSnips
 
 final class PizzaSnipsTests: XCTestCase {
     func testExample() throws {
