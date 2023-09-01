@@ -175,8 +175,13 @@ public enum DirectionalToggleOption {
 	case skip
 }
 public typealias DirectionalToggle = DirectionalMeasurement<DirectionalToggleOption>
-public extension DirectionalToggle {
-	static let all = DirectionalToggle(uniform: .create)
-	static let horizontal = DirectionalToggle(horizontal: .create, vertical: .skip)
-	static let vertical = DirectionalToggle(horizontal: .skip, vertical: .create)
+extension DirectionalToggle: Withable {
+	public static let all = DirectionalToggle(uniform: .create)
+	public static let horizontal = DirectionalToggle(horizontal: .create, vertical: .skip)
+	public static let vertical = DirectionalToggle(horizontal: .skip, vertical: .create)
+
+	public static let top = DirectionalToggle(uniform: .skip).with { $0.top = .create }
+	public static let bottom = DirectionalToggle(uniform: .skip).with { $0.bottom = .create }
+	public static let leading = DirectionalToggle(uniform: .skip).with { $0.leading = .create }
+	public static let trailing = DirectionalToggle(uniform: .skip).with { $0.trailing = .create }
 }
