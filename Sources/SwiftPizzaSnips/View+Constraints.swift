@@ -1,0 +1,182 @@
+#if os(macOS)
+import AppKit
+
+public typealias OSView = NSView
+public typealias ConstraintPriority = NSLayoutConstraint.Priority
+#elseif os(iOS) || os(tvOS)
+import UIKit
+
+public typealias OSView = UIView
+public typealias ConstraintPriority = UILayoutPriority
+#endif
+
+
+public extension OSView {
+	/**
+	 requires that the childview is ALREADY a child view
+	 */
+	@available(macOS 10.15, *)
+	@discardableResult
+	func constrain(
+		_ childView: OSView,
+		inset: NSDirectionalEdgeInsets = .zero,
+		priorities: DirectionalEdgeConstraintPriorities = .required,
+		directions: DirectionalToggle = .all,
+		activate: Bool = false) -> [NSLayoutConstraint] {
+			assert(childView.isSubviewOf(self), "\(childView) is not a subview of \(self). Cannot create constraints.")
+
+			childView.translatesAutoresizingMaskIntoConstraints = false
+
+			var constraints: [NSLayoutConstraint] = []
+			defer {
+				if activate { NSLayoutConstraint.activate(constraints) }
+			}
+
+			if directions.top == .create {
+				constraints += [
+					childView.topAnchor.constraint(equalTo: topAnchor, constant: inset.top)
+						.withPriority(priorities.top)
+				]
+			}
+
+			if directions.leading == .create {
+				constraints += [
+					childView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset.leading)
+						.withPriority(priorities.leading)
+				]
+			}
+			if directions.bottom == .create {
+				constraints += [
+					bottomAnchor.constraint(equalTo: childView.bottomAnchor, constant: inset.bottom)
+						.withPriority(priorities.bottom)
+				]
+			}
+			if directions.trailing == .create {
+				constraints += [
+					trailingAnchor.constraint(equalTo: childView.trailingAnchor, constant: inset.trailing)
+						.withPriority(priorities.trailing)
+				]
+			}
+
+			return constraints
+		}
+
+	private func isSubviewOf(_ possibleSuperview: OSView) -> Bool {
+		var current: OSView? = self
+		while let sub = current {
+			defer { current = sub.superview }
+			guard
+				sub.superview === possibleSuperview
+			else { continue }
+			return true
+		}
+		return false
+	}
+}
+
+@available(macOS 10.15, *)
+public extension NSDirectionalEdgeInsets {
+
+	static let zero = NSDirectionalEdgeInsets()
+	static let eight = NSDirectionalEdgeInsets(scalar: 8)
+	static let sixteen = NSDirectionalEdgeInsets(scalar: 16)
+
+	init(horizontal: Double = 0, vertical: Double = 0) {
+		self.init(
+			top: vertical,
+			leading: horizontal,
+			bottom: vertical,
+			trailing: horizontal)
+	}
+
+	init(scalar: Double = 0) {
+		self.init(
+			top: scalar,
+			leading: scalar,
+			bottom: scalar,
+			trailing: scalar)
+	}
+}
+
+public struct DirectionalMeasurement<Measurement> {
+	public var top: Measurement
+	public var leading: Measurement
+	public var bottom: Measurement
+	public var trailing: Measurement
+
+	public init(
+		top: Measurement,
+		leading: Measurement,
+		bottom: Measurement,
+		trailing: Measurement) {
+			self.top = top
+			self.leading = leading
+			self.bottom = bottom
+			self.trailing = trailing
+		}
+
+	public init(
+		horizontal: Measurement,
+		vertical: Measurement) {
+			self.init(
+				top: vertical,
+				leading: horizontal,
+				bottom: vertical,
+				trailing: horizontal)
+		}
+
+	public init(uniform: Measurement) {
+		self.init(
+			horizontal: uniform,
+			vertical: uniform)
+	}
+}
+
+public typealias DirectionalEdgeConstraintPriorities = DirectionalMeasurement<ConstraintPriority>
+public extension DirectionalEdgeConstraintPriorities {
+	static let required = DirectionalEdgeConstraintPriorities(uniform: .required)
+	static let defaultHigh = DirectionalEdgeConstraintPriorities(uniform: .defaultHigh)
+	static let defaultLow = DirectionalEdgeConstraintPriorities(uniform: .defaultLow)
+
+	init(
+		top: ConstraintPriority = .required,
+		leading: ConstraintPriority = .required,
+		bottom: ConstraintPriority = .required,
+		trailing: ConstraintPriority = .required) {
+			self.top = top
+			self.leading = leading
+			self.bottom = bottom
+			self.trailing = trailing
+		}
+	
+	init(
+		horizontal: ConstraintPriority = .required,
+		vertical: ConstraintPriority = .required) {
+			self.init(
+				top: vertical,
+				leading: horizontal,
+				bottom: vertical,
+				trailing: horizontal)
+		}
+	
+	init(uniform: ConstraintPriority = .required) {
+		self.init(
+			horizontal: uniform,
+			vertical: uniform)
+	}
+	
+	init(floatLiteral value: Float) {
+		self.init(uniform: ConstraintPriority(value))
+	}
+}
+
+public enum DirectionalToggleOption {
+	case create
+	case skip
+}
+public typealias DirectionalToggle = DirectionalMeasurement<DirectionalToggleOption>
+public extension DirectionalToggle {
+	static let all = DirectionalToggle(uniform: .create)
+	static let horizontal = DirectionalToggle(horizontal: .create, vertical: .skip)
+	static let vertical = DirectionalToggle(horizontal: .skip, vertical: .create)
+}
