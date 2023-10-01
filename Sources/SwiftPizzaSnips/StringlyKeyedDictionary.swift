@@ -12,7 +12,7 @@ where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
 	public var dictionary: [String: Value]
 
-	init(dictionary: [String : Value], type: StringlyKey.Type) {
+	public init(dictionary: [String : Value], type: StringlyKey.Type) {
 		self.dictionary = dictionary
 	}
 
