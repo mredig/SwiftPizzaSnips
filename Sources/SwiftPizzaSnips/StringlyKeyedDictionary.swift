@@ -12,8 +12,12 @@ where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
 	public var dictionary: [String: Value]
 
-	public init(dictionary: [String : Value], type: StringlyKey.Type) {
+	public init(dictionary: [String: Value], type: StringlyKey.Type) {
 		self.dictionary = dictionary
+	}
+
+	public init(dictionary: [String: Value]) {
+		self.init(dictionary: dictionary, type: StringlyKey.self)
 	}
 
 	public subscript(key: StringlyKey) -> Value? {

@@ -3,15 +3,15 @@ import XCTest
 
 final class StringlyKeyedDictionaryTests: XCTestCase {
 
-	func testStringlyKeyedDictionary() {
-		struct Keysss: RawRepresentable {
-			static let foo = Keysss(rawValue: "foo")
-			static let bar = Keysss(rawValue: "bar")
-			static let mismatch = Keysss(rawValue: "baz")
-			
-			let rawValue: String
-		}
+	struct Keysss: RawRepresentable {
+		static let foo = Keysss(rawValue: "foo")
+		static let bar = Keysss(rawValue: "bar")
+		static let mismatch = Keysss(rawValue: "baz")
 
+		let rawValue: String
+	}
+
+	func testStringlyKeyedDictionary() {
 		let starterDict = [
 			"foo": 5,
 			"bar": 10,
@@ -32,5 +32,12 @@ final class StringlyKeyedDictionaryTests: XCTestCase {
 		XCTAssertEqual(keyedDict[.foo], 50)
 		XCTAssertNotEqual(keyedDict[.mismatch], 15)
 		XCTAssertEqual(keyedDict[.mismatch], 100)
+	}
+
+	func testStringlyKeyedSimplerInit() {
+		// this doesn't actually need any assertions, but demonstrates how to init with an explicit type and an empty
+		// dictionary
+		let testing = StringlyKeyedDictionary<Keysss, Any>(dictionary: [:])
+		XCTAssertNil(testing[.foo])
 	}
 }
