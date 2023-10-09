@@ -30,7 +30,7 @@ public extension ContiguousArray {
 	}
 }
 
-extension Optional where Wrapped == String {
+public extension Optional where Wrapped == String {
 	var nilIsEmpty: Wrapped {
 		switch self {
 		case .none:
