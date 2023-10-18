@@ -6,19 +6,59 @@ public class DefaultsManager {
 	public static let shared = DefaultsManager()
 
 	public func getValue<Value>(for key: Key<Value>) -> Value? {
-		Self.defaults.object(forKey: key.rawValue) as? Value
+		if let transform = key.transform {
+			guard
+				let data = Self.defaults.data(forKey: key.rawValue)
+			else { return nil }
+			do {
+				return try transform.get(data)
+			} catch {
+				print("Error converting stored data for key: \(error)")
+				return nil
+			}
+		} else {
+			return Self.defaults.object(forKey: key.rawValue) as? Value
+		}
 	}
 
 	public func getValue<Value>(for key: KeyWithDefault<Value>) -> Value {
-		(Self.defaults.object(forKey: key.rawValue) as? Value) ?? key.defaultValue
+		if let transform = key.transform {
+			guard
+				let data = Self.defaults.data(forKey: key.rawValue)
+			else { return key.defaultValue }
+			do {
+				return try transform.get(data)
+			} catch {
+				print("Error converting stored data for key: \(error)")
+				return key.defaultValue
+			}
+		} else {
+			return (Self.defaults.object(forKey: key.rawValue) as? Value) ?? key.defaultValue
+		}
 	}
 
 	public func setValue<Value>(_ value: Value?, for key: KeyWithDefault<Value>) {
-		Self.defaults.set(value, forKey: key.rawValue)
+		let key = Key<Value>(rawValue: key.rawValue)
+
+		setValue(value, for: key)
 	}
 
 	public func setValue<Value>(_ value: Value?, for key: Key<Value>) {
-		Self.defaults.set(value, forKey: key.rawValue)
+		guard let value else {
+			Self.defaults.removeObject(forKey: key.rawValue)
+			return
+		}
+
+		if let transform = key.transform {
+			do {
+				let data = try transform.set(value)
+				Self.defaults.set(data, forKey: key.rawValue)
+			} catch {
+				print("Error converting value for key \(key) to data: \(error)")
+			}
+		} else {
+			Self.defaults.set(value, forKey: key.rawValue)
+		}
 	}
 
 	public subscript<Value>(key: Key<Value>) -> Value? {
@@ -41,7 +81,7 @@ public class DefaultsManager {
 
 	public struct Key<Value>: RawRepresentable {
 		public let rawValue: String
-		private var transform: Transform<Value>?
+		internal private(set) var transform: Transform<Value>?
 
 		public init(rawValue: String) {
 			self.rawValue = rawValue
@@ -64,7 +104,7 @@ public class DefaultsManager {
 
 		public let defaultValue: Value
 
-		private var transform: Transform<Value>?
+		internal private(set) var transform: Transform<Value>?
 
 		@available(*, deprecated, message: "Always fails. Use init(rawValue:, defaultValue:)")
 		public init?(rawValue: String) { nil }
@@ -81,7 +121,7 @@ public class DefaultsManager {
 			return new
 		}
 
-		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) -> Data) -> Self {
+		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) throws -> Data) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
