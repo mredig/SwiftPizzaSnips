@@ -38,9 +38,13 @@ public class DefaultsManager {
 	}
 
 	public func setValue<Value>(_ value: Value?, for key: KeyWithDefault<Value>) {
-		let key = Key<Value>(rawValue: key.rawValue)
+		var newKey = Key<Value>(rawValue: key.rawValue)
 
-		setValue(value, for: key)
+		if let transform = key.transform {
+			newKey = newKey.withTransform(transform)
+		}
+
+		setValue(value, for: newKey)
 	}
 
 	public func setValue<Value>(_ value: Value?, for key: Key<Value>) {
