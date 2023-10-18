@@ -1,9 +1,22 @@
 import Foundation
 
-public class DefaultsManager {
+@available(macOS 10.15, *)
+public class DefaultsManager: ObservableObject {
 	private static let defaults = UserDefaults.standard
 
+	private var bag = Bag()
+
 	public static let shared = DefaultsManager()
+	private init() {
+		NotificationCenter
+			.default
+			.publisher(for: UserDefaults.didChangeNotification)
+			.receive(on: RunLoop.main)
+			.sink(receiveValue: { [weak self] _ in
+				self?.objectWillChange.send()
+			})
+			.store(in: &bag)
+	}
 
 	public func getValue<Value>(for key: Key<Value>) -> Value? {
 		if let transform = key.transform {
