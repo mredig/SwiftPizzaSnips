@@ -1,6 +1,8 @@
 import Foundation
 
 public extension URL {
+	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	/// listed in an array
 	static func relativeComponents(from origin: URL, to destination: URL) throws -> [String] {
 		guard
 			origin.scheme == destination.scheme
@@ -36,13 +38,16 @@ public extension URL {
 		return outPath
 	}
 
+	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	static func relativePath(from origin: URL, to destination: URL) throws -> String {
 		try relativeComponents(from: origin, to: destination).joined(separator: "/")
 	}
 
+	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
+	/// suitable for creating symlinks
 	static func relativeFileURL(from origin: URL, to destination: URL) throws -> URL {
 		guard
-			[origin, destination].allSatisfy({ $0.scheme == "file" })
+			[origin, destination].allSatisfy({ $0.isFileURL })
 		else { throw RelativePathError.oneOrBothURLsNotFilepathURL }
 
 		if #available(macOS 13.0, *) {
