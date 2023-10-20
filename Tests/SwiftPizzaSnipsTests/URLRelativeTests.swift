@@ -132,4 +132,22 @@ final class URLRelativeTests: XCTestCase {
 		let parent = URL.commonParentDirectoryURL(from: urls)
 		XCTAssertNil(parent)
 	}
+
+	func testParentCheck() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+		let urlC = URL(filePath: "/Users/nobody/")
+		let urlD = URL(filePath: "/Users/nobody")
+		let urlE = URL(filePath: "/Users/nobody/file.txt")
+		let urlF = URL(filePath: "/Users/nobody/De")
+
+		XCTAssertFalse(urlB.isAParentOf(urlA))
+		XCTAssertTrue(urlC.isAParentOf(urlA))
+		XCTAssertFalse(urlA.isAParentOf(urlB))
+		XCTAssertFalse(urlA.isAParentOf(urlC))
+		XCTAssertFalse(urlA.isAParentOf(urlD))
+		XCTAssertTrue(urlD.isAParentOf(urlA))
+		XCTAssertFalse(urlE.isAParentOf(urlA))
+		XCTAssertFalse(urlF.isAParentOf(urlA))
+	}
 }

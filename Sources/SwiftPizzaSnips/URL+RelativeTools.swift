@@ -115,6 +115,23 @@ public extension URL {
 		return common
 	}
 
+	func isAParentOf(_ url: URL) -> Bool {
+		var new = self
+		if hasDirectoryPath == false {
+			if #available(macOS 13.0, *) {
+				new = URL(filePath: path(percentEncoded: false), directoryHint: .isDirectory)
+			} else {
+				new = URL(fileURLWithPath: path, isDirectory: true)
+			}
+		}
+//		return URL.commonParentDirectoryURL(between: new, and: url) == new
+		if #available(macOS 13.0, *) {
+			return url.path(percentEncoded: false).hasPrefix(new.path(percentEncoded: false))
+		} else {
+			return url.path.hasPrefix(new.path)
+		}
+	}
+
 	// sourcery:localizedError
 	enum RelativePathError: Error {
 		case mismatchedURLScheme
