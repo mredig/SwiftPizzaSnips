@@ -27,4 +27,47 @@ public extension String {
 		var rng = SystemRandomNumberGenerator()
 		return randomLoremIpsum(wordCount: count, using: &rng)
 	}
+
+	static func random<R: RandomNumberGenerator>(
+		characterCount count: Int,
+		from characterSet: CharacterSet = .urlHostAllowed,
+		using rng: inout R
+	) -> String {
+		var validCharacters: Set<Character> = []
+
+		let bitmap = characterSet.bitmapRepresentation
+		let mask: UInt8 = 1
+		for (byteIndex, byte) in bitmap.enumerated() {
+			guard byteIndex < 8192 else { break }
+			let bitOffset = byteIndex * 8
+			for offset in 0..<8 {
+				let base = (byte >> offset) & mask
+				if base > 0 {
+					let totalBitOffset = bitOffset + offset
+					guard
+						let scalar = UnicodeScalar(totalBitOffset)
+					else { fatalError("Invalid value") }
+					let character = Character(scalar)
+					validCharacters.insert(character)
+				}
+			}
+		}
+
+		guard validCharacters.isOccupied else { return "" }
+
+		var accumulator = ""
+		for _ in 0..<count {
+			let new = validCharacters.randomElement(using: &rng)!
+			accumulator.append(new)
+		}
+		return accumulator
+	}
+
+	static func random(
+		characterCount count: Int,
+		from characterSet: CharacterSet = .urlHostAllowed
+	) -> String {
+		var rng = SystemRandomNumberGenerator()
+		return random(characterCount: count, from: characterSet, using: &rng)
+	}
 }
