@@ -124,6 +124,7 @@ public extension URL {
 				new = URL(fileURLWithPath: path, isDirectory: true)
 			}
 		}
+		// TODO: bench a comparison between these methods sometime.
 //		return URL.commonParentDirectoryURL(between: new, and: url) == new
 		if #available(macOS 13.0, *) {
 			return url.path(percentEncoded: false).hasPrefix(new.path(percentEncoded: false))
