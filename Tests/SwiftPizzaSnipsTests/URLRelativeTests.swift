@@ -5,7 +5,7 @@ final class URLRelativeTests: XCTestCase {
 
 	@available(iOS 13.0, *)
 	func testURLRelativeFilePaths() throws {
-		let urlA = URL(filePath: "/Users/nobody/Desktop/Junk/Don't look in here/Secret stuff/")
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 
 		let pathComponents = [
@@ -32,5 +32,104 @@ final class URLRelativeTests: XCTestCase {
 		XCTAssertThrowsError(try URL.relativeComponents(from: urlA, to: urlB)) { error in
 			XCTAssertEqual(URL.RelativePathError.mismatchedURLScheme, error as? URL.RelativePathError)
 		}
+	}
+
+	func testURLParentDirectoryPair() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+		let expectedParent = URL(filePath: "/Users/nobody/")
+
+		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
+		XCTAssertEqual(expectedParent, parent)
+	}
+
+	func testURLParentDirectoryFilePait() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Planets.epub")
+		let urlB = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Stars.epub")
+		let expectedParent = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/")
+
+		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
+		XCTAssertEqual(expectedParent, parent)
+	}
+
+	func testURLParentWebURL() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
+		let urlB = URL(string: "https://foo.com")!
+
+		let parentA = URL.commonParentDirectoryURL(between: urlA, and: urlB)
+		XCTAssertNil(parentA)
+
+		let parentB = URL.commonParentDirectoryURL(between: urlB, and: urlA)
+		XCTAssertNil(parentB)
+	}
+
+	func testURLParentFileURL() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+		let expectedParent = URL(filePath: "/Users/nobody/")
+
+		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
+		XCTAssertEqual(expectedParent, parent)
+	}
+
+	func testURLParentWithSimpleArray() {
+		let urls = [
+			URL(filePath: "/Users/nobody/Documents", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/Downloads", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/Pictures", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/Music", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/WorkProjects", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/Personal", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/TravelPhotos", directoryHint: .isDirectory),
+			URL(filePath: "/Users/nobody/Programming", directoryHint: .isDirectory),
+		]
+
+		let expectedParent = URL(filePath: "/Users/nobody/")
+
+		let parent = URL.commonParentDirectoryURL(from: urls)
+		XCTAssertEqual(expectedParent, parent)
+	}
+
+	func testURLParentWithMoreComplicatedArray() {
+		let urls = [
+			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/TravelPhotos/Europe/Italy/Rome"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Music/Playlists/Workout"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Documents/School/Physics/Homework"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Programming/Swift/PersonalProjects/App1"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Pictures/Family/2021/Christmas"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Personal/Finance/2022/Taxes"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design/Logo.ai"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/TravelPhotos/Europe/Italy/Rome/Colosseum.jpg"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Music/Playlists/Workout/Track1.mp3"),
+			URL(filePath: "/Users/nobody/Desktop/Documents/School/Physics/Homework/Assignment1.docx"),
+		]
+
+		let expectedParent = URL(filePath: "/Users/nobody/Desktop/")
+
+		let parent = URL.commonParentDirectoryURL(from: urls)
+		XCTAssertEqual(expectedParent, parent)
+	}
+
+	func testURLParentWithInvalidArray() {
+		let urls = [
+			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design"),
+			URL(string: "https://foo.com")!,
+			URL(filePath: "/Users/nobody/Desktop/Stuff/TravelPhotos/Europe/Italy/Rome"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Music/Playlists/Workout"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Documents/School/Physics/Homework"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Programming/Swift/PersonalProjects/App1"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Pictures/Family/2021/Christmas"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Personal/Finance/2022/Taxes"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design/Logo.ai"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/TravelPhotos/Europe/Italy/Rome/Colosseum.jpg"),
+			URL(filePath: "/Users/nobody/Desktop/Stuff/Music/Playlists/Workout/Track1.mp3"),
+			URL(filePath: "/Users/nobody/Desktop/Documents/School/Physics/Homework/Assignment1.docx"),
+		]
+
+		let parent = URL.commonParentDirectoryURL(from: urls)
+		XCTAssertNil(parent)
 	}
 }

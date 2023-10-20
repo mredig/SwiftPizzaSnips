@@ -52,6 +52,64 @@ public extension URL {
 		}
 	}
 
+	/// `pathA` and `pathB` must both be file scheme URLs and point to a directory
+	/// (enforced via the soft heuristics `.hasDirectoryPath`). If it appears to point to a file, the last component will
+	/// be removed.
+	static func commonParentDirectoryURL(between pathA: URL, and pathB: URL) -> URL? {
+		var pathA = pathA
+		var pathB = pathB
+
+		if pathA.hasDirectoryPath == false {
+			pathA.deleteLastPathComponent()
+		}
+		if pathB.hasDirectoryPath == false {
+			pathB.deleteLastPathComponent()
+		}
+
+		guard
+			[pathA, pathB].allSatisfy({ $0.isFileURL && $0.hasDirectoryPath })
+		else { return nil }
+		guard pathA != pathB else { return pathA }
+
+		let aComponents = pathA.absoluteURL.pathComponents
+		let bComponents = pathB.absoluteURL.pathComponents
+
+		var index = 0
+		var pathAccumulator: [String] = []
+		while
+			let aComponent = aComponents[optional: index],
+			let bComponent = bComponents[optional: index] {
+			defer { index += 1 }
+
+			guard aComponent == bComponent else { break }
+			pathAccumulator.append(aComponent)
+		}
+
+		if pathAccumulator.first == "/" {
+			pathAccumulator.popFirst()
+		}
+
+		let commonPath = "/" + pathAccumulator.joined(separator: "/")
+		if #available(macOS 13.0, *) {
+			return URL(filePath: commonPath, directoryHint: .isDirectory)
+		} else {
+			return URL(fileURLWithPath: commonPath, isDirectory: true)
+		}
+	}
+
+	static func commonParentDirectoryURL(from urls: [URL]) -> URL? {
+		guard urls.count > 1 else { return urls.first }
+		var urls = urls
+
+		var common = urls.popLast()
+
+		for url in urls {
+			guard let previous = common else { return nil }
+			common = commonParentDirectoryURL(between: previous, and: url)
+		}
+		return common
+	}
+
 	// sourcery:localizedError
 	enum RelativePathError: Error {
 		case mismatchedURLScheme
