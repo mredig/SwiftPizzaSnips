@@ -41,4 +41,13 @@ extension NSManagedObjectContext {
 			}
 		}
 	}
+
+	public func noThrowSave(file: StaticString = #file, line: UInt = #line) {
+		do {
+			try save()
+		} catch {
+			print("Error saving core data context (\(line):\(file)) - \(error)")
+		}
+	}
 }
+

@@ -13,7 +13,12 @@ final class CoreDataTests: XCTestCase {
 			.unwrap()
 			.url(forResource: "Foo", withExtension: "momd")
 			.unwrap()
-		return try CoreDataStack(modelURL: modelURL)
+
+		let cds = try CoreDataStack(modelURL: modelURL)
+
+		cds.registerModel(Foo.self)
+		try cds.resetRegisteredTypesInContainer()
+		return cds
 	}
 
 	func testCoreDataRegisterModel() throws {
@@ -22,13 +27,13 @@ final class CoreDataTests: XCTestCase {
 
 		let stack = try testableCoreDataStack()
 
-		XCTAssertTrue(stack.registeredModels.isEmpty)
-		stack.registerModel(ExampleModel.self)
 		XCTAssertEqual(1, stack.registeredModels.count)
-		stack.registerModel(SecondModel.self)
-		XCTAssertEqual(2, stack.registeredModels.count)
 		stack.registerModel(ExampleModel.self)
 		XCTAssertEqual(2, stack.registeredModels.count)
+		stack.registerModel(SecondModel.self)
+		XCTAssertEqual(3, stack.registeredModels.count)
+		stack.registerModel(ExampleModel.self)
+		XCTAssertEqual(3, stack.registeredModels.count)
 	}
 
 	func testMergePolicySetterGetter() throws {
@@ -66,5 +71,33 @@ final class CoreDataTests: XCTestCase {
 
 		coreDataStack.mainContext.mergeConflictResolutionPolicy = .errorMergePolicyType
 		XCTAssertEqual(coreDataStack.mainContext.mergeConflictResolutionPolicy, .errorMergePolicyType)
+	}
+
+	func testNoThrowSave() async throws {
+		let coreDataStack = try testableCoreDataStack()
+		let context = coreDataStack.mainContext
+
+		let fetchRequest = NSFetchRequest<NSNumber>(entityName: "Foo")
+		fetchRequest.resultType = .countResultType
+		let beforeCount = try await context.perform {
+			let count = try context.fetch(fetchRequest) as? [Int] ?? []
+			return count.first ?? 0
+		}
+
+		// create new item
+		await context.perform {
+			let newFoo = Foo(context: context)
+			newFoo.id = UUID()
+			newFoo.value = String.randomLoremIpsum(wordCount: 5)
+
+			context.noThrowSave()
+		}
+
+		let afterCount = try await context.perform {
+			let count = try context.fetch(fetchRequest) as? [Int] ?? []
+			return count.first ?? 0
+		}
+
+		XCTAssertEqual(beforeCount + 1, afterCount)
 	}
 }
