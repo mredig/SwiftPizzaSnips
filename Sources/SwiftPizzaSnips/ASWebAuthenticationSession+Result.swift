@@ -1,7 +1,7 @@
 import AuthenticationServices
 
 @available(macOS 10.15, iOS 12.0, *)
-extension ASWebAuthenticationSession {
+public extension ASWebAuthenticationSession {
 	convenience init(url: URL, callbackURLScheme: String?, completion: @escaping (Result<URL, Error>) -> Void) {
 		self.init(
 			url: url,
