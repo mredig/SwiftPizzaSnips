@@ -17,3 +17,8 @@ public extension Withable {
 }
 
 extension NSObject: Withable {}
+
+extension JSONDecoder: Withable {}
+extension JSONEncoder: Withable {}
+extension PropertyListDecoder: Withable {}
+extension PropertyListEncoder: Withable {}
