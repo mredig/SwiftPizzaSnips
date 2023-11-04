@@ -18,6 +18,10 @@ let package = Package(
             name: "SwiftPizzaSnips"),
         .testTarget(
             name: "SwiftPizzaSnipsTests",
-            dependencies: ["SwiftPizzaSnips"]),
+            dependencies: ["SwiftPizzaSnips"],
+			resources: [
+				.copy("sample.bin"),
+			]
+		),
     ]
 )
