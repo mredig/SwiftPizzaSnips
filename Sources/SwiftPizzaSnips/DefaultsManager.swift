@@ -18,13 +18,13 @@ public class DefaultsManager: ObservableObject {
 			.store(in: &bag)
 	}
 
-	public func getValue<Value>(for key: Key<Value>) -> Value? {
-		if let transform = key.transform {
+	public func getValue<Value, StoredValue: PropertyListCodable>(for key: Key<Value, StoredValue>) -> Value? {
+		if let getTransform = key.transform?.get {
 			guard
-				let data = Self.defaults.data(forKey: key.rawValue)
+				let storedValue = Self.defaults.object(forKey: key.rawValue) as? StoredValue
 			else { return nil }
 			do {
-				return try transform.get(data)
+				return try getTransform(storedValue)
 			} catch {
 				print("Error converting stored data for key: \(error)")
 				return nil
@@ -34,13 +34,13 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
-	public func getValue<Value>(for key: KeyWithDefault<Value>) -> Value {
-		if let transform = key.transform {
+	public func getValue<Value, StoredValue: PropertyListCodable>(for key: KeyWithDefault<Value, StoredValue>) -> Value {
+		if let getTransform = key.transform?.get {
 			guard
-				let data = Self.defaults.data(forKey: key.rawValue)
+				let storedValue = Self.defaults.object(forKey: key.rawValue) as? StoredValue
 			else { return key.defaultValue }
 			do {
-				return try transform.get(data)
+				return try getTransform(storedValue)
 			} catch {
 				print("Error converting stored data for key: \(error)")
 				return key.defaultValue
@@ -51,8 +51,8 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
-	public func setValue<Value>(_ value: Value?, for key: KeyWithDefault<Value>) {
-		var newKey = Key<Value>(rawValue: key.rawValue)
+	public func setValue<Value, StoredValue: PropertyListCodable>(_ value: Value?, for key: KeyWithDefault<Value, StoredValue>) {
+		var newKey = Key<Value, StoredValue>(rawValue: key.rawValue)
 
 		if let transform = key.transform {
 			newKey = newKey.withTransform(transform)
@@ -61,15 +61,15 @@ public class DefaultsManager: ObservableObject {
 		setValue(value, for: newKey)
 	}
 
-	public func setValue<Value>(_ value: Value?, for key: Key<Value>) {
+	public func setValue<Value, StoredValue: PropertyListCodable>(_ value: Value?, for key: Key<Value, StoredValue>) {
 		guard let value else {
 			Self.defaults.removeObject(forKey: key.rawValue)
 			return
 		}
 
-		if let transform = key.transform {
+		if let setTransform = key.transform?.set {
 			do {
-				let data = try transform.set(value)
+				let data = try setTransform(value)
 				Self.defaults.set(data, forKey: key.rawValue)
 			} catch {
 				print("Error converting value for key \(key) to data: \(error)")
@@ -79,16 +79,16 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
-	public func removeValue<Value>(for key: Key<Value>) {
+	public func removeValue<Value, StoredValue: PropertyListCodable>(for key: Key<Value, StoredValue>) {
 		setValue(nil, for: key)
 	}
 
-	public func removeValue<Value>(for key: KeyWithDefault<Value>) {
-		let newKey = Key<Value>(rawValue: key.rawValue)
+	public func removeValue<Value, StoredValue: PropertyListCodable>(for key: KeyWithDefault<Value, StoredValue>) {
+		let newKey = Key<Value, StoredValue>(rawValue: key.rawValue)
 		removeValue(for: newKey)
 	}
 
-	public subscript<Value>(key: Key<Value>) -> Value? {
+	public subscript<Value, StoredValue: PropertyListCodable>(key: Key<Value, StoredValue>) -> Value? {
 		get {
 			getValue(for: key)
 		}
@@ -97,7 +97,7 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
-	public subscript<Value>(key: KeyWithDefault<Value>) -> Value {
+	public subscript<Value, StoredValue: PropertyListCodable>(key: KeyWithDefault<Value, StoredValue>) -> Value {
 		get {
 			getValue(for: key)
 		}
@@ -116,35 +116,73 @@ public class DefaultsManager: ObservableObject {
 //		}
 //	}
 
-	public struct Key<Value>: RawRepresentable {
+	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
-		internal private(set) var transform: Transform<Value>?
+		internal private(set) var transform: Transform<Value, StoredValue>?
 
 		public init(rawValue: String) {
 			self.rawValue = rawValue
 		}
 
-		public func withTransform(_ transform: Transform<Value>) -> Self {
+		public init(rawValue: String, storedValueType: StoredValue.Type) {
+			self.rawValue = rawValue
+		}
+
+		public func withTransform(_ transform: Transform<Value, StoredValue>) -> Self {
 			var new = self
 			new.transform = transform
 			return new
 		}
 
-		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) throws -> Data) -> Self {
+		public func withTransform(get: Transform<Value, StoredValue>.GetTransform?, set: Transform<Value, StoredValue>.SetTransform?) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
 	}
 
-	public struct KeyWithDefault<Value>: RawRepresentable {
+//	public struct KeyWithDefault<Value>: RawRepresentable {
+//		public let rawValue: String
+//
+//		public let defaultValue: Value
+//
+//		internal private(set) var transform: Transform<Value>?
+//
+//		@available(*, deprecated, message: "Always fails. Use init(rawValue:, defaultValue:)")
+//		public init?(rawValue: String) { nil }
+//
+//		public init(rawValue: String, defaultValue: Value) {
+//			self.rawValue = rawValue
+//			self.defaultValue = defaultValue
+//			self.transform = nil
+//		}
+//
+//		public func withTransform(_ transform: Transform<Value>) -> Self {
+//			var new = self
+//			new.transform = transform
+//			return new
+//		}
+//
+//		public func withTransform(get: Transform<Value>.GetTransform?, set: Transform<Value>.SetTransform?) -> Self {
+//			let transform = Transform(get: get, set: set)
+//			return withTransform(transform)
+//		}
+//	}
+
+	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
 
 		public let defaultValue: Value
 
-		internal private(set) var transform: Transform<Value>?
+		internal private(set) var transform: Transform<Value, StoredValue>?
 
 		@available(*, deprecated, message: "Always fails. Use init(rawValue:, defaultValue:)")
 		public init?(rawValue: String) { nil }
+
+		public init(rawValue: String, defaultValue: Value, storedValueType: StoredValue.Type) {
+			self.rawValue = rawValue
+			self.defaultValue = defaultValue
+			self.transform = nil
+		}
 
 		public init(rawValue: String, defaultValue: Value) {
 			self.rawValue = rawValue
@@ -152,25 +190,61 @@ public class DefaultsManager: ObservableObject {
 			self.transform = nil
 		}
 
-		public func withTransform(_ transform: Transform<Value>) -> Self {
+
+		public func withTransform(_ transform: Transform<Value, StoredValue>) -> Self {
 			var new = self
 			new.transform = transform
 			return new
 		}
 
-		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) throws -> Data) -> Self {
+		public func withTransform(get: Transform<Value, StoredValue>.GetTransform?, set: Transform<Value, StoredValue>.SetTransform?) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
 	}
 
-	public struct Transform<T> {
-		public let get: (Data) throws -> T
-		public let set: (T) throws -> Data
+//	public struct Transform<T> {
+//		public typealias GetTransform = (Data) throws -> T
+//		public typealias SetTransform = (T) throws -> Data
+//
+//		public let get: GetTransform?
+//		public let set: SetTransform?
+//
+//		public init(get: GetTransform?, set: SetTransform?) {
+//			self.get = get
+//			self.set = set
+//		}
+//	}
 
-		public init(get: @escaping (Data) throws -> T, set: @escaping (T) throws -> Data) {
+	public struct Transform<Input, Stored: PropertyListCodable> {
+		public typealias GetTransform = (Stored) throws -> Input
+		public typealias SetTransform = (Input) throws -> Stored
+
+		public let get: GetTransform?
+		public let set: SetTransform?
+
+		public init(get: GetTransform?, set: SetTransform?) {
 			self.get = get
 			self.set = set
 		}
 	}
 }
+//
+//@available(macOS 10.15, *)
+//extension DefaultsManager.KeyWithDefault where Value == StoredValue {
+//	public init(rawValue: String, defaultValue: Value, storedValueType: StoredValue.Type = Value.self) {
+//		self.rawValue = rawValue
+//		self.defaultValue = defaultValue
+//		self.transform = nil
+//	}
+//}
+
+public protocol PropertyListCodable {}
+extension String: PropertyListCodable {}
+extension Data: PropertyListCodable {}
+extension Int: PropertyListCodable {}
+extension Double: PropertyListCodable {}
+extension Float: PropertyListCodable {}
+extension Date: PropertyListCodable {}
+extension Array: PropertyListCodable where Element: PropertyListCodable {}
+extension Dictionary: PropertyListCodable where Key: PropertyListCodable, Value: PropertyListCodable {}

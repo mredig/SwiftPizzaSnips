@@ -154,31 +154,31 @@ private let transformableValueTransform = DefaultsManager.Transform(
 		try DefaultsManagerTests.encoder.encode(value)
 	})
 
-extension DefaultsManager.Key where Value == Int {
-	static let testValueNil = DefaultsManager.Key<Int>(rawValue: DefaultsManagerTests.testValueNilKey)
-	static let testValueValue = DefaultsManager.Key<Int>(rawValue: DefaultsManagerTests.testValueValueKey)
+extension DefaultsManager.Key where Value == Int, StoredValue == Value {
+	static let testValueNil = Self(rawValue: DefaultsManagerTests.testValueNilKey)
+	static let testValueValue = Self(rawValue: DefaultsManagerTests.testValueValueKey)
 }
 
-extension DefaultsManager.Key where Value == TransformableValue {
-	static let transformableNil = DefaultsManager.Key<TransformableValue>(
+extension DefaultsManager.Key where Value == TransformableValue, StoredValue == Data {
+	static let transformableNil = Self(
 		rawValue: DefaultsManagerTests.transformableTestValueNilKey)
 		.withTransform(transformableValueTransform)
 
-	static let transformableWithValue = DefaultsManager.Key<TransformableValue>(
+	static let transformableWithValue = Self(
 		rawValue: DefaultsManagerTests.transformableTestValueKey)
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
 }
 
-extension DefaultsManager.KeyWithDefault where Value == Double {
-	static let doubleValueTest = DefaultsManager.KeyWithDefault<Double>(
+extension DefaultsManager.KeyWithDefault where Value == Double, StoredValue == Value {
+	static let doubleValueTest = Self(
 		rawValue: DefaultsManagerTests.doubleValueTestKey,
 		defaultValue: 3.14159)
 }
 
-extension DefaultsManager.KeyWithDefault where Value == TransformableValue {
-	static let transformableDefault = DefaultsManager.KeyWithDefault<TransformableValue>(
+extension DefaultsManager.KeyWithDefault where Value == TransformableValue, StoredValue == Data {
+	static let transformableDefault = Self(
 		rawValue: DefaultsManagerTests.transformableTestValueDefaultKey,
 		defaultValue: DefaultsManagerTests.tValueFrank)
 		.withTransform(
