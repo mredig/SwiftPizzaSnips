@@ -46,7 +46,8 @@ public class DefaultsManager: ObservableObject {
 				return key.defaultValue
 			}
 		} else {
-			return (Self.defaults.object(forKey: key.rawValue) as? Value) ?? key.defaultValue
+			let defaultsValue = Self.defaults.object(forKey: key.rawValue) as? Value
+			return defaultsValue ?? key.defaultValue
 		}
 	}
 
@@ -78,6 +79,15 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
+	public func removeValue<Value>(for key: Key<Value>) {
+		setValue(nil, for: key)
+	}
+
+	public func removeValue<Value>(for key: KeyWithDefault<Value>) {
+		let newKey = Key<Value>(rawValue: key.rawValue)
+		removeValue(for: newKey)
+	}
+
 	public subscript<Value>(key: Key<Value>) -> Value? {
 		get {
 			getValue(for: key)
@@ -95,6 +105,16 @@ public class DefaultsManager: ObservableObject {
 			setValue(newValue, for: key)
 		}
 	}
+//
+//	@_disfavoredOverload
+//	public subscript<Value>(key: KeyWithDefault<Value>) -> Value? {
+//		get {
+//			getValue(for: key)
+//		}
+//		set {
+//			setValue(newValue, for: key)
+//		}
+//	}
 
 	public struct Key<Value>: RawRepresentable {
 		public let rawValue: String
@@ -110,7 +130,7 @@ public class DefaultsManager: ObservableObject {
 			return new
 		}
 
-		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) -> Data) -> Self {
+		public func withTransform(get: @escaping (Data) throws -> Value, set: @escaping (Value) throws -> Data) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
@@ -147,5 +167,10 @@ public class DefaultsManager: ObservableObject {
 	public struct Transform<T> {
 		public let get: (Data) throws -> T
 		public let set: (T) throws -> Data
+
+		public init(get: @escaping (Data) throws -> T, set: @escaping (T) throws -> Data) {
+			self.get = get
+			self.set = set
+		}
 	}
 }
