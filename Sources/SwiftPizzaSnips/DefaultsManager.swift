@@ -18,6 +18,9 @@ public class DefaultsManager: ObservableObject {
 			.store(in: &bag)
 	}
 
+	public static let defaultDecoder = PropertyListDecoder()
+	public static let defaultEncoder = PropertyListEncoder()
+
 	public func getValue<Value, StoredValue: PropertyListCodable>(for key: Key<Value, StoredValue>) -> Value? {
 		if let getTransform = key.transform?.get {
 			guard
