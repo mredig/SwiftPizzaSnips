@@ -185,6 +185,7 @@ public class DefaultsManager: ObservableObject {
 public protocol PropertyListCodable {}
 extension String: PropertyListCodable {}
 extension Data: PropertyListCodable {}
+extension Bool: PropertyListCodable {}
 extension Int: PropertyListCodable {}
 extension Double: PropertyListCodable {}
 extension Float: PropertyListCodable {}
