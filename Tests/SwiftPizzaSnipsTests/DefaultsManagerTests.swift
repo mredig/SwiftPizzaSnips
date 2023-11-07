@@ -8,6 +8,7 @@ final class DefaultsManagerTests: XCTestCase {
 	static let transformableTestValueKey = "com.pizzaSnips.transformableTestValue"
 	static let transformableTestValueNilKey = "com.pizzaSnips.transformableTestValueNil"
 	static let transformableTestValueDefaultKey = "com.pizzaSnips.transformableTestValueDefault"
+	static let asymettricalTransformableTestValueDefaultKey = "com.pizzaSnips.asymettricalTransformableTestValueDefault"
 	static let allKeys = [
 		testValueNilKey,
 		testValueValueKey,
@@ -15,6 +16,7 @@ final class DefaultsManagerTests: XCTestCase {
 		transformableTestValueKey,
 		transformableTestValueNilKey,
 		transformableTestValueDefaultKey,
+		asymettricalTransformableTestValueDefaultKey,
 	]
 
 	static let tValuePeter = TransformableValue(name: "Peter", age: 31, favoriteColor: "Green")
@@ -144,6 +146,29 @@ final class DefaultsManagerTests: XCTestCase {
 		defaults.removeValue(for: .transformableDefault)
 		XCTAssertEqual(Self.tValueFrank, defaults[.transformableDefault])
 	}
+
+	func testDefaultsManagerSetAsymetricalTransformedKeyWithDefault() {
+		let nobodyPath = "/Users/nobody"
+		let somebodyPath = "/Users/somebody"
+
+		let initialValue = defaults[.asymTransformValue]
+		XCTAssertEqual([], initialValue)
+
+		defaults[.asymTransformValue].append(nobodyPath)
+		XCTAssertEqual([nobodyPath], defaults[.asymTransformValue])
+
+		defaults[.asymTransformValue].append(nobodyPath)
+		XCTAssertEqual([nobodyPath], defaults[.asymTransformValue])
+
+		defaults[.asymTransformValue].append(somebodyPath)
+		XCTAssertEqual([nobodyPath, somebodyPath], defaults[.asymTransformValue])
+
+		defaults[.asymTransformValue].append(nobodyPath)
+		XCTAssertEqual([nobodyPath, somebodyPath], defaults[.asymTransformValue])
+
+		defaults[.asymTransformValue].append(somebodyPath)
+		XCTAssertEqual([nobodyPath, somebodyPath], defaults[.asymTransformValue])
+	}
 }
 
 private let transformableValueTransform = DefaultsManager.Transform(
@@ -184,6 +209,19 @@ extension DefaultsManager.KeyWithDefault where Value == TransformableValue, Stor
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
+}
+
+extension DefaultsManager.KeyWithDefault where Value == [String], StoredValue == Value {
+	static let asymTransformValue = Self(
+		rawValue: DefaultsManagerTests.asymettricalTransformableTestValueDefaultKey,
+		defaultValue: [])
+		.withTransform(set: { arrayIn in
+			arrayIn.reduce(
+				into: [String]()) {
+					guard $0.contains($1) == false else { return }
+					$0.append($1)
+				}
+		})
 }
 
 struct TransformableValue: Codable, Hashable {

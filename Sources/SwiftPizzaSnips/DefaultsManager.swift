@@ -105,16 +105,6 @@ public class DefaultsManager: ObservableObject {
 			setValue(newValue, for: key)
 		}
 	}
-//
-//	@_disfavoredOverload
-//	public subscript<Value>(key: KeyWithDefault<Value>) -> Value? {
-//		get {
-//			getValue(for: key)
-//		}
-//		set {
-//			setValue(newValue, for: key)
-//		}
-//	}
 
 	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
@@ -134,39 +124,11 @@ public class DefaultsManager: ObservableObject {
 			return new
 		}
 
-		public func withTransform(get: Transform<Value, StoredValue>.GetTransform?, set: Transform<Value, StoredValue>.SetTransform?) -> Self {
+		public func withTransform(get: Transform<Value, StoredValue>.GetTransform? = nil, set: Transform<Value, StoredValue>.SetTransform? = nil) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
 	}
-
-//	public struct KeyWithDefault<Value>: RawRepresentable {
-//		public let rawValue: String
-//
-//		public let defaultValue: Value
-//
-//		internal private(set) var transform: Transform<Value>?
-//
-//		@available(*, deprecated, message: "Always fails. Use init(rawValue:, defaultValue:)")
-//		public init?(rawValue: String) { nil }
-//
-//		public init(rawValue: String, defaultValue: Value) {
-//			self.rawValue = rawValue
-//			self.defaultValue = defaultValue
-//			self.transform = nil
-//		}
-//
-//		public func withTransform(_ transform: Transform<Value>) -> Self {
-//			var new = self
-//			new.transform = transform
-//			return new
-//		}
-//
-//		public func withTransform(get: Transform<Value>.GetTransform?, set: Transform<Value>.SetTransform?) -> Self {
-//			let transform = Transform(get: get, set: set)
-//			return withTransform(transform)
-//		}
-//	}
 
 	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
@@ -197,24 +159,11 @@ public class DefaultsManager: ObservableObject {
 			return new
 		}
 
-		public func withTransform(get: Transform<Value, StoredValue>.GetTransform?, set: Transform<Value, StoredValue>.SetTransform?) -> Self {
+		public func withTransform(get: Transform<Value, StoredValue>.GetTransform? = nil, set: Transform<Value, StoredValue>.SetTransform? = nil) -> Self {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
 	}
-
-//	public struct Transform<T> {
-//		public typealias GetTransform = (Data) throws -> T
-//		public typealias SetTransform = (T) throws -> Data
-//
-//		public let get: GetTransform?
-//		public let set: SetTransform?
-//
-//		public init(get: GetTransform?, set: SetTransform?) {
-//			self.get = get
-//			self.set = set
-//		}
-//	}
 
 	public struct Transform<Input, Stored: PropertyListCodable> {
 		public typealias GetTransform = (Stored) throws -> Input
@@ -229,15 +178,6 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 }
-//
-//@available(macOS 10.15, *)
-//extension DefaultsManager.KeyWithDefault where Value == StoredValue {
-//	public init(rawValue: String, defaultValue: Value, storedValueType: StoredValue.Type = Value.self) {
-//		self.rawValue = rawValue
-//		self.defaultValue = defaultValue
-//		self.transform = nil
-//	}
-//}
 
 public protocol PropertyListCodable {}
 extension String: PropertyListCodable {}
