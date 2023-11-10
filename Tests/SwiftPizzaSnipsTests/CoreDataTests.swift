@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
 
 final class CoreDataTests: XCTestCase {
 	private func testableCoreDataStack() throws -> CoreDataStack {

@@ -3,8 +3,8 @@ import Foundation
 fileprivate let encoder = PropertyListEncoder()
 fileprivate let decoder = PropertyListDecoder()
 
-class CodableTransformer<CodableType: Codable>: ValueTransformer {
-	override func transformedValue(_ value: Any?) -> Any? {
+public class CodableTransformer<CodableType: Codable>: ValueTransformer {
+	public override func transformedValue(_ value: Any?) -> Any? {
 		guard let original = value as? CodableType else { return nil }
 
 		do {
@@ -15,7 +15,7 @@ class CodableTransformer<CodableType: Codable>: ValueTransformer {
 		}
 	}
 
-	override func reverseTransformedValue(_ value: Any?) -> Any? {
+	public override func reverseTransformedValue(_ value: Any?) -> Any? {
 		guard let data = value as? Data else { return nil }
 
 		do {
