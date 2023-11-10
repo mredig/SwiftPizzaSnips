@@ -100,4 +100,36 @@ final class CoreDataTests: XCTestCase {
 
 		XCTAssertEqual(beforeCount + 1, afterCount)
 	}
+
+	func testTransformer() async throws {
+		ValueTransformer
+			.setValueTransformer(
+				CodableTransformer<[String]>(),
+				forName: NSValueTransformerName(rawValue: "StringArrayTransformer"))
+
+		let coreDataStack = try testableCoreDataStack()
+		let context = coreDataStack.mainContext
+
+		coreDataStack.registerModel(Baz.self)
+
+		let expected = ["G.O.B.", "Motley", "Quixote"]
+
+		try await context.perform {
+			let bazzer = Baz(context: context)
+			bazzer.fools = expected
+
+			try context.save()
+		}
+		addTeardownBlock {
+			try coreDataStack.resetRegisteredTypesInContainer()
+		}
+
+		let fetchRequest = Baz.fetchRequest()
+		let retrieved = try await context.perform {
+			fetchRequest.fetchLimit = 1
+			return try context.fetch(fetchRequest).first.unwrap()
+		}
+
+		XCTAssertEqual(expected, retrieved.fools)
+	}
 }

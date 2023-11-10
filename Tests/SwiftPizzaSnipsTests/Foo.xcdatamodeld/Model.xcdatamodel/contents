@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="22G120" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Baz" representedClassName="Baz" syncable="YES" codeGenerationType="class">
+        <attribute name="fools" optional="YES" attributeType="Transformable" valueTransformerName="StringArrayTransformer" customClassName=".[String]"/>
+    </entity>
     <entity name="Foo" representedClassName="Foo" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="value" optional="YES" attributeType="String"/>
