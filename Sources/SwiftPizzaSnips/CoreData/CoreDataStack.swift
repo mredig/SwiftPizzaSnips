@@ -2,7 +2,7 @@ import Foundation
 import CoreData
 
 // no events should be created from this, but observable object allows storing in environment object
-@available(macOS 12.0, *)
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 public class CoreDataStack {
 
 	var modelFileName: String { modelURL.deletingPathExtension().lastPathComponent }

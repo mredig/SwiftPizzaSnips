@@ -50,7 +50,7 @@ public extension URL {
 			[origin, destination].allSatisfy({ $0.isFileURL })
 		else { throw RelativePathError.oneOrBothURLsNotFilepathURL }
 
-		if #available(macOS 13.0, *) {
+		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
 			return URL(filePath: try relativePath(from: origin, to: destination), relativeTo: origin)
 		} else {
 			return URL(fileURLWithPath: try relativePath(from: origin, to: destination), relativeTo: origin)
@@ -95,7 +95,7 @@ public extension URL {
 		}
 
 		let commonPath = "/" + pathAccumulator.joined(separator: "/")
-		if #available(macOS 13.0, *) {
+		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
 			return URL(filePath: commonPath, directoryHint: .isDirectory)
 		} else {
 			return URL(fileURLWithPath: commonPath, isDirectory: true)
@@ -118,7 +118,7 @@ public extension URL {
 	func isAParentOf(_ url: URL) -> Bool {
 		var new = self
 		if hasDirectoryPath == false {
-			if #available(macOS 13.0, *) {
+			if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
 				new = URL(filePath: path(percentEncoded: false), directoryHint: .isDirectory)
 			} else {
 				new = URL(fileURLWithPath: path, isDirectory: true)
@@ -126,7 +126,7 @@ public extension URL {
 		}
 		// TODO: bench a comparison between these methods sometime.
 //		return URL.commonParentDirectoryURL(between: new, and: url) == new
-		if #available(macOS 13.0, *) {
+		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
 			return url.path(percentEncoded: false).hasPrefix(new.path(percentEncoded: false))
 		} else {
 			return url.path.hasPrefix(new.path)
