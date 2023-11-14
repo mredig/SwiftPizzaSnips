@@ -1,6 +1,7 @@
 import XCTest
 import SwiftPizzaSnips
 
+@available(iOS 13.0, *)
 final class AsyncFunctionalProgrammingTests: XCTestCase {
 	func testAsyncFilter() async throws {
 		let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]

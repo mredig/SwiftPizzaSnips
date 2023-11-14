@@ -1,9 +1,8 @@
 import XCTest
 @testable import SwiftPizzaSnips
 
+@available(iOS 16.0, *)
 final class WithableTests: XCTestCase {
-	
-	@available(iOS 13.0, *)
 	func testWithable() {
 		let str = "fee fie fo fum"
 		let attStr = NSMutableAttributedString(string: str).with {

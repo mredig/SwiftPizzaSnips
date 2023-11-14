@@ -1,8 +1,18 @@
 import Foundation
 import XCTest
 import SwiftPizzaSnips
+import CoreData
 
+@available(iOS 15.0, *)
 final class CoreDataTests: XCTestCase {
+	override class func setUp() {
+		super.setUp()
+		ValueTransformer
+			.setValueTransformer(
+				CodableTransformer<[String]>(),
+				forName: NSValueTransformerName(rawValue: "StringArrayTransformer"))
+	}
+
 	private func testableCoreDataStack() throws -> CoreDataStack {
 		let bundle = Bundle(for: Self.self)
 		let subBundleURL = try bundle
@@ -102,11 +112,6 @@ final class CoreDataTests: XCTestCase {
 	}
 
 	func testTransformer() async throws {
-		ValueTransformer
-			.setValueTransformer(
-				CodableTransformer<[String]>(),
-				forName: NSValueTransformerName(rawValue: "StringArrayTransformer"))
-
 		let coreDataStack = try testableCoreDataStack()
 		let context = coreDataStack.mainContext
 

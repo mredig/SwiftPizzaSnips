@@ -1,6 +1,5 @@
 import XCTest
 @testable import SwiftPizzaSnips
-import AppKit
 
 final class StringRandomGenerationTests: XCTestCase {
 	func testLoremGeneration() {

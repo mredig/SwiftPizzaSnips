@@ -1,9 +1,9 @@
 import XCTest
 @testable import SwiftPizzaSnips
 
+@available(iOS 16.0, *)
 final class URLRelativeTests: XCTestCase {
 
-	@available(iOS 13.0, *)
 	func testURLRelativeFilePaths() throws {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
