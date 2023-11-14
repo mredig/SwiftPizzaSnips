@@ -137,4 +137,61 @@ final class CoreDataTests: XCTestCase {
 
 		XCTAssertEqual(expected, retrieved.fools)
 	}
+
+	func testCoreDataConsistentGlobalContext() throws {
+		let coreDataStack = try testableCoreDataStack()
+
+		let contextA = try coreDataStack.context(.global)
+		let contextB = try coreDataStack.context(.global)
+
+		XCTAssertEqual(contextA, contextB)
+	}
+
+	func testCoreDataConsistentMainContext() throws {
+		let coreDataStack = try testableCoreDataStack()
+
+		let contextA = try coreDataStack.context(.main)
+		let contextB = try coreDataStack.context(.main)
+		let contextC = coreDataStack.mainContext
+
+		XCTAssertEqual(contextA, contextB)
+		XCTAssertEqual(contextA, contextC)
+	}
+
+	func testCreateContsistentContext() throws {
+		let coreDataStack = try testableCoreDataStack()
+
+		let contextA = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+		let contextB = coreDataStack.registerConsistentContext(
+			coreDataStack.container.newBackgroundContext(),
+			forKey: .myOtherCustomContext)
+
+		let contextARetrieve = try coreDataStack.context(.myCustomContext)
+		let contextBRetrieve = try coreDataStack.context(.myOtherCustomContext)
+
+		XCTAssertEqual(contextA, contextARetrieve)
+		XCTAssertEqual(contextB, contextBRetrieve)
+		XCTAssertNotEqual(contextA, contextB)
+
+		let contextASecondRegister = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+		XCTAssertEqual(contextA, contextASecondRegister)
+	}
+
+	func testDeregisterConsistentContext() throws {
+		let coreDataStack = try testableCoreDataStack()
+
+		let contextA = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+
+		XCTAssertNoThrow(try coreDataStack.context(.myCustomContext))
+
+		coreDataStack.deregisterConsistentContext(forKey: .myCustomContext)
+
+		XCTAssertThrowsError(try coreDataStack.context(.myCustomContext))
+	}
+}
+
+@available(iOS 15.0, *)
+extension CoreDataStack.ContextKey {
+	static let myCustomContext: Self = "my custom context"
+	static let myOtherCustomContext: Self = "my other custom context"
 }

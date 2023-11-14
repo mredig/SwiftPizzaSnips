@@ -67,6 +67,10 @@ public class CoreDataStack {
 				})
 				// May need to be disabled if dataset is too large for performance reasons
 				container.viewContext.automaticallyMergesChangesFromParent = true
+
+				_registerConsistentContext(container.newBackgroundContext(), forKey: .global, on: container)
+				_registerConsistentContext(container.viewContext, forKey: .main, on: container)
+
 				_container = container
 				return container
 			}
@@ -75,6 +79,59 @@ public class CoreDataStack {
 
 	public var mainContext: NSManagedObjectContext {
 		return container.viewContext
+	}
+
+	public private(set) var consistentContexts: [ContextKey: NSManagedObjectContext] = [:]
+
+	@discardableResult
+	public func registerConsistentContext(
+		_ context: NSManagedObjectContext? = nil,
+		forKey key: ContextKey
+	) -> NSManagedObjectContext {
+		let container = container
+		Self.containerLock.lock()
+		defer { Self.containerLock.unlock() }
+
+		return _registerConsistentContext(context, forKey: key, on: container)
+	}
+
+	@discardableResult
+	private func _registerConsistentContext(
+		_ context: NSManagedObjectContext? = nil,
+		forKey key: ContextKey,
+		on container: NSPersistentContainer
+	) -> NSManagedObjectContext {
+		if let existing = consistentContexts[key] {
+			return existing
+		}
+
+		let theContext = context ?? container.newBackgroundContext()
+		consistentContexts[key] = theContext
+		return theContext
+	}
+
+	public func deregisterConsistentContext(forKey key: ContextKey) {
+		_ = container
+		Self.containerLock.lock()
+		defer { Self.containerLock.unlock() }
+
+		guard key != .main else {
+			print("Cannot deregister main (view) context")
+			return
+		}
+
+		consistentContexts.removeValue(forKey: key)
+	}
+
+	public func context(_ key: ContextKey) throws -> NSManagedObjectContext {
+		_ = container
+		Self.containerLock.lock()
+		defer { Self.containerLock.unlock() }
+
+		guard
+			let context = consistentContexts[key]
+		else { throw SimpleError(message: "No context registered for key: \(key)") }
+		return context
 	}
 
 	public private(set) var registeredModels: [NSManagedObject.Type] = []
