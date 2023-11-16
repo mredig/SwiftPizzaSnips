@@ -109,6 +109,10 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 
+	public subscript<Value, StoredValue: PropertyListCodable>(defaultValue key: KeyWithDefault<Value, StoredValue>) -> Value {
+		key.defaultValue
+	}
+
 	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
 		internal private(set) var transform: Transform<Value, StoredValue>?

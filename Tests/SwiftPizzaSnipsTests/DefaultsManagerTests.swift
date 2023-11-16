@@ -170,6 +170,16 @@ final class DefaultsManagerTests: XCTestCase {
 		defaults[.asymTransformValue].append(somebodyPath)
 		XCTAssertEqual([nobodyPath, somebodyPath], defaults[.asymTransformValue])
 	}
+
+	func testDefaultsManagerGetDefaultValueFromKeyWithDefault() {
+		let expectedValue = 3.14159
+
+		XCTAssertEqual(expectedValue, defaults[.doubleValueTest])
+
+		defaults[.doubleValueTest] = 213
+		XCTAssertEqual(213, defaults[.doubleValueTest])
+		XCTAssertEqual(expectedValue, defaults[defaultValue: .doubleValueTest])
+	}
 }
 
 @available(iOS 13.0, *)
