@@ -1,0 +1,14 @@
+version: '3.7'
+
+x-shared_environment: &shared_environment
+  LOG_LEVEL: ${LOG_LEVEL:-debug}
+
+services:
+  app:
+    image: swiftpizzasnipstests:latest
+    build:
+      context: .
+      args:
+        CONFIG: ${CONFIG}
+    environment:
+      <<: *shared_environment
