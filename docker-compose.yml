@@ -12,3 +12,5 @@ services:
         CONFIG: ${CONFIG}
     environment:
       <<: *shared_environment
+    # command: ["--filter", "SwiftPizzaSnipsTests.URLLinuxSupportTests.testFilePathInit"]
+    # command: ["list"]
