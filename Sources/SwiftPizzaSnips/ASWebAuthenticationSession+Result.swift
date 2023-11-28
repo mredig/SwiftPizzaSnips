@@ -1,3 +1,4 @@
+#if canImport(AuthenticationServices)
 import AuthenticationServices
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -20,3 +21,4 @@ public extension ASWebAuthenticationSession {
 			})
 	}
 }
+#endif
