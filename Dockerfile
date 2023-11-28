@@ -1,7 +1,7 @@
 # ================================
 # Build image
 # ================================
-FROM swift:5.9.1-jammy as build
+FROM swift:5.9.1-jammy
 
 # Install OS updates and, if needed, sqlite3
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -32,16 +32,7 @@ RUN --mount=type=cache,target=/build/.build \
     -c $CONFIG \
     --static-swift-stdlib
 
-# Switch to the staging area
-WORKDIR /staging
+RUN swift \
+    test
 
-# # # Copy main executable to staging area
-# RUN --mount=type=cache,target=/build/.build cp "$(swift build --package-path /build -c $CONFIG --show-bin-path)/Server" ./
-
-# # Copy resources bundled by SPM to staging area
-# RUN --mount=type=cache,target=/build/.build find -L "$(swift build --package-path /build -c $CONFIG --show-bin-path)/" -regex '.*\.resources$' -exec cp -Ra {} ./ \;
-
-# # Copy any resources from the public directory and views directory if the directories exist
-# # Ensure that by default, neither the directory nor any of its contents are writable.
-# RUN --mount=type=cache,target=/build/.build [ -d /build/Public ] && { mv /build/Public ./Public && chmod -R a-w ./Public; } || true
-# RUN --mount=type=cache,target=/build/.build [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w ./Resources; } || true
+ENTRYPOINT ["swift", "test"]

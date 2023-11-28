@@ -1,5 +1,6 @@
+#if !canImport(FoundationNetworking)
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
 
 final class ViewConstraintTests: XCTestCase {
 	private func createAnchorSet(_ anchors: AnyHashable...) -> Set<AnyHashable?> {
@@ -125,3 +126,4 @@ final class ViewConstraintTests: XCTestCase {
 		XCTAssertTrue(output.allSatisfy { $0.priority == .required })
 	}
 }
+#endif

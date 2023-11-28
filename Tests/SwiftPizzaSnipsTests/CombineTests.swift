@@ -1,5 +1,6 @@
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
+#if !canImport(FoundationNetworking)
 import Combine
 
 final class CombineTests: XCTestCase {
@@ -20,3 +21,4 @@ final class CombineTests: XCTestCase {
 		XCTAssertEqual(bag.count, 1)
 	}
 }
+#endif

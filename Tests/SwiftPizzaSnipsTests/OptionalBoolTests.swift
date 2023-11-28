@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
 
 final class OptionalBoolTests: XCTestCase {
 	func testOptionalTrue() {

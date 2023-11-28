@@ -1,19 +1,16 @@
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
 
 @available(iOS 16.0, *)
 final class WithableTests: XCTestCase {
 	func testWithable() {
 		let str = "fee fie fo fum"
-		let attStr = NSMutableAttributedString(string: str).with {
-			$0.addAttribute(
-				.underlineColor,
-				value: CGColor(srgbRed: 0.5, green: 0.5, blue: 0.5, alpha: 1),
-				range: NSRange(location: 0, length: $0.length))
+		let nsArray = NSMutableArray().with { 
+			$0.add(str as NSString)
 		}
 
-		let attributes = attStr.attributes(at: 0, effectiveRange: nil)
-		XCTAssertTrue(attributes.keys.contains(.underlineColor))
+		XCTAssertEqual(1, nsArray.count)
+		XCTAssertEqual(nsArray[0] as? NSString, str as NSString)
 	}
 
 	func testThrowingWithable() throws {

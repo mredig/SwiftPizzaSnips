@@ -32,8 +32,12 @@ package extension URL {
 
 	func path(percentEncoded: Bool = true) -> String {
 		let strPath: String = path
-		return percentEncoded ?
+		var outPath = percentEncoded ?
 			strPath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? strPath :
 			strPath
+		if hasDirectoryPath && outPath.last != "/" {
+			outPath.append("/")
+		}
+		return outPath
 	}
 }

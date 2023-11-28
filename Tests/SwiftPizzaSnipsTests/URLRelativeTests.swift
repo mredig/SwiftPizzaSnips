@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftPizzaSnips
+import SwiftPizzaSnips
 
 @available(iOS 16.0, *)
 final class URLRelativeTests: XCTestCase {
@@ -43,7 +43,7 @@ final class URLRelativeTests: XCTestCase {
 		XCTAssertEqual(expectedParent, parent)
 	}
 
-	func testURLParentDirectoryFilePait() {
+	func testURLParentDirectoryFilePair() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Planets.epub")
 		let urlB = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Stars.epub")
 		let expectedParent = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/")
@@ -141,13 +141,13 @@ final class URLRelativeTests: XCTestCase {
 		let urlE = URL(filePath: "/Users/nobody/file.txt")
 		let urlF = URL(filePath: "/Users/nobody/De")
 
-		XCTAssertFalse(urlB.isAParentOf(urlA))
-		XCTAssertTrue(urlC.isAParentOf(urlA))
-		XCTAssertFalse(urlA.isAParentOf(urlB))
-		XCTAssertFalse(urlA.isAParentOf(urlC))
-		XCTAssertFalse(urlA.isAParentOf(urlD))
-		XCTAssertTrue(urlD.isAParentOf(urlA))
-		XCTAssertFalse(urlE.isAParentOf(urlA))
-		XCTAssertFalse(urlF.isAParentOf(urlA))
+		XCTAssertFalse(urlB.isAParentOf(urlA), "urlB.isAParentOf(urlA) failed")
+		XCTAssertTrue(urlC.isAParentOf(urlA), "urlC.isAParentOf(urlA) failed")
+		XCTAssertFalse(urlA.isAParentOf(urlB), "urlA.isAParentOf(urlB) failed")
+		XCTAssertFalse(urlA.isAParentOf(urlC), "urlA.isAParentOf(urlC) failed")
+		XCTAssertFalse(urlA.isAParentOf(urlD), "urlA.isAParentOf(urlD) failed")
+		XCTAssertTrue(urlD.isAParentOf(urlA), "urlD.isAParentOf(urlA) failed")
+		XCTAssertFalse(urlE.isAParentOf(urlA), "urlE.isAParentOf(urlA) failed")
+		XCTAssertFalse(urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
 	}
 }

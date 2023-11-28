@@ -32,9 +32,9 @@ final class DefaultsManagerTests: XCTestCase {
 			UserDefaults.standard.removeObject(forKey: key)
 		}
 
-		UserDefaults.standard.setValue(42, forKey: testValueValueKey)
+		UserDefaults.standard.set(42, forKey: testValueValueKey)
 		let data = try! encoder.encode(tValueViolet)
-		UserDefaults.standard.setValue(data, forKey: transformableTestValueKey)
+		UserDefaults.standard.set(data, forKey: transformableTestValueKey)
 	}
 
 	override func setUp() {

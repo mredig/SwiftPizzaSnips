@@ -1,7 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftPizzaSnips
-import Combine
+import SwiftPizzaSnips
 
 final class CollectionConvenienceTests: XCTestCase {
 	func testPopFirst() {
