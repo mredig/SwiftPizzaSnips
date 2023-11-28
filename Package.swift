@@ -1,7 +1,23 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+
+let snipsExcludes: [String]
+let testsExcludes: [String]
+let testResources: [Resource]
+#if canImport(FoundationNetworking)
+snipsExcludes = ["CoreData"]
+testsExcludes = ["Foo.xcdatamodeld"]
+testResources = [.copy("sample.bin")]
+#else
+snipsExcludes = []
+testsExcludes = []
+testResources = [
+	.copy("sample.bin"),
+	.process("Foo.xcdatamodeld")
+]
+#endif
 
 let package = Package(
     name: "SwiftPizzaSnips",
@@ -14,14 +30,21 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
+		.target(
+			name: "LinuxSupport"),
         .target(
-            name: "SwiftPizzaSnips"),
+            name: "SwiftPizzaSnips",
+			dependencies: [
+				.targetItem(
+					name: "LinuxSupport",
+					condition: .when(platforms: [.linux, .windows, .openbsd, .android]))
+			],
+			exclude: snipsExcludes),
         .testTarget(
             name: "SwiftPizzaSnipsTests",
             dependencies: ["SwiftPizzaSnips"],
-			resources: [
-				.copy("sample.bin"),
-			]
+			exclude: testsExcludes,
+			resources: testResources
 		),
     ]
 )

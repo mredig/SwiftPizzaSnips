@@ -1,12 +1,15 @@
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-public class DefaultsManager: ObservableObject {
+public class DefaultsManager {
 	private static let defaults = UserDefaults.standard
 
-	private var bag = Bag()
-
 	public static let shared = DefaultsManager()
+
+	#if canImport(FoundationNetworking)
+	private init() {}
+	#else
+	private var bag = Bag()
 	private init() {
 		NotificationCenter
 			.default
@@ -17,6 +20,7 @@ public class DefaultsManager: ObservableObject {
 			})
 			.store(in: &bag)
 	}
+	#endif
 
 	public static let defaultDecoder = PropertyListDecoder()
 	public static let defaultEncoder = PropertyListEncoder()
@@ -185,6 +189,11 @@ public class DefaultsManager: ObservableObject {
 		}
 	}
 }
+
+#if !canImport(FoundationNetworking)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager: ObservableObject {}
+#endif
 
 public protocol PropertyListCodable {}
 extension String: PropertyListCodable {}

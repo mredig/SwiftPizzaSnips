@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import LinuxSupport
+#endif
 
 public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories

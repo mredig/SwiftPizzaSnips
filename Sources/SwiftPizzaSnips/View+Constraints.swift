@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 #if os(macOS)
 import AppKit
 
@@ -185,3 +186,4 @@ extension DirectionalToggle: Withable {
 	public static let leading = DirectionalToggle(uniform: .skip).with { $0.leading = .create }
 	public static let trailing = DirectionalToggle(uniform: .skip).with { $0.trailing = .create }
 }
+#endif

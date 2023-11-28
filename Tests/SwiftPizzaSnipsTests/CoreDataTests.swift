@@ -3,6 +3,10 @@ import XCTest
 import SwiftPizzaSnips
 import CoreData
 
+#if !canImport(FoundationNetworking)
+/// Even though Apple Platforms should all work, `swift test` doesn't actually code gen CoreData files, so this will 
+/// fail to build on macos for that reason. Either use Xcode's UI or
+/// `xcodebuild test -scheme SwiftPizzaSnips -destination 'platform=macOS'`
 @available(iOS 15.0, *)
 final class CoreDataTests: XCTestCase {
 	override class func setUp() {
@@ -195,3 +199,4 @@ extension CoreDataStack.ContextKey {
 	static let myCustomContext: Self = "my custom context"
 	static let myOtherCustomContext: Self = "my other custom context"
 }
+#endif
