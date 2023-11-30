@@ -5,7 +5,7 @@ public protocol Withable {
 
 	@discardableResult
 	func with(_ block: (_ instance: inout TSelf) throws -> Void) rethrows -> TSelf
-	@available(macOS 10.15.0, iOS 13.0, *)
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 	func asyncWith(_ block: (_ instance: inout TSelf) async throws -> Void) async rethrows -> TSelf
 }
 
@@ -17,7 +17,7 @@ public extension Withable {
 		return new
 	}
 
-	@available(macOS 10.15.0, iOS 13.0, *)
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 	@discardableResult
 	func asyncWith(_ block: (_ instance: inout Self) async throws -> Void) async rethrows -> Self {
 		var new = self
