@@ -5,6 +5,8 @@ import CoreData
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 public class CoreDataStack {
 
+	public static let didResetRegisteredTypesNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypesNotification")
+
 	var modelFileName: String { modelURL.deletingPathExtension().lastPathComponent }
 	let modelURL: URL
 	public convenience init(modelFileName: String) throws {
@@ -143,6 +145,7 @@ public class CoreDataStack {
 	}
 
 	public func resetRegisteredTypesInContainer() throws {
+		defer { NotificationCenter.default.post(name: Self.didResetRegisteredTypesNotification, object: self) }
 		let bgContext = container.newBackgroundContext()
 
 		for model in registeredModels {
