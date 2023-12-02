@@ -32,3 +32,40 @@ extension JSONDecoder: Withable {}
 extension JSONEncoder: Withable {}
 extension PropertyListDecoder: Withable {}
 extension PropertyListEncoder: Withable {}
+
+extension Bool: Withable {}
+extension Int: Withable {}
+extension UInt: Withable {}
+extension Int8: Withable {}
+extension UInt8: Withable {}
+extension Int16: Withable {}
+extension UInt16: Withable {}
+extension Int32: Withable {}
+extension UInt32: Withable {}
+extension Int64: Withable {}
+extension UInt64: Withable {}
+extension Float: Withable {}
+#if arch(arm64) // see Float16 docs
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
+extension Float16: Withable {}
+#endif
+#if arch(x86_64)
+extension Float80: Withable {}
+#endif
+extension Double: Withable {}
+extension Decimal: Withable {}
+extension Range: Withable {}
+extension ClosedRange: Withable {}
+
+extension String: Withable {}
+extension Substring: Withable {}
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, *)
+extension Regex: Withable {}
+
+extension Array: Withable {}
+extension Dictionary: Withable {}
+extension Set: Withable {}
+extension Data: Withable {}
+extension Slice: Withable {}
+
+extension Optional: Withable {}
