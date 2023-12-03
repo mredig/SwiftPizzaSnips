@@ -6,6 +6,8 @@ public struct EmailAddress: RawRepresentable {
 
 	public let supportLevel: SupportLevel
 
+	public let requireTLD: Bool
+
 	public init?(rawValue: String) {
 		try? self.init(withValidation: rawValue)
 	}
@@ -13,6 +15,7 @@ public struct EmailAddress: RawRepresentable {
 	public init(withValidation rawValue: String, requireTLD: Bool = true) throws {
 		self.supportLevel = try Self.validateEmailAddress(rawValue, requireTLD: requireTLD)
 		self.rawValue = rawValue
+		self.requireTLD = requireTLD
 	}
 
 	/// These values are given in soft language intentionally because email validation is highly varied and many
@@ -193,3 +196,46 @@ public struct EmailAddress: RawRepresentable {
 		}
 	}
 }
+
+@available(macOS 13, iOS 16, tvOS 16, watchOS 10, *)
+extension EmailAddress: Codable {
+	enum CodingKeys: String, CodingKey {
+		case rawValue
+		case requireTLD
+	}
+
+	public init(from decoder: Decoder) throws {
+		// singleString
+		do {
+			let container = try decoder.singleValueContainer()
+			let strAddress = try container.decode(String.self)
+			try self.init(withValidation: strAddress)
+			return
+		} catch {
+			if error is EmailError {
+				throw error
+			}
+		}
+
+		// codingkeys
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		let requireTLD = try container.decodeIfPresent(Bool.self, forKey: .requireTLD) ?? true
+		let rawValue = try container.decode(String.self, forKey: .rawValue)
+
+		try self.init(withValidation: rawValue, requireTLD: requireTLD)
+	}
+
+	public func encode(to encoder: Encoder) throws {
+		if requireTLD == false {
+			var container = encoder.container(keyedBy: CodingKeys.self)
+			try container.encode(rawValue, forKey: .rawValue)
+			try container.encode(requireTLD, forKey: .requireTLD)
+		} else {
+			var container = encoder.singleValueContainer()
+			try container.encode(rawValue)
+		}
+	}
+}
+
+@available(macOS 13, iOS 16, tvOS 16, watchOS 10, *)
+extension EmailAddress: Hashable {}

@@ -99,4 +99,33 @@ final class EmailValidationTests: XCTestCase {
 		emailResult = wrap { try EmailAddress(withValidation: ##"gatsby@f.sc.ot.t.f.i.tzg.era.l.d."##) }
 		XCTAssertThrowsError(try emailResult.get())
 	}
+
+	func testCodingEmail() throws {
+		let encoder = JSONEncoder()
+		let decoder = JSONDecoder()
+
+		let widely = try EmailAddress(withValidation: ##"dclo@us.ibm.com"##)
+		let widelyData = try encoder.encode(widely)
+		let widelyDecoded = try decoder.decode(EmailAddress.self, from: widelyData)
+		XCTAssertEqual(widelyDecoded.supportLevel, .widelySupported)
+		XCTAssertEqual(widelyDecoded, widely)
+
+		let mostly = try EmailAddress(withValidation: ##"user+mailbox@example.com"##)
+		let mostlyData = try encoder.encode(mostly)
+		let mostlyDecoded = try decoder.decode(EmailAddress.self, from: mostlyData)
+		XCTAssertEqual(mostlyDecoded.supportLevel, .mostlySupported)
+		XCTAssertEqual(mostlyDecoded, mostly)
+
+		let technically = try EmailAddress(withValidation: ##""Abc@def"@example.com"##)
+		let technicallyData = try encoder.encode(technically)
+		let technicallyDecoded = try decoder.decode(EmailAddress.self, from: technicallyData)
+		XCTAssertEqual(technicallyDecoded.supportLevel, .technicallySupported)
+		XCTAssertEqual(technicallyDecoded, technically)
+
+		let noTLD = try EmailAddress(withValidation: "test@gmail", requireTLD: false)
+		let noTLDData = try encoder.encode(noTLD)
+		let noTLDDecoded = try decoder.decode(EmailAddress.self, from: noTLDData)
+		XCTAssertEqual(noTLDDecoded.supportLevel, .technicallySupported)
+		XCTAssertEqual(noTLDDecoded, noTLD)
+	}
 }

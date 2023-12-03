@@ -1,6 +1,6 @@
 import Foundation
 
-public struct IP4Address: RawRepresentable {
+public struct IP4Address: RawRepresentable, Codable, Hashable {
 	public let rawValue: String
 
 	public init?(rawValue: String) {
