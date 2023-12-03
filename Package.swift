@@ -39,7 +39,10 @@ let package = Package(
 					name: "LinuxSupport",
 					condition: .when(platforms: [.linux, .windows, .openbsd, .android]))
 			],
-			exclude: snipsExcludes),
+			exclude: snipsExcludes,
+			swiftSettings: [
+				.enableUpcomingFeature("BareSlashRegexLiterals"),
+			]),
         .testTarget(
             name: "SwiftPizzaSnipsTests",
             dependencies: ["SwiftPizzaSnips"],
