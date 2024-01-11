@@ -2,9 +2,13 @@ import Foundation
 
 public extension Optional {
 	/// Often times it's much more convenient or clean to unwrap an optional by throwing
-	func unwrap(line: Int = #line, file: String = #file) throws -> Wrapped {
+	func unwrap(_ messageOnFail: String? = nil, line: Int = #line, file: String = #file) throws -> Wrapped {
 		guard case .some(let wrapped) = self else {
-			throw OptionalError.nilValue(ofType: Wrapped.self, line: line, file: file)
+			throw OptionalError.nilValue(
+				ofType: Wrapped.self,
+				message: messageOnFail,
+				line: line,
+				file: file)
 		}
 		return wrapped
 	}
@@ -21,14 +25,18 @@ public extension Optional {
 
 	// sourcery:localizedError
 	enum OptionalError: Error {
-		case nilValue(ofType: Wrapped.Type, line: Int, file: String)
+		case nilValue(ofType: Wrapped.Type, message: String?, line: Int, file: String)
 	}
 }
 
 extension Optional.OptionalError: CustomDebugStringConvertible, LocalizedError {
 	public var debugDescription: String {
 		switch self {
-		case .nilValue(let type, _, _): "OptionalError.nilValue of \(type)"
+		case .nilValue(let type, let message, _, _):
+			guard let message else {
+				return "OptionalError.nilValue of \(type)"
+			}
+			return  "OptionalError.nilValue of \(type) - \(message)"
 		}
 	}
 
