@@ -193,18 +193,16 @@ private let transformableValueTransform = DefaultsManager.Transform(
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.Key where Value == Int, StoredValue == Value {
-	static let testValueNil = Self(rawValue: DefaultsManagerTests.testValueNilKey)
-	static let testValueValue = Self(rawValue: DefaultsManagerTests.testValueValueKey)
+	static let testValueNil = Self(DefaultsManagerTests.testValueNilKey)
+	static let testValueValue = Self(DefaultsManagerTests.testValueValueKey)
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.Key where Value == TransformableValue, StoredValue == Data {
-	static let transformableNil = Self(
-		rawValue: DefaultsManagerTests.transformableTestValueNilKey)
+	static let transformableNil = Self(DefaultsManagerTests.transformableTestValueNilKey)
 		.withTransform(transformableValueTransform)
 
-	static let transformableWithValue = Self(
-		rawValue: DefaultsManagerTests.transformableTestValueKey)
+	static let transformableWithValue = Self(DefaultsManagerTests.transformableTestValueKey)
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
@@ -212,15 +210,13 @@ extension DefaultsManager.Key where Value == TransformableValue, StoredValue == 
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == Double, StoredValue == Value {
-	static let doubleValueTest = Self(
-		rawValue: DefaultsManagerTests.doubleValueTestKey,
-		defaultValue: 3.14159)
+	static let doubleValueTest = Self(DefaultsManagerTests.doubleValueTestKey, defaultValue: 3.14159)
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == TransformableValue, StoredValue == Data {
 	static let transformableDefault = Self(
-		rawValue: DefaultsManagerTests.transformableTestValueDefaultKey,
+		DefaultsManagerTests.transformableTestValueDefaultKey,
 		defaultValue: DefaultsManagerTests.tValueFrank)
 		.withTransform(
 			get: transformableValueTransform.get,
@@ -230,7 +226,7 @@ extension DefaultsManager.KeyWithDefault where Value == TransformableValue, Stor
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == [String], StoredValue == Value {
 	static let asymTransformValue = Self(
-		rawValue: DefaultsManagerTests.asymettricalTransformableTestValueDefaultKey,
+		DefaultsManagerTests.asymettricalTransformableTestValueDefaultKey,
 		defaultValue: [])
 		.withTransform(set: { arrayIn in
 			arrayIn.reduce(

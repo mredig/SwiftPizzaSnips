@@ -59,7 +59,7 @@ public class DefaultsManager {
 	}
 
 	public func setValue<Value, StoredValue: PropertyListCodable>(_ value: Value?, for key: KeyWithDefault<Value, StoredValue>) {
-		var newKey = Key<Value, StoredValue>(rawValue: key.rawValue)
+		var newKey = Key<Value, StoredValue>(key.rawValue)
 
 		if let transform = key.transform {
 			newKey = newKey.withTransform(transform)
@@ -91,7 +91,7 @@ public class DefaultsManager {
 	}
 
 	public func removeValue<Value, StoredValue: PropertyListCodable>(for key: KeyWithDefault<Value, StoredValue>) {
-		let newKey = Key<Value, StoredValue>(rawValue: key.rawValue)
+		let newKey = Key<Value, StoredValue>(key.rawValue)
 		removeValue(for: newKey)
 	}
 
@@ -119,14 +119,25 @@ public class DefaultsManager {
 
 	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
+		public var key: String { rawValue }
 		internal private(set) var transform: Transform<Value, StoredValue>?
 
-		public init(rawValue: String) {
-			self.rawValue = rawValue
+		public init(_ key: String) {
+			self.rawValue = key
 		}
 
+		@available(*, deprecated, message: "Confusing. Use init(_:)")
+		public init(rawValue: String) {
+			self.init(rawValue)
+		}
+
+		public init(_ key: String, storedValueType: StoredValue.Type) {
+			self.rawValue = key
+		}
+
+		@available(*, deprecated, message: "Confusing. Use init(_:, storedValueType:)")
 		public init(rawValue: String, storedValueType: StoredValue.Type) {
-			self.rawValue = rawValue
+			self.init(rawValue, storedValueType: storedValueType)
 		}
 
 		public func withTransform(_ transform: Transform<Value, StoredValue>) -> Self {
@@ -143,26 +154,36 @@ public class DefaultsManager {
 
 	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
+		public var key: String { rawValue }
 
 		public let defaultValue: Value
 
 		internal private(set) var transform: Transform<Value, StoredValue>?
 
-		@available(*, deprecated, message: "Always fails. Use init(rawValue:, defaultValue:)")
+		@available(*, deprecated, message: "Always fails. Use init(_:, defaultValue:)")
 		public init?(rawValue: String) { nil }
 
+		@available(*, deprecated, message: "Confusing. Use init(_:, defaultValue:, storedValueType:)")
 		public init(rawValue: String, defaultValue: Value, storedValueType: StoredValue.Type) {
-			self.rawValue = rawValue
+			self.init(rawValue, defaultValue: defaultValue)
+		}
+
+		public init(_ key: String, defaultValue: Value, storedValueType: StoredValue.Type) {
+			self.rawValue = key
 			self.defaultValue = defaultValue
 			self.transform = nil
 		}
 
+		@available(*, deprecated, message: "Confusing. Use init(_:, defaultValue:)")
 		public init(rawValue: String, defaultValue: Value) {
-			self.rawValue = rawValue
+			self.init(rawValue, defaultValue: defaultValue)
+		}
+
+		public init(_ key: String, defaultValue: Value) {
+			self.rawValue = key
 			self.defaultValue = defaultValue
 			self.transform = nil
 		}
-
 
 		public func withTransform(_ transform: Transform<Value, StoredValue>) -> Self {
 			var new = self

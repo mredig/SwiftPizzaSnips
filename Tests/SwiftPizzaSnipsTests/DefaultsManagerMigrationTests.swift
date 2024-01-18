@@ -3,8 +3,8 @@ import SwiftPizzaSnips
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 final class DefaultsManagerMigrationTests: XCTestCase {
-	static let doubleValueTestKey = DefaultsManager.KeyWithDefault<Double, Double>.doubleValueTest.rawValue
-	static let stringyValueKey = DefaultsManager.Key<String, String>.stringyValue.rawValue
+	static let doubleValueTestKey = DefaultsManager.KeyWithDefault<Double, Double>.doubleValueTest.key
+	static let stringyValueKey = DefaultsManager.Key<String, String>.stringyValue.key
 	static let defaultsVersionKey = "com.pizzaSnips.defaultsVersion"
 	static let allKeys = [
 		doubleValueTestKey,
@@ -94,6 +94,5 @@ final class DefaultsManagerMigrationTests: XCTestCase {
 }
 
 extension DefaultsManager.Key where Value == String, StoredValue == String {
-	static let stringyValue = Self(
-		rawValue: "com.pizzaSnips.stringyValue")
+	static let stringyValue = Self("com.pizzaSnips.stringyValue")
 }
