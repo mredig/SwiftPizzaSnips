@@ -1,7 +1,7 @@
 import XCTest
 import SwiftPizzaSnips
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 final class DefaultsManagerTests: XCTestCase {
 	static let testValueNilKey = "com.pizzaSnips.testValueNil"
 	static let testValueValueKey = "com.pizzaSnips.testValueValue"
@@ -182,7 +182,7 @@ final class DefaultsManagerTests: XCTestCase {
 	}
 }
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 private let transformableValueTransform = DefaultsManager.Transform(
 	get: { data in
 		try DefaultsManagerTests.decoder.decode(TransformableValue.self, from: data)
@@ -191,13 +191,13 @@ private let transformableValueTransform = DefaultsManager.Transform(
 		try DefaultsManagerTests.encoder.encode(value)
 	})
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.Key where Value == Int, StoredValue == Value {
 	static let testValueNil = Self(rawValue: DefaultsManagerTests.testValueNilKey)
 	static let testValueValue = Self(rawValue: DefaultsManagerTests.testValueValueKey)
 }
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.Key where Value == TransformableValue, StoredValue == Data {
 	static let transformableNil = Self(
 		rawValue: DefaultsManagerTests.transformableTestValueNilKey)
@@ -210,14 +210,14 @@ extension DefaultsManager.Key where Value == TransformableValue, StoredValue == 
 			set: transformableValueTransform.set)
 }
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == Double, StoredValue == Value {
 	static let doubleValueTest = Self(
 		rawValue: DefaultsManagerTests.doubleValueTestKey,
 		defaultValue: 3.14159)
 }
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == TransformableValue, StoredValue == Data {
 	static let transformableDefault = Self(
 		rawValue: DefaultsManagerTests.transformableTestValueDefaultKey,
@@ -227,7 +227,7 @@ extension DefaultsManager.KeyWithDefault where Value == TransformableValue, Stor
 			set: transformableValueTransform.set)
 }
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == [String], StoredValue == Value {
 	static let asymTransformValue = Self(
 		rawValue: DefaultsManagerTests.asymettricalTransformableTestValueDefaultKey,
