@@ -27,6 +27,16 @@ public extension Optional {
 	enum OptionalError: Error {
 		case nilValue(ofType: Wrapped.Type, message: String?, line: Int, file: String)
 	}
+
+	func unwrapCast<T>(as: T.Type, message: String? = nil, line: Int = #line, file: String = #file) throws -> T {
+		let unwrapped = try self.unwrap(message, line: line, file: file)
+		return try (unwrapped as? T).unwrap(message, line: line, file: file)
+	}
+
+	func unwrapCastOrFatalError<T>(as: T.Type, message: String, line: Int = #line, file: String = #file) -> T {
+		let unwrapped = self.unwrapOrFatalError(message: message, line: line, file: file)
+		return (unwrapped as? T).unwrapOrFatalError(message: message, line: line, file: file)
+	}
 }
 
 extension Optional.OptionalError: CustomDebugStringConvertible, LocalizedError {
