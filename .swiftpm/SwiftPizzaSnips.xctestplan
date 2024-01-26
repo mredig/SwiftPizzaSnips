@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "2FDA5187-5258-4BD4-87BE-60B7B845E0D9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "SwiftPizzaSnips",
+          "name" : "SwiftPizzaSnips"
+        }
+      ]
+    },
+    "environmentVariableEntries" : [
+      {
+        "key" : "FOO",
+        "value" : "bar"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SwiftPizzaSnipsTests",
+        "name" : "SwiftPizzaSnipsTests"
+      }
+    }
+  ],
+  "version" : 1
+}
