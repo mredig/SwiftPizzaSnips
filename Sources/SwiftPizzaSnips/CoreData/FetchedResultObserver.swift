@@ -1,0 +1,107 @@
+import Foundation
+import CoreData
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
+import Combine
+
+@available(macOS 10.15.1, iOS 13.0, tvOS 13.0, *)
+public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
+
+	private var frc: NSFetchedResultsController<Result>
+
+	public typealias DiffableDataSourceType = NSDiffableDataSourceSnapshot<String, NSManagedObjectID>
+	public let updatePublisher = PassthroughSubject<DiffableDataSourceType, Never>()
+
+	public typealias StreamType = AsyncStream<DiffableDataSourceType>
+	public var resultStream: StreamType {
+		_resultStream
+	}
+	private var _resultStream: StreamType!
+	private var streamContinuation: StreamType.Continuation?
+	public var finishStreamOnDeallocate: Bool
+
+	public private(set) var managedObjectContext: NSManagedObjectContext
+	public private(set) var sectionNameKeyPath: String?
+	public private(set) var cacheName: String?
+
+	private static func createFRC(
+		fetchRequest: NSFetchRequest<Result>,
+		managedObjectContext: NSManagedObjectContext,
+		sectionNameKeyPath: String?,
+		cacheName: String?
+	) -> NSFetchedResultsController<Result> {
+		NSFetchedResultsController(
+			fetchRequest: fetchRequest,
+			managedObjectContext: managedObjectContext,
+			sectionNameKeyPath: sectionNameKeyPath,
+			cacheName: cacheName)
+	}
+
+	public init(
+		fetchRequest: NSFetchRequest<Result>,
+		managedObjectContext: NSManagedObjectContext,
+		sectionNameKeyPath: String? = nil,
+		cacheName: String? = nil,
+		finishStreamOnDeallocate: Bool = true
+	) throws {
+		guard
+			fetchRequest.sortDescriptors?.isOccupied == true
+		else { throw ResultObserverError.fetchedResultsControllerRequiresSortDescriptors }
+
+		self.managedObjectContext = managedObjectContext
+		self.sectionNameKeyPath = sectionNameKeyPath
+		self.cacheName = cacheName
+		self.frc = Self.createFRC(
+			fetchRequest: fetchRequest,
+			managedObjectContext: managedObjectContext,
+			sectionNameKeyPath: sectionNameKeyPath,
+			cacheName: cacheName)
+		self.finishStreamOnDeallocate = finishStreamOnDeallocate
+
+		super.init()
+
+		self._resultStream = AsyncStream { continuation in
+			self.streamContinuation = continuation
+		}
+
+		frc.delegate = self
+	}
+
+	deinit {
+		if finishStreamOnDeallocate {
+			streamContinuation?.finish()
+		}
+	}
+
+	public func start() throws {
+		try frc.performFetch()
+	}
+
+	public func updateFetchRequest(_ request: NSFetchRequest<Result>) throws {
+		guard
+			request.sortDescriptors?.isOccupied == true
+		else { throw ResultObserverError.fetchedResultsControllerRequiresSortDescriptors }
+
+		let frc = Self.createFRC(
+			fetchRequest: request,
+			managedObjectContext: managedObjectContext,
+			sectionNameKeyPath: sectionNameKeyPath,
+			cacheName: cacheName)
+		self.frc = frc
+
+		try start()
+	}
+
+	public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {
+		let snap = snapshot as NSDiffableDataSourceSnapshot<String, NSManagedObjectID>
+		streamContinuation?.yield(snap)
+		updatePublisher.send(snap)
+	}
+
+	public enum ResultObserverError: Error {
+		case fetchedResultsControllerRequiresSortDescriptors
+	}
+}
