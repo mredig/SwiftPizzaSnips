@@ -91,5 +91,46 @@ final class FetchedResultObserverTests: XCTestCase {
 		let fooRequest = Foo.fetchRequest()
 		XCTAssertThrowsError(try FetchedResultObserver(fetchRequest: fooRequest, managedObjectContext: coreDataStack.mainContext))
 	}
+
+	func testObjectRetrieval() async throws {
+		let coreDataStack = try testableCoreDataStack()
+		coreDataStack.registerModel(Foo.self)
+		let existing = Foo(context: coreDataStack.mainContext)
+		existing.id = UUID()
+		existing.value = "foooooo"
+
+		addTeardownBlock {
+			try coreDataStack.resetRegisteredTypesInContainer()
+		}
+
+		try coreDataStack.mainContext.save()
+
+		let fooRequest = Foo.fetchRequest()
+		fooRequest.sortDescriptors = [
+			.init(keyPath: \Foo.value, ascending: true)
+		]
+
+		let resultObserver = try FetchedResultObserver(fetchRequest: fooRequest, managedObjectContext: coreDataStack.mainContext)
+
+		let streamCreatedExp = expectation(description: "Stream created")
+		Task {
+			let stream = resultObserver.resultStream
+			streamCreatedExp.fulfill()
+
+			for await snapshot in stream {
+				print(snapshot)
+			}
+		}
+		try resultObserver.start()
+
+		await fulfillment(of: [streamCreatedExp], timeout: 5)
+
+		let snap = resultObserver.latestSnapshot
+		let id = try snap.itemIdentifiers.first.unwrap("No item object id")
+
+		let object = resultObserver.maybeObject(for: id, on: coreDataStack.mainContext)
+
+		XCTAssertNotNil(object)
+	}
 }
 #endif

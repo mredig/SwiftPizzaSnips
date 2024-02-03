@@ -106,6 +106,18 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 		updatePublisher.send(snap)
 	}
 
+	public func object(for objectID: NSManagedObjectID, on context: NSManagedObjectContext? = nil) throws -> Result {
+		let context = context ?? managedObjectContext
+
+		let object = try context.existingObject(with: objectID)
+
+		return try (object as? Result).unwrap("Object either doesn't exist or isn't of \(Result.self) type.")
+	}
+
+	public func maybeObject(for objectID: NSManagedObjectID, on context: NSManagedObjectContext? = nil) -> Result? {
+		try? object(for: objectID, on: context)
+	}
+
 	public enum ResultObserverError: Error {
 		case fetchedResultsControllerRequiresSortDescriptors
 	}
