@@ -40,4 +40,11 @@ final class StringlyKeyedDictionaryTests: XCTestCase {
 		let testing = StringlyKeyedDictionary<Keysss, Any>(dictionary: [:])
 		XCTAssertNil(testing[.foo])
 	}
+
+	func testStringlyKeyedSimplestInit() {
+		// this doesn't actually need any assertions, but demonstrates how to init with an explicit type and an empty
+		// dictionary
+		let testing: StringlyKeyedDictionary<Keysss, Any> = [:]
+		XCTAssertNil(testing[.foo])
+	}
 }

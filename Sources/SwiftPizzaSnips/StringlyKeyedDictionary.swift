@@ -7,7 +7,7 @@ import Foundation
  Simply create a type that conforms to `RawRepresentable` with `String` as the `RawValue`, create all your keys as
  static values on that type, then wrap your dictionary in a `StringlyKeyedDictionary`
  */
-public struct StringlyKeyedDictionary<StringlyKey, Value>
+public struct StringlyKeyedDictionary<StringlyKey, Value>: ExpressibleByDictionaryLiteral
 where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
 	public var dictionary: [String: Value]
@@ -18,6 +18,13 @@ where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
 	public init(dictionary: [String: Value]) {
 		self.init(dictionary: dictionary, type: StringlyKey.self)
+	}
+
+	public init(dictionaryLiteral elements: (StringlyKey, Value)...) {
+		let dictionary = elements.reduce(into: [String: Value]()) {
+			$0[$1.0.rawValue] = $1.1
+		}
+		self.init(dictionary: dictionary)
 	}
 
 	public subscript(key: StringlyKey) -> Value? {
