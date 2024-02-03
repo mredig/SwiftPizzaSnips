@@ -211,9 +211,30 @@ public class DefaultsManager {
 	}
 }
 
-#if !canImport(FoundationNetworking)
+#if canImport(SwiftUI)
+import SwiftUI
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-extension DefaultsManager: ObservableObject {}
+extension DefaultsManager: ObservableObject {
+	public subscript <Value, StoredValue: PropertyListCodable>(binding key: Key<Value, StoredValue>) -> Binding<Value?> {
+		.init(
+			get: {
+				self[key]
+			},
+			set: {
+				self[key] = $0
+			})
+	}
+
+	public subscript <Value, StoredValue: PropertyListCodable>(binding key: KeyWithDefault<Value, StoredValue>) -> Binding<Value> {
+		.init(
+			get: {
+				self[key]
+			},
+			set: {
+				self[key] = $0
+			})
+	}
+}
 #endif
 
 public protocol PropertyListCodable {}
