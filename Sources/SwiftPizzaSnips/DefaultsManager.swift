@@ -47,7 +47,7 @@ public class DefaultsManager {
 				let storedValue = Self.defaults.object(forKey: key.rawValue) as? StoredValue
 			else { return key.defaultValue }
 			do {
-				return try getTransform(storedValue)
+				return try getTransform(storedValue).unwrap("Transform provided nil Optional")
 			} catch {
 				print("Error converting stored data for key: \(error)")
 				return key.defaultValue
@@ -198,8 +198,8 @@ public class DefaultsManager {
 	}
 
 	public struct Transform<Input, Stored: PropertyListCodable> {
-		public typealias GetTransform = (Stored) throws -> Input
-		public typealias SetTransform = (Input) throws -> Stored
+		public typealias GetTransform = (Stored) throws -> Input?
+		public typealias SetTransform = (Input) throws -> Stored?
 
 		public let get: GetTransform?
 		public let set: SetTransform?
@@ -245,5 +245,8 @@ extension Int: PropertyListCodable {}
 extension Double: PropertyListCodable {}
 extension Float: PropertyListCodable {}
 extension Date: PropertyListCodable {}
+
+extension Optional: PropertyListCodable where Wrapped: PropertyListCodable {}
+
 extension Array: PropertyListCodable where Element: PropertyListCodable {}
 extension Dictionary: PropertyListCodable where Key: PropertyListCodable, Value: PropertyListCodable {}

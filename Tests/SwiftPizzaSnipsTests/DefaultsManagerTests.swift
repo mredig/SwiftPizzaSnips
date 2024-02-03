@@ -7,6 +7,7 @@ final class DefaultsManagerTests: XCTestCase {
 	static let testValueValueKey = "com.pizzaSnips.testValueValue"
 	static let doubleValueTestKey = "com.pizzaSnips.doubleTestValue"
 	static let transformableTestValueKey = "com.pizzaSnips.transformableTestValue"
+	static let transformableTestIDKey = "com.pizzaSnips.transformableTestID"
 	static let transformableTestValueNilKey = "com.pizzaSnips.transformableTestValueNil"
 	static let transformableTestValueDefaultKey = "com.pizzaSnips.transformableTestValueDefault"
 	static let asymettricalTransformableTestValueDefaultKey = "com.pizzaSnips.asymettricalTransformableTestValueDefault"
@@ -109,6 +110,15 @@ final class DefaultsManagerTests: XCTestCase {
 		XCTAssertEqual(Self.tValuePeter, defaults[.transformableWithValue])
 	}
 
+	func testDefaultsManagerTransformableIDStoredAsString() throws {
+		let id = UUID()
+		defaults[.transformableID] = id
+		XCTAssertEqual(id, defaults[.transformableID])
+
+		defaults[.transformableID] = nil
+		XCTAssertNil(defaults[.transformableID])
+	}
+
 	// MARK: - KeyWithDefault
 	func testDefaultsManagerGetKeyWithDefault() {
 		let defaultValue = defaults[.doubleValueTest]
@@ -206,6 +216,14 @@ extension DefaultsManager.Key where Value == TransformableValue, StoredValue == 
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.Key where Value == UUID, StoredValue == String {
+	static let transformableID = Self(DefaultsManagerTests.transformableTestIDKey)
+		.withTransform(
+			get: { UUID(uuidString: $0) },
+			set: { $0.uuidString })
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
