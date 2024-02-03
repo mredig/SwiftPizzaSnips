@@ -14,6 +14,10 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 
 	public typealias DiffableDataSourceType = NSDiffableDataSourceSnapshot<String, NSManagedObjectID>
 	public let updatePublisher = PassthroughSubject<DiffableDataSourceType, Never>()
+	#if canImport(SwiftUI)
+	@Published
+	#endif
+	public private(set) var latestSnapshot: DiffableDataSourceType = .init()
 
 	public typealias StreamType = AsyncStream<DiffableDataSourceType>
 	public var resultStream: StreamType {
@@ -97,6 +101,7 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 
 	public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {
 		let snap = snapshot as NSDiffableDataSourceSnapshot<String, NSManagedObjectID>
+		latestSnapshot = snap
 		streamContinuation?.yield(snap)
 		updatePublisher.send(snap)
 	}
@@ -105,3 +110,8 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 		case fetchedResultsControllerRequiresSortDescriptors
 	}
 }
+
+#if canImport(SwiftUI)
+@available(macOS 10.15.1, iOS 13.0, tvOS 13.0, *)
+extension FetchedResultObserver: ObservableObject {}
+#endif
