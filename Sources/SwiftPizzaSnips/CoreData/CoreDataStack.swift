@@ -6,6 +6,7 @@ import CoreData
 public class CoreDataStack {
 
 	public static let didResetRegisteredTypesNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypesNotification")
+	public static let didResetRegisteredTypeNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypeNotification")
 
 	var modelFileName: String { modelURL.deletingPathExtension().lastPathComponent }
 	let modelURL: URL
@@ -144,25 +145,33 @@ public class CoreDataStack {
 		registeredModels.append(model)
 	}
 
-	public func resetRegisteredTypesInContainer() throws {
-		defer { NotificationCenter.default.post(name: Self.didResetRegisteredTypesNotification, object: self) }
+	public func resetRegisteredTypeInContainer(_ type: NSManagedObject.Type) throws {
+		defer {
+			NotificationCenter.default.post(name: Self.didResetRegisteredTypeNotification, object: self, userInfo: ["ResetType": type])
+		}
 		let bgContext = container.newBackgroundContext()
 
-		for model in registeredModels {
-			try bgContext.performAndWait {
-				let fetchRequest = model.fetchRequest() as NSFetchRequest<NSFetchRequestResult>
-				fetchRequest.resultType = .managedObjectIDResultType
-				let imageDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+		try bgContext.performAndWait {
+			let fetchRequest = type.fetchRequest() as NSFetchRequest<NSFetchRequestResult>
+			fetchRequest.resultType = .managedObjectIDResultType
+			let imageDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
 
-				if
-					let deleteResult = try bgContext.execute(imageDeleteRequest) as? NSBatchDeleteResult,
-					let objectIDs = deleteResult.result as? [NSManagedObjectID] {
+			if
+				let deleteResult = try bgContext.execute(imageDeleteRequest) as? NSBatchDeleteResult,
+				let objectIDs = deleteResult.result as? [NSManagedObjectID] {
 
-					NSManagedObjectContext.mergeChanges(
-						fromRemoteContextSave: [NSDeletedObjectIDsKey: objectIDs],
-						into: [bgContext, mainContext])
-				}
+				NSManagedObjectContext.mergeChanges(
+					fromRemoteContextSave: [NSDeletedObjectIDsKey: objectIDs],
+					into: [bgContext, mainContext])
 			}
+		}
+	}
+
+	public func resetRegisteredTypesInContainer() throws {
+		defer { NotificationCenter.default.post(name: Self.didResetRegisteredTypesNotification, object: self) }
+
+		for model in registeredModels {
+			try resetRegisteredTypeInContainer(model)
 		}
 	}
 }
