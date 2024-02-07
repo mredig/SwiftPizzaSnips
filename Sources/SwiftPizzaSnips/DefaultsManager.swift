@@ -86,6 +86,12 @@ public class DefaultsManager {
 		}
 	}
 
+	@discardableResult
+	public func reset<Value, StoredValue: PropertyListCodable>(key: KeyWithDefault<Value, StoredValue>) -> Value {
+		setValue(key.reset.resetValue, for: key)
+		return getValue(for: key)
+	}
+
 	public func removeValue<Value, StoredValue: PropertyListCodable>(for key: Key<Value, StoredValue>) {
 		setValue(nil, for: key)
 	}
@@ -117,9 +123,14 @@ public class DefaultsManager {
 		key.defaultValue
 	}
 
+	public subscript<Value, StoredValue: PropertyListCodable>(reset key: KeyWithDefault<Value, StoredValue>) -> Value {
+		reset(key: key)
+	}
+
 	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
 		public var key: String { rawValue }
+		
 		internal private(set) var transform: Transform<Value, StoredValue>?
 
 		public init(_ key: String) {
@@ -155,6 +166,9 @@ public class DefaultsManager {
 	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
 		public let rawValue: String
 		public var key: String { rawValue }
+		public var reset: DefaultsReset<Value, StoredValue> {
+			DefaultsReset(resetValue: defaultValue, key: self)
+		}
 
 		public let defaultValue: Value
 
@@ -169,9 +183,7 @@ public class DefaultsManager {
 		}
 
 		public init(_ key: String, defaultValue: Value, storedValueType: StoredValue.Type) {
-			self.rawValue = key
-			self.defaultValue = defaultValue
-			self.transform = nil
+			self.init(key, defaultValue: defaultValue)
 		}
 
 		@available(*, deprecated, message: "Confusing. Use init(_:, defaultValue:)")
@@ -195,6 +207,11 @@ public class DefaultsManager {
 			let transform = Transform(get: get, set: set)
 			return withTransform(transform)
 		}
+	}
+
+	public struct DefaultsReset<V, SV: PropertyListCodable> {
+		let resetValue: V
+		let key: KeyWithDefault<V, SV>
 	}
 
 	public struct Transform<Input, Stored: PropertyListCodable> {

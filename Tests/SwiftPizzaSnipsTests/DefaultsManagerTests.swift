@@ -190,6 +190,25 @@ final class DefaultsManagerTests: XCTestCase {
 		XCTAssertEqual(213, defaults[.doubleValueTest])
 		XCTAssertEqual(expectedValue, defaults[defaultValue: .doubleValueTest])
 	}
+
+	func testDefaultsManagerResetToDefaultValueFromKeyWithDefault() {
+		let expectedValue = 3.14159
+
+		XCTAssertEqual(expectedValue, defaults[.doubleValueTest])
+
+		defaults[.doubleValueTest] = 213
+		XCTAssertEqual(213, defaults[.doubleValueTest])
+
+		defaults.reset(key: .doubleValueTest) // <-- first option
+		XCTAssertEqual(expectedValue, defaults[.doubleValueTest])
+
+		// alternative option
+		defaults[.doubleValueTest] = 213
+		XCTAssertEqual(213, defaults[.doubleValueTest])
+
+		_ = defaults[reset: .doubleValueTest] // <-- this is the alt
+		XCTAssertEqual(expectedValue, defaults[.doubleValueTest])
+	}
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
