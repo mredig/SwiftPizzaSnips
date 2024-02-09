@@ -77,4 +77,55 @@ public func getProtocolConformances(for class: AnyObject.Type?) {
 		print(protName)
 	}
 }
+
+public func getProtocolSymbols(for protocol: Protocol?) {
+	guard
+		let `protocol`
+	else { return }
+	var count: Int32 = 0
+	let properties = protocol_copyPropertyList(`protocol`, &count)
+	for i in 0..<Int(count) {
+		guard
+			let property = properties?.advanced(by: i).pointee
+		else { continue }
+		let propertyNameChars = property_getName(property)
+		guard
+			let propertyName = String(validatingUTF8: propertyNameChars)
+		else { continue }
+		if let typeInfo = getPropertyType(for: property) {
+			print("\(typeInfo): ", terminator: "")
+		}
+		print(propertyName)
+	}
+
+	let variations: [(required: Bool, instance: Bool)] = [
+		(false, false),
+		(false, true),
+		(true, true),
+		(true, false),
+	]
+
+	for variation in variations {
+		print("required: \(variation.required) instance: \(variation.instance)")
+		let methods = protocol_copyMethodDescriptionList(`protocol`, variation.required, variation.instance, &count)
+		for i in 0..<Int(count) {
+			let method = methods?.advanced(by: i).pointee
+			guard
+				let selector = method?.name
+			else { continue }
+			let name = NSStringFromSelector(selector)
+			print(name, terminator: " ")
+
+			guard
+				let typesChars = method?.types,
+				let types = String(validatingUTF8: typesChars)
+			else {
+				print()
+				continue
+			}
+			print(types)
+		}
+		print()
+	}
+}
 #endif
