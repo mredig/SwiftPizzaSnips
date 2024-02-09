@@ -132,5 +132,66 @@ final class FetchedResultObserverTests: XCTestCase {
 
 		XCTAssertNotNil(object)
 	}
+
+	func testResetResultObserver() async throws {
+		let coreDataStack = try testableCoreDataStack()
+		coreDataStack.registerModel(Foo.self)
+		let a = Foo(context: coreDataStack.mainContext)
+		a.id = UUID()
+		a.value = "foo"
+
+		let b = Foo(context: coreDataStack.mainContext)
+		b.id = UUID()
+		b.value = "bar"
+
+		addTeardownBlock {
+			try coreDataStack.resetRegisteredTypesInContainer()
+		}
+
+		try coreDataStack.mainContext.save()
+
+		let fooRequest = Foo.fetchRequest()
+		fooRequest.sortDescriptors = [
+			.init(keyPath: \Foo.value, ascending: true)
+		]
+
+		let resultObserver = try FetchedResultObserver(fetchRequest: fooRequest, managedObjectContext: coreDataStack.mainContext)
+
+		let expectedStartCount = expectation(description: "expected start Count")
+		expectedStartCount.assertForOverFulfill = false
+		let expectedFilterCount = expectation(description: "expected filter Count")
+		let expectedResetCount = expectation(description: "expected reset Count")
+		expectedResetCount.expectedFulfillmentCount = 2
+		Task {
+			let stream = resultObserver.resultStream
+
+			for await snapshot in stream {
+				print(snapshot)
+
+				if snapshot.numberOfItems == 2 {
+					expectedStartCount.fulfill()
+					expectedResetCount.fulfill()
+				}
+
+				if snapshot.numberOfItems == 1 {
+					expectedFilterCount.fulfill()
+				}
+			}
+		}
+		try resultObserver.start()
+
+		await fulfillment(of: [expectedStartCount], timeout: 5)
+
+		let filteredFR = fooRequest.copy() as! NSFetchRequest<Foo>
+		filteredFR.predicate = NSPredicate(format: "value == %@", "foo" as NSString)
+		try resultObserver.updateFetchRequest(filteredFR)
+
+		await fulfillment(of: [expectedFilterCount], timeout: 5)
+
+		try resultObserver.resetFetchRequest()
+
+		await fulfillment(of: [expectedResetCount], timeout: 5)
+	}
+
 }
 #endif

@@ -31,6 +31,8 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 	public private(set) var sectionNameKeyPath: String?
 	public private(set) var cacheName: String?
 
+	public let initialFetchRequest: NSFetchRequest<Result>
+
 	private static func createFRC(
 		fetchRequest: NSFetchRequest<Result>,
 		managedObjectContext: NSManagedObjectContext,
@@ -55,6 +57,7 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 			fetchRequest.sortDescriptors?.isOccupied == true
 		else { throw ResultObserverError.fetchedResultsControllerRequiresSortDescriptors }
 
+		self.initialFetchRequest = fetchRequest
 		self.managedObjectContext = managedObjectContext
 		self.sectionNameKeyPath = sectionNameKeyPath
 		self.cacheName = cacheName
@@ -97,6 +100,11 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 		self.frc = frc
 
 		try start()
+	}
+
+	/// Resets to `initialFetchRequest` - the one that was passed in the initializer
+	public func resetFetchRequest() throws {
+		try updateFetchRequest(initialFetchRequest)
 	}
 
 	public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {
