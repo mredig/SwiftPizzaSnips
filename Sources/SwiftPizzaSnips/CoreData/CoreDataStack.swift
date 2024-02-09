@@ -80,9 +80,9 @@ public class CoreDataStack {
 		}
 	}
 
-	public var mainContext: NSManagedObjectContext {
-		return container.viewContext
-	}
+	public var mainContext: NSManagedObjectContext { container.viewContext }
+
+	public func newBackgroundContext() -> NSManagedObjectContext { container.newBackgroundContext() }
 
 	public private(set) var consistentContexts: [ContextKey: NSManagedObjectContext] = [:]
 
