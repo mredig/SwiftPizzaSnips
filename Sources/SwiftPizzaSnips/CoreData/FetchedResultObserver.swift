@@ -98,6 +98,7 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 			sectionNameKeyPath: sectionNameKeyPath,
 			cacheName: cacheName)
 		self.frc = frc
+		frc.delegate = self
 
 		try start()
 	}
