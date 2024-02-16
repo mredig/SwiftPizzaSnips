@@ -5,10 +5,7 @@ import CryptoKit
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Digest {
 	public func toHexString() -> String {
-		map { byte in
-			String(format: "%02hhx", byte)
-		}
-		.joined()
+		Data(self).toHexString()
 	}
 }
 
