@@ -47,7 +47,9 @@ let package = Package(
             name: "SwiftPizzaSnipsTests",
             dependencies: ["SwiftPizzaSnips"],
 			exclude: testsExcludes,
-			resources: testResources
-		),
+			resources: testResources,
+			swiftSettings: [
+				.enableUpcomingFeature("BareSlashRegexLiterals"),
+			]),
     ]
 )
