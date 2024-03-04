@@ -3,7 +3,7 @@ import SwiftPizzaSnips
 
 final class SeedableRNGTests: XCTestCase {
 	func testRandomNumberGeneration() {
-		var rng = SeedableRNG(seed: 70)
+		var rng = SeedableRNG(seed: 70, primingIterations: 20)
 
 		let first = Int.random(in: 0...100, using: &rng)
 		XCTAssertEqual(65, first)
@@ -16,7 +16,7 @@ final class SeedableRNGTests: XCTestCase {
 	}
 
 	func testUniformness() throws {
-		var rng = SeedableRNG(seed: 0)
+		var rng = SeedableRNG(seed: 0, primingIterations: 20)
 
 		var unique: Set<Int> = []
 
