@@ -41,6 +41,11 @@ public struct PersistentHasher: HashFunction {
 		update(bool: bool)
 	}
 
+	public mutating func update<T: PersistentHashable>(_ optional: T?) {
+		guard let optional else { return }
+		optional.hash(persistentlyInto: &self)
+	}
+
 	public mutating func update(_ bufferPointer: UnsafeRawBufferPointer) {
 		update(bufferPointer: bufferPointer)
 	}
