@@ -1,5 +1,6 @@
 import XCTest
 import SwiftPizzaSnips
+#if canImport(CryptoKit)
 
 // Note: Many of these tests are just confirming that they provide consistent hashes. If it's found that a value is
 // incorrect, but consistent, that's *kind* of a bug? Kind of? But not really, as long as it achieves consistency...
@@ -107,3 +108,4 @@ final class PersistentHashableTests: XCTestCase {
 		XCTAssertEqual(null.persistentHashValue().toHexString(), "93b885adfe0da089cdf634904fd59f71")
 	}
 }
+#endif

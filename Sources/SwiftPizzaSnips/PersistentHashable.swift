@@ -9,11 +9,11 @@ public protocol PersistentHashable {
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 public extension PersistentHashable {
-	typealias Hasher = Insecure.MD5
-	typealias Hash = Insecure.MD5Digest
+	typealias Hasher = PersistentHasher
+	typealias Hash = Hasher.PersistentDigest
 
 	func persistentHashValue() -> Hash {
-		var hasher = Insecure.MD5()
+		var hasher = Hasher()
 		hash(persistentlyInto: &hasher)
 		return hasher.finalize()
 	}
@@ -22,86 +22,86 @@ public extension PersistentHashable {
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Date: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: timeIntervalSinceReferenceDate)
+		hasher.update(timeIntervalSinceReferenceDate)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Bool: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(bool: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Int: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension UInt: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Int8: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension UInt8: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Int16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension UInt16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Int32: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension UInt32: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Int64: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension UInt64: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Float: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 #if arch(arm64) // see Float16 docs
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
 extension Float16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 #endif
@@ -114,26 +114,26 @@ extension Float80: PersistentHashable {
 		defer { buffer.deallocate() }
 		buffer[0] = self
 		let rawBuffer = UnsafeRawBufferPointer(buffer)
-		update(bufferPointer: rawBuffer)
+		update(rawBuffer)
 	}
 }
 #endif
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Double: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(number: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Decimal: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(string: description)
+		hasher.update(description)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Range: PersistentHashable where Bound: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(string: "Range:")
+		hasher.update("Range:")
 		lowerBound.hash(persistentlyInto: &hasher)
 		upperBound.hash(persistentlyInto: &hasher)
 	}
@@ -141,7 +141,7 @@ extension Range: PersistentHashable where Bound: PersistentHashable {
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension ClosedRange: PersistentHashable where Bound: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(string: "ClosedRange:")
+		hasher.update("ClosedRange:")
 		lowerBound.hash(persistentlyInto: &hasher)
 		upperBound.hash(persistentlyInto: &hasher)
 	}
@@ -149,13 +149,13 @@ extension ClosedRange: PersistentHashable where Bound: PersistentHashable {
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension String: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(string: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Substring: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(string: String(self))
+		hasher.update(String(self))
 	}
 }
 
@@ -185,7 +185,7 @@ extension Set: PersistentHashable where Element: PersistentHashable & Comparable
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Data: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
-		hasher.update(data: self)
+		hasher.update(self)
 	}
 }
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -200,7 +200,7 @@ extension Optional: PersistentHashable where Wrapped: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		switch self {
 		case .none:
-			hasher.update(data: Data([0]))
+			hasher.update(Data([0]))
 		case .some(let wrapped):
 			wrapped.hash(persistentlyInto: &hasher)
 		}
