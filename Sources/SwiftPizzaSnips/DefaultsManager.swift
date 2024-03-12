@@ -1,7 +1,7 @@
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-public class DefaultsManager {
+public class DefaultsManager: Withable {
 	private static let defaults = UserDefaults.standard
 
 	public static let shared = DefaultsManager()

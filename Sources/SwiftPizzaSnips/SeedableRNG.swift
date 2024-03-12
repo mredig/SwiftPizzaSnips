@@ -1,7 +1,7 @@
 import Foundation
 
 /// Not super high quality RNG, but somewhat uniform. Definltely NOT secure.
-public struct SeedableRNG: RandomNumberGenerator {
+public struct SeedableRNG: RandomNumberGenerator, Withable {
 	public let initialSeed: UInt64
 	public private(set) var currentSeedvalue: UInt64
 

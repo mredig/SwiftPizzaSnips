@@ -3,7 +3,7 @@ import Foundation
 import CryptoKit
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-public struct PersistentHasher: HashFunction {
+public struct PersistentHasher: HashFunction, Withable {
 	public static var blockByteCount: Int {
 		get { Insecure.MD5.blockByteCount }
 		set { Insecure.MD5.blockByteCount = newValue }

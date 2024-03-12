@@ -3,7 +3,7 @@ import CoreData
 
 // no events should be created from this, but observable object allows storing in environment object
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
-public class CoreDataStack {
+public class CoreDataStack: Withable {
 
 	public static let didResetRegisteredTypesNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypesNotification")
 	public static let didResetRegisteredTypeNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypeNotification")

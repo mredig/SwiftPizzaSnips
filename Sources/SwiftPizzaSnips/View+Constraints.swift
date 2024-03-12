@@ -99,7 +99,7 @@ public extension NSDirectionalEdgeInsets {
 	}
 }
 
-public struct DirectionalMeasurement<Measurement> {
+public struct DirectionalMeasurement<Measurement>: Withable {
 	public var top: Measurement
 	public var leading: Measurement
 	public var bottom: Measurement
@@ -176,7 +176,7 @@ public enum DirectionalToggleOption {
 	case skip
 }
 public typealias DirectionalToggle = DirectionalMeasurement<DirectionalToggleOption>
-extension DirectionalToggle: Withable {
+extension DirectionalToggle {
 	public static let all = DirectionalToggle(uniform: .create)
 	public static let horizontal = DirectionalToggle(horizontal: .create, vertical: .skip)
 	public static let vertical = DirectionalToggle(horizontal: .skip, vertical: .create)

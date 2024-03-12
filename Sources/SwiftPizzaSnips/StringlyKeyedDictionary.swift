@@ -7,7 +7,7 @@ import Foundation
  Simply create a type that conforms to `RawRepresentable` with `String` as the `RawValue`, create all your keys as
  static values on that type, then wrap your dictionary in a `StringlyKeyedDictionary`
  */
-public struct StringlyKeyedDictionary<StringlyKey, Value>: ExpressibleByDictionaryLiteral
+public struct StringlyKeyedDictionary<StringlyKey, Value>: ExpressibleByDictionaryLiteral, Withable
 where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
 	public var dictionary: [String: Value]
