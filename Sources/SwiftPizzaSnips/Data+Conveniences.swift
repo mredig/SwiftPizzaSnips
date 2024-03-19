@@ -81,3 +81,10 @@ extension Data {
 		case invalidStringInput
 	}
 }
+
+public extension Data {
+	func write(to output: URL, options: WritingOptions = [], creatingIntermediateDirectories: Bool) throws {
+		try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
+		try write(to: output, options: options)
+	}
+}
