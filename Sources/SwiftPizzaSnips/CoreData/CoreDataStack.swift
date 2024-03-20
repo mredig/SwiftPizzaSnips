@@ -17,7 +17,7 @@ public class CoreDataStack: Withable {
 	public init(modelURL: URL) throws {
 		guard
 			try modelURL.checkResourceIsReachable()
-		else { throw SimpleError(message: "No CoreData model at specified path") }
+		else { throw Error.noCoreDataModel(atPath: modelURL) }
 
 		self.modelURL = modelURL
 	}
@@ -26,10 +26,10 @@ public class CoreDataStack: Withable {
 	public func save(
 		context: NSManagedObjectContext,
 		// might be able to use `NSMergePolicy = .mergeByPropertyObjectTrump` instead
-		withMergePolicy mergePolicy: AnyObject = NSMergeByPropertyObjectTrumpMergePolicy) throws {
-
+		withMergePolicy mergePolicy: AnyObject = NSMergeByPropertyObjectTrumpMergePolicy
+	) throws {
 		//Placeholder in case something doesn't work
-		var closureError: Error?
+		var closureError: Swift.Error?
 
 		context.mergePolicy = mergePolicy
 
@@ -133,7 +133,7 @@ public class CoreDataStack: Withable {
 
 		guard
 			let context = consistentContexts[key]
-		else { throw SimpleError(message: "No context registered for key: \(key)") }
+		else { throw Error.noContextRegistered(forKey: key) }
 		return context
 	}
 
@@ -173,5 +173,10 @@ public class CoreDataStack: Withable {
 		for model in registeredModels {
 			try resetRegisteredTypeInContainer(model)
 		}
+	}
+
+	public enum Error: Swift.Error {
+		case noCoreDataModel(atPath: URL)
+		case noContextRegistered(forKey: ContextKey)
 	}
 }
