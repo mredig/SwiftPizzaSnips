@@ -1,7 +1,6 @@
 import Foundation
 import CoreData
 
-// no events should be created from this, but observable object allows storing in environment object
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 public class CoreDataStack: Withable {
 
@@ -9,54 +8,51 @@ public class CoreDataStack: Withable {
 	public static let didResetRegisteredTypeNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypeNotification")
 
 	var modelFileName: String { modelURL.deletingPathExtension().lastPathComponent }
-	let modelURL: URL
+	var modelURL: URL {
+		configuration.modelURL
+	}
 	/// If `configureContainer` is set to `false`, you must call `configureContainer()` prior to using `CoreDataStack`.
 	/// This provides an opportunity for small configuration adjustments. Default is `true`. 
 	/// Failure to follow this directive **may result in a crash**
-	public convenience init(modelFileName: String, configureContainer: Bool = true) throws {
+	public convenience init(modelFileName: String, configureContainerImmediately: Bool = true) throws {
 		let modelURL = try Bundle.main.url(forResource: modelFileName, withExtension: "momd").unwrap()
-		try self.init(modelURL: modelURL, configureContainer: configureContainer)
+		try self.init(modelURL: modelURL, configureContainerImmediately: configureContainerImmediately)
 	}
 
 	/// If `configureContainer` is set to `false`, you must call `configureContainer()` prior to using `CoreDataStack`.
 	/// This provides an opportunity for small configuration adjustments. Default is `true`. 
 	/// Failure to follow this directive **may result in a crash**
-	public init(modelURL: URL, configureContainer: Bool = true) throws {
+	public convenience init(modelURL: URL, configureContainerImmediately: Bool = true) throws {
+		let config = Configuration(modelURL: modelURL).with {
+			$0.storeOption = .sqlDefaults
+		}
+
+		try self.init(configuration: config, configureContainerImmediately: configureContainerImmediately)
+	}
+
+	public init(configuration: Configuration, configureContainerImmediately: Bool = true) throws {
 		guard
-			try modelURL.checkResourceIsReachable()
-		else { throw Error.noCoreDataModel(atPath: modelURL) }
+			try configuration.modelURL.checkResourceIsReachable()
+		else { throw Error.noCoreDataModel(atPath: configuration.modelURL) }
 
-		self.modelURL = modelURL
+		self._configuration = configuration
 
-		if configureContainer {
+		if configureContainerImmediately {
 			try self.configureContainer()
 		}
 	}
 
-	/// This must be set to the desired value BEFORE accessing `container`
-	private var useMemoryStore = false
-
-	/// A generic function to save any context we want (main or background)
-	public func save(
-		context: NSManagedObjectContext,
-		// might be able to use `NSMergePolicy = .mergeByPropertyObjectTrump` instead
-		withMergePolicy mergePolicy: AnyObject = NSMergeByPropertyObjectTrumpMergePolicy
-	) throws {
-		//Placeholder in case something doesn't work
-		var closureError: Swift.Error?
-
-		context.mergePolicy = mergePolicy
-
-		context.performAndWait {
-			do {
-				try context.save()
-			} catch {
-				print("error saving context: \(error)")
-				closureError = error
+	private var _configuration: Configuration
+	public var configuration: Configuration {
+		get { _configuration }
+		set {
+			Self.containerLock.lock()
+			defer { Self.containerLock.unlock() }
+			guard _containerStore == nil else {
+				print("Warning: Trying to update CoreDataStack configuration AFTER container has already been configured!")
+				return
 			}
-		}
-		if let error = closureError {
-			throw error
+			_configuration = newValue
 		}
 	}
 
@@ -93,7 +89,11 @@ public class CoreDataStack: Withable {
 	public var mainContext: NSManagedObjectContext { try! configuredContainer.viewContext }
 
 	/// Will cause a crash if `configureContainer()` is not called prior!
-	public func newBackgroundContext() -> NSManagedObjectContext { try! configuredContainer.newBackgroundContext() }
+	public func newBackgroundContext() -> NSManagedObjectContext {
+		try! configuredContainer.newBackgroundContext().with {
+			$0.mergeConflictResolutionPolicy = configuration.newBackgroundContextDefaultMergePolicy
+		}
+	}
 
 	@discardableResult
 	private func _configureContainer() throws -> NSPersistentContainer {
@@ -102,20 +102,58 @@ public class CoreDataStack: Withable {
 		else { throw Error.cantFindObjectModel(at: modelURL) }
 
 		let container = NSPersistentContainer(name: modelFileName, managedObjectModel: model)
-		if useMemoryStore {
+
+		switch configuration.storeOption {
+		case .sql(config: let config):
+			if let config {
+				let options: [AnyHashable: Any]? = {
+					var out: [String: Any] = [:]
+					if let readOnly = config.readOnly {
+						out[NSReadOnlyPersistentStoreOption] = readOnly
+					}
+					if let pragmas = config.pragmas {
+						out[NSSQLitePragmasOption] = pragmas
+					}
+					if let analyze = config.analyze {
+						out[NSSQLiteAnalyzeOption] = analyze
+					}
+					if let vacuum = config.vacuum {
+						out[NSSQLiteManualVacuumOption] = vacuum
+					}
+					#if !os(macOS) && !os(Linux)
+					if let protectionKey = config.protectionKey {
+						out[NSPersistentStoreFileProtectionKey] = protectionKey
+					}
+					#endif
+
+					guard out.isOccupied else { return nil }
+					return out
+				}()
+
+				_ = try container.persistentStoreCoordinator.addPersistentStore(
+					type: .sqlite,
+					configuration: config.modelConfiguration,
+					at: config.storeURL,
+					options: options)
+			} else {
+				container.loadPersistentStores(completionHandler: { description, error in
+					if let error = error {
+						fatalError("Failed to load persistent store: \(error)")
+					}
+				})
+			}
+		case .inMemory:
 			_ = try container.persistentStoreCoordinator.addPersistentStore(type: .inMemory, at: URL(string: "/dev/null")!)
-		} else {
-			container.loadPersistentStores(completionHandler: { description, error in
-				if let error = error {
-					fatalError("Failed to load persistent store: \(error)")
-				}
-			})
+		case .custom(let block):
+			try block(container)
 		}
 
 		// May need to be disabled if dataset is too large for performance reasons
-		container.viewContext.automaticallyMergesChangesFromParent = true
+		container.viewContext.automaticallyMergesChangesFromParent = configuration.mainContextAutomaticallyMergeChanges
+		container.viewContext.mergeConflictResolutionPolicy = configuration.mainContextDefaultMergePolicy
 
 		_registerConsistentContext(container.newBackgroundContext(), forKey: .global, on: container)
+		consistentContexts[.global]?.mergeConflictResolutionPolicy = configuration.newBackgroundContextDefaultMergePolicy
 		_registerConsistentContext(container.viewContext, forKey: .main, on: container)
 
 		_containerStore = container
@@ -192,6 +230,40 @@ public class CoreDataStack: Withable {
 		registeredModels.append(model)
 	}
 
+	/// A generic function to save any context we want (main or background)
+	public func save(
+		context: NSManagedObjectContext,
+		withMergePolicyOverride mergePolicy: NSMergePolicyType? = nil
+	) throws {
+		//Placeholder in case something doesn't work
+		var closureError: Swift.Error?
+
+		let previousPolicy: NSMergePolicyType?
+		defer {
+			if let previousPolicy {
+				context.mergeConflictResolutionPolicy = previousPolicy
+			}
+		}
+		if let mergePolicy {
+			previousPolicy = context.mergeConflictResolutionPolicy
+			context.mergeConflictResolutionPolicy = mergePolicy
+		} else {
+			previousPolicy = nil
+		}
+
+		context.performAndWait {
+			do {
+				try context.save()
+			} catch {
+				print("error saving context: \(error)")
+				closureError = error
+			}
+		}
+		if let error = closureError {
+			throw error
+		}
+	}
+
 	/// Will trigger a call to `configureContainer()` if not already configured.
 	public func resetRegisteredTypeInContainer(_ type: NSManagedObject.Type) throws {
 		defer {
@@ -222,14 +294,6 @@ public class CoreDataStack: Withable {
 		for model in registeredModels {
 			try resetRegisteredTypeInContainer(model)
 		}
-	}
-
-	/// Must be called BEFORE `container` is accessed. throws only if `container` is already configured.
-	public func setUseMemoryStore() throws {
-		guard
-			_containerStore == nil
-		else { throw Error.containerAlreadyConfigured }
-		useMemoryStore = true
 	}
 
 	public enum Error: Swift.Error {

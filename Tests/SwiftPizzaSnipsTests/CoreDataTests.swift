@@ -28,11 +28,12 @@ final class CoreDataTests: XCTestCase {
 			.url(forResource: "Foo", withExtension: "momd")
 			.unwrap()
 
-		let cds = try CoreDataStack(modelURL: modelURL, configureContainer: false)
-		if inMemory {
-			try cds.setUseMemoryStore()
+		let config = CoreDataStack.Configuration(modelURL: modelURL).with {
+			if inMemory {
+				$0.storeOption = .inMemory
+			}
 		}
-		try cds.configureContainer()
+		let cds = try CoreDataStack(configuration: config)
 
 		cds.registerModel(Foo.self)
 		if inMemory == false {
