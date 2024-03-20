@@ -12,6 +12,11 @@ extension CoreDataStack {
 
 		public var newBackgroundContextDefaultMergePolicy: NSMergePolicyType = .errorMergePolicyType
 
+		public init(modelFileName: String) throws {
+			let modelURL = try Bundle.main.url(forResource: modelFileName, withExtension: "momd").unwrap()
+			self.init(modelURL: modelURL)
+		}
+
 		public init(modelURL: URL) {
 			self.modelURL = modelURL
 		}
