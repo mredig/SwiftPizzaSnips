@@ -17,7 +17,7 @@ final class CoreDataTests: XCTestCase {
 				forName: NSValueTransformerName(rawValue: "StringArrayTransformer"))
 	}
 
-	private func testableCoreDataStack() throws -> CoreDataStack {
+	private func testableCoreDataStack(inMemory: Bool = false) throws -> CoreDataStack {
 		let bundle = Bundle(for: Self.self)
 		let subBundleURL = try bundle
 			.url(forResource: "SwiftPizzaSnips_SwiftPizzaSnipsTests", withExtension: "bundle")
@@ -29,9 +29,14 @@ final class CoreDataTests: XCTestCase {
 			.unwrap()
 
 		let cds = try CoreDataStack(modelURL: modelURL)
+		if inMemory {
+			try cds.setUseMemoryStore()
+		}
 
 		cds.registerModel(Foo.self)
-		try cds.resetRegisteredTypesInContainer()
+		if inMemory == false {
+			try cds.resetRegisteredTypesInContainer()
+		}
 		return cds
 	}
 
@@ -88,7 +93,7 @@ final class CoreDataTests: XCTestCase {
 	}
 
 	func testNoThrowSave() async throws {
-		let coreDataStack = try testableCoreDataStack()
+		let coreDataStack = try testableCoreDataStack(inMemory: true)
 		let context = coreDataStack.mainContext
 
 		let fetchRequest = NSFetchRequest<NSNumber>(entityName: "Foo")

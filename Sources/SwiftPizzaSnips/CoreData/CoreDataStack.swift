@@ -22,6 +22,9 @@ public class CoreDataStack: Withable {
 		self.modelURL = modelURL
 	}
 
+	/// This must be set to the desired value BEFORE accessing `container`
+	private var useMemoryStore = false
+
 	/// A generic function to save any context we want (main or background)
 	public func save(
 		context: NSManagedObjectContext,
@@ -62,12 +65,16 @@ public class CoreDataStack: Withable {
 				else { fatalError("can't find object model: \(modelFileName)") }
 
 				let container = NSPersistentContainer(name: modelFileName, managedObjectModel: model)
+				if useMemoryStore {
+					_ = try? container.persistentStoreCoordinator.addPersistentStore(type: .inMemory, at: URL(string: "/dev/null")!)
+				} else {
+					container.loadPersistentStores(completionHandler: { description, error in
+						if let error = error {
+							fatalError("Failed to load persistent store: \(error)")
+						}
+					})
+				}
 
-				container.loadPersistentStores(completionHandler: { description, error in
-					if let error = error {
-						fatalError("Failed to load persistent store: \(error)")
-					}
-				})
 				// May need to be disabled if dataset is too large for performance reasons
 				container.viewContext.automaticallyMergesChangesFromParent = true
 
@@ -175,7 +182,16 @@ public class CoreDataStack: Withable {
 		}
 	}
 
+	/// Must be called BEFORE `container` is accessed. throws only if `container` is already configured.
+	public func setUseMemoryStore() throws {
+		guard
+			_container == nil
+		else { throw Error.containerAlreadyConfigured }
+		useMemoryStore = true
+	}
+
 	public enum Error: Swift.Error {
+		case containerAlreadyConfigured
 		case noCoreDataModel(atPath: URL)
 		case noContextRegistered(forKey: ContextKey)
 	}
