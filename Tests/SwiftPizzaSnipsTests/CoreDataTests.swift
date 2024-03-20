@@ -28,10 +28,11 @@ final class CoreDataTests: XCTestCase {
 			.url(forResource: "Foo", withExtension: "momd")
 			.unwrap()
 
-		let cds = try CoreDataStack(modelURL: modelURL)
+		let cds = try CoreDataStack(modelURL: modelURL, configureContainer: false)
 		if inMemory {
 			try cds.setUseMemoryStore()
 		}
+		try cds.configureContainer()
 
 		cds.registerModel(Foo.self)
 		if inMemory == false {
@@ -170,9 +171,9 @@ final class CoreDataTests: XCTestCase {
 	func testCreateContsistentContext() throws {
 		let coreDataStack = try testableCoreDataStack()
 
-		let contextA = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
-		let contextB = coreDataStack.registerConsistentContext(
-			coreDataStack.container.newBackgroundContext(),
+		let contextA = try coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+		let contextB = try coreDataStack.registerConsistentContext(
+			coreDataStack.newBackgroundContext(),
 			forKey: .myOtherCustomContext)
 
 		let contextARetrieve = try coreDataStack.context(.myCustomContext)
@@ -182,18 +183,18 @@ final class CoreDataTests: XCTestCase {
 		XCTAssertEqual(contextB, contextBRetrieve)
 		XCTAssertNotEqual(contextA, contextB)
 
-		let contextASecondRegister = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+		let contextASecondRegister = try coreDataStack.registerConsistentContext(forKey: .myCustomContext)
 		XCTAssertEqual(contextA, contextASecondRegister)
 	}
 
 	func testDeregisterConsistentContext() throws {
 		let coreDataStack = try testableCoreDataStack()
 
-		let contextA = coreDataStack.registerConsistentContext(forKey: .myCustomContext)
+		let contextA = try coreDataStack.registerConsistentContext(forKey: .myCustomContext)
 
 		XCTAssertNoThrow(try coreDataStack.context(.myCustomContext))
 
-		coreDataStack.deregisterConsistentContext(forKey: .myCustomContext)
+		try coreDataStack.deregisterConsistentContext(forKey: .myCustomContext)
 
 		XCTAssertThrowsError(try coreDataStack.context(.myCustomContext))
 	}

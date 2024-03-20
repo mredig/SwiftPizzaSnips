@@ -10,16 +10,27 @@ public class CoreDataStack: Withable {
 
 	var modelFileName: String { modelURL.deletingPathExtension().lastPathComponent }
 	let modelURL: URL
-	public convenience init(modelFileName: String) throws {
+	/// If `configureContainer` is set to `false`, you must call `configureContainer()` prior to using `CoreDataStack`.
+	/// This provides an opportunity for small configuration adjustments. Default is `true`. 
+	/// Failure to follow this directive **may result in a crash**
+	public convenience init(modelFileName: String, configureContainer: Bool = true) throws {
 		let modelURL = try Bundle.main.url(forResource: modelFileName, withExtension: "momd").unwrap()
-		try self.init(modelURL: modelURL)
+		try self.init(modelURL: modelURL, configureContainer: configureContainer)
 	}
-	public init(modelURL: URL) throws {
+
+	/// If `configureContainer` is set to `false`, you must call `configureContainer()` prior to using `CoreDataStack`.
+	/// This provides an opportunity for small configuration adjustments. Default is `true`. 
+	/// Failure to follow this directive **may result in a crash**
+	public init(modelURL: URL, configureContainer: Bool = true) throws {
 		guard
 			try modelURL.checkResourceIsReachable()
 		else { throw Error.noCoreDataModel(atPath: modelURL) }
 
 		self.modelURL = modelURL
+
+		if configureContainer {
+			try self.configureContainer()
+		}
 	}
 
 	/// This must be set to the desired value BEFORE accessing `container`
@@ -51,56 +62,85 @@ public class CoreDataStack: Withable {
 
 	/// Access to the Persistent Container
 	private static let containerLock = NSLock()
-	private var _container: NSPersistentContainer?
+	private var _containerStore: NSPersistentContainer?
+	@available(*, deprecated, message: "Use `configuredContainer`")
 	public var container: NSPersistentContainer {
-		get {
+		Self.containerLock.lock()
+		defer { Self.containerLock.unlock() }
+
+		if let existing = _containerStore {
+			return existing
+		} else {
+			return try! _configureContainer()
+		}
+	}
+
+	/// Usage will call `configureContainer()` if not already configured.
+	public var configuredContainer: NSPersistentContainer {
+		get throws {
 			Self.containerLock.lock()
 			defer { Self.containerLock.unlock() }
 
-			if let _container = _container {
-				return _container
+			if let existing = _containerStore {
+				return existing
 			} else {
-				guard
-					let model = NSManagedObjectModel(contentsOf: modelURL)
-				else { fatalError("can't find object model: \(modelFileName)") }
-
-				let container = NSPersistentContainer(name: modelFileName, managedObjectModel: model)
-				if useMemoryStore {
-					_ = try? container.persistentStoreCoordinator.addPersistentStore(type: .inMemory, at: URL(string: "/dev/null")!)
-				} else {
-					container.loadPersistentStores(completionHandler: { description, error in
-						if let error = error {
-							fatalError("Failed to load persistent store: \(error)")
-						}
-					})
-				}
-
-				// May need to be disabled if dataset is too large for performance reasons
-				container.viewContext.automaticallyMergesChangesFromParent = true
-
-				_registerConsistentContext(container.newBackgroundContext(), forKey: .global, on: container)
-				_registerConsistentContext(container.viewContext, forKey: .main, on: container)
-
-				_container = container
-				return container
+				return try _configureContainer()
 			}
 		}
 	}
 
-	public var mainContext: NSManagedObjectContext { container.viewContext }
+	/// Will cause a crash if `configureContainer()` is not called prior!
+	public var mainContext: NSManagedObjectContext { try! configuredContainer.viewContext }
 
-	public func newBackgroundContext() -> NSManagedObjectContext { container.newBackgroundContext() }
+	/// Will cause a crash if `configureContainer()` is not called prior!
+	public func newBackgroundContext() -> NSManagedObjectContext { try! configuredContainer.newBackgroundContext() }
+
+	@discardableResult
+	private func _configureContainer() throws -> NSPersistentContainer {
+		guard
+			let model = NSManagedObjectModel(contentsOf: modelURL)
+		else { throw Error.cantFindObjectModel(at: modelURL) }
+
+		let container = NSPersistentContainer(name: modelFileName, managedObjectModel: model)
+		if useMemoryStore {
+			_ = try container.persistentStoreCoordinator.addPersistentStore(type: .inMemory, at: URL(string: "/dev/null")!)
+		} else {
+			container.loadPersistentStores(completionHandler: { description, error in
+				if let error = error {
+					fatalError("Failed to load persistent store: \(error)")
+				}
+			})
+		}
+
+		// May need to be disabled if dataset is too large for performance reasons
+		container.viewContext.automaticallyMergesChangesFromParent = true
+
+		_registerConsistentContext(container.newBackgroundContext(), forKey: .global, on: container)
+		_registerConsistentContext(container.viewContext, forKey: .main, on: container)
+
+		_containerStore = container
+
+		return container
+	}
+	public func configureContainer() throws {
+		Self.containerLock.lock()
+		defer { Self.containerLock.unlock() }
+
+		try _configureContainer()
+	}
 
 	public private(set) var consistentContexts: [ContextKey: NSManagedObjectContext] = [:]
 
+	/// Will trigger a call to `configureContainer()` if not already configured.
 	@discardableResult
 	public func registerConsistentContext(
 		_ context: NSManagedObjectContext? = nil,
 		forKey key: ContextKey
-	) -> NSManagedObjectContext {
-		let container = container
+	) throws -> NSManagedObjectContext {
 		Self.containerLock.lock()
 		defer { Self.containerLock.unlock() }
+
+		let container = try _containerStore ?? _configureContainer()
 
 		return _registerConsistentContext(context, forKey: key, on: container)
 	}
@@ -120,8 +160,8 @@ public class CoreDataStack: Withable {
 		return theContext
 	}
 
-	public func deregisterConsistentContext(forKey key: ContextKey) {
-		_ = container
+	public func deregisterConsistentContext(forKey key: ContextKey) throws {
+		guard _containerStore != nil else { throw Error.coreDataStackNeverConfigured }
 		Self.containerLock.lock()
 		defer { Self.containerLock.unlock() }
 
@@ -134,7 +174,7 @@ public class CoreDataStack: Withable {
 	}
 
 	public func context(_ key: ContextKey) throws -> NSManagedObjectContext {
-		_ = container
+		guard _containerStore != nil else { throw Error.coreDataStackNeverConfigured }
 		Self.containerLock.lock()
 		defer { Self.containerLock.unlock() }
 
@@ -152,10 +192,12 @@ public class CoreDataStack: Withable {
 		registeredModels.append(model)
 	}
 
+	/// Will trigger a call to `configureContainer()` if not already configured.
 	public func resetRegisteredTypeInContainer(_ type: NSManagedObject.Type) throws {
 		defer {
 			NotificationCenter.default.post(name: Self.didResetRegisteredTypeNotification, object: self, userInfo: ["ResetType": type])
 		}
+		let container = try configuredContainer
 		let bgContext = container.newBackgroundContext()
 
 		try bgContext.performAndWait {
@@ -185,7 +227,7 @@ public class CoreDataStack: Withable {
 	/// Must be called BEFORE `container` is accessed. throws only if `container` is already configured.
 	public func setUseMemoryStore() throws {
 		guard
-			_container == nil
+			_containerStore == nil
 		else { throw Error.containerAlreadyConfigured }
 		useMemoryStore = true
 	}
@@ -194,5 +236,7 @@ public class CoreDataStack: Withable {
 		case containerAlreadyConfigured
 		case noCoreDataModel(atPath: URL)
 		case noContextRegistered(forKey: ContextKey)
+		case cantFindObjectModel(at: URL)
+		case coreDataStackNeverConfigured
 	}
 }
