@@ -105,19 +105,20 @@ extension Float16: PersistentHashable {
 	}
 }
 #endif
-#if arch(x86_64)
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-extension Float80: PersistentHashable {
-	/// vulnerable to endianness flipping
-	public func hash(persistentlyInto hasher: inout PersistentHasher) {
-		let buffer = UnsafeMutableBufferPointer<Self>.allocate(capacity: 1)
-		defer { buffer.deallocate() }
-		buffer[0] = self
-		let rawBuffer = UnsafeRawBufferPointer(buffer)
-		update(rawBuffer)
-	}
-}
-#endif
+// this causes the x86 build to fail and I cannot immediately figure out why
+//#if arch(x86_64)
+//@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+//extension Float80: PersistentHashable {
+//	/// vulnerable to endianness flipping
+//	public func hash(persistentlyInto hasher: inout PersistentHasher) {
+//		let buffer = UnsafeMutableBufferPointer<Self>.allocate(capacity: 1)
+//		defer { buffer.deallocate() }
+//		buffer[0] = self
+//		let rawBuffer = UnsafeRawBufferPointer(buffer)
+//		update(rawBuffer)
+//	}
+//}
+//#endif
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension Double: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
