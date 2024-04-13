@@ -23,8 +23,11 @@ public enum SleepStopper {
 	/// Will tell you the current status of `SleepStopper`
 	static public var isPreventingSleep: Bool { _isIdleTimerDisabled }
 
-	private static var tokens: Set<Token> = [] {
+	private static var tokens: [WeakBox<Token>] = [] {
 		didSet {
+			guard
+				tokens.contains(where: { $0.content == nil }) == false
+			else { return cleanTokens() }
 			updateSleepAllowState()
 		}
 	}
@@ -39,7 +42,8 @@ public enum SleepStopper {
 		func invalidate() {
 			SleepStopper.sleepLock.lock()
 			defer { SleepStopper.sleepLock.unlock() }
-			SleepStopper.tokens.remove(self)
+			let weakBox = WeakBox(content: self)
+			SleepStopper.tokens.removeAll(where: { $0 == weakBox })
 		}
 
 		static func == (lhs: Token, rhs: Token) -> Bool {
@@ -51,17 +55,21 @@ public enum SleepStopper {
 		}
 	}
 
+	private static func cleanTokens() {
+		tokens.removeAll(where: { $0.content == nil })
+	}
+
 	/// Call this method and hold on to the token until you want to allow sleep to resume. If you can't release the
 	/// object easily, you can also call `invalidate()` on the token when you're finished and sleep will,
 	/// once again, be possible.
 	///
 	/// You can call this multiple times and have multiple active tokens. Sleep will be disabled until all tokens
 	/// are released/invalidated.
-	public func disableSleepUntilTokenRelease() -> SleepStopperToken {
-		Self.sleepLock.lock()
-		defer { Self.sleepLock.unlock() }
+	public static func disableSleepUntilTokenRelease() -> SleepStopperToken {
+		sleepLock.lock()
+		defer { sleepLock.unlock() }
 		let newToken = Token()
-		Self.tokens.insert(newToken)
+		tokens.append(WeakBox(content: newToken))
 		return newToken
 	}
 
