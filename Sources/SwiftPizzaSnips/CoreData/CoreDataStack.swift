@@ -264,6 +264,10 @@ public class CoreDataStack: Withable {
 		}
 	}
 
+	/// Deletes all instances of the given type in the primary container
+	///
+	/// See `registerModel(_:)`
+	///
 	/// Will trigger a call to `configureContainer()` if not already configured.
 	public func resetRegisteredTypeInContainer(_ type: NSManagedObject.Type) throws {
 		defer {
@@ -288,6 +292,11 @@ public class CoreDataStack: Withable {
 		}
 	}
 
+	/// Deletes all instances of all registered types in the primary container
+	///
+	/// See `registerModel(_:)`
+	///
+	/// Will trigger a call to `configureContainer()` if not already configured.
 	public func resetRegisteredTypesInContainer() throws {
 		defer { NotificationCenter.default.post(name: Self.didResetRegisteredTypesNotification, object: self) }
 
