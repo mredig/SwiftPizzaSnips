@@ -40,3 +40,9 @@ public extension Optional where Wrapped == String {
 		}
 	}
 }
+
+public extension Optional where Wrapped: ExpressibleByArrayLiteral {
+	var nilIsEmpty: Wrapped {
+		self ?? []
+	}
+}

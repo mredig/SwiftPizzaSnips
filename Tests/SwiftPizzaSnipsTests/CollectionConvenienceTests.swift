@@ -56,8 +56,15 @@ final class CollectionConvenienceTests: XCTestCase {
 	func testNilIsEmpty() {
 		let str1: String? = "foo"
 		let str2: String? = nil
+		let arr1: [Int]? = []
+		let arr2: [Int]? = [1]
+		let arr3: [Int]? = nil
 
 		XCTAssertEqual(str1.nilIsEmpty, "foo")
 		XCTAssertEqual(str2.nilIsEmpty, "")
+
+		XCTAssertEqual(arr1.nilIsEmpty, [])
+		XCTAssertEqual(arr2.nilIsEmpty, [1])
+		XCTAssertEqual(arr3.nilIsEmpty, [])
 	}
 }
