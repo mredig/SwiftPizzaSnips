@@ -1,3 +1,4 @@
+#if os(macOS)
 import XCTest
 @testable import SwiftPizzaSnips
 
@@ -55,3 +56,4 @@ final class SleepStopperTests: XCTestCase {
 		XCTAssertFalse(SleepStopper.isPreventingSleep)
 	}
 }
+#endif

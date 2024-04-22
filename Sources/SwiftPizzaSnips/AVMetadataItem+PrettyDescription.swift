@@ -1,6 +1,6 @@
 import AVFoundation
 
-@available(macOS 12, *)
+@available(iOS 15.0, tvOS 15.0, macOS 12.0, *)
 extension AVMetadataItem: @unchecked Sendable {
 	public var loadDescription: String {
 		get async {
