@@ -20,7 +20,7 @@ public extension NSApplication {
 extension DefaultsManager.KeyWithDefault where Value == Bool, StoredValue == Value {
 	/// Alternatively can be set via passing this argument to the app while launching: `-_NS_4445425547 YES`
 	///
-	/// Might require relaunching the app. As of writing, using defaults is untested. However, this menu is magic.
+	/// Requires relaunching the app. This menu is magic. It gives you information on the RESPONDOR CHAIN 🤯
 	public static let enableDebugMenu = Self("_NS_4445425547", defaultValue: false)
 }
 
