@@ -14,6 +14,17 @@ public extension Collection {
 	}
 
 	var emptyIsNil: Self? { isOccupied ? self : nil }
+
+	func binaryFilter(_ predicate: (Element) throws -> Bool) rethrows -> (pass: [Element], fail: [Element]) {
+		try reduce(into: (pass: [Element](), fail: [Element]())) {
+			let value = try predicate($1)
+			if value {
+				$0.0.append($1)
+			} else {
+				$0.1.append($1)
+			}
+		}
+	}
 }
 
 public extension Array {

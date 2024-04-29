@@ -67,4 +67,13 @@ final class CollectionConvenienceTests: XCTestCase {
 		XCTAssertEqual(arr2.nilIsEmpty, [1])
 		XCTAssertEqual(arr3.nilIsEmpty, [])
 	}
+
+	func testBinaryFilter() throws {
+		let inputs = (0...10).map { $0 }
+
+		let (even, odd) = inputs.binaryFilter { $0.isMultiple(of: 2) }
+
+		XCTAssertEqual(even, [0, 2, 4, 6, 8, 10])
+		XCTAssertEqual(odd, [1, 3, 5, 7, 9])
+	}
 }
