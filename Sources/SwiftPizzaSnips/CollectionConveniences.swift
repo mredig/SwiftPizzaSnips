@@ -15,7 +15,11 @@ public extension Collection {
 
 	var emptyIsNil: Self? { isOccupied ? self : nil }
 
+	@available(*, deprecated, renamed: "bifurcate")
 	func binaryFilter(_ predicate: (Element) throws -> Bool) rethrows -> (pass: [Element], fail: [Element]) {
+		try bifurcate(predicate)
+	}
+	func bifurcate(_ predicate: (Element) throws -> Bool) rethrows -> (pass: [Element], fail: [Element]) {
 		try reduce(into: (pass: [Element](), fail: [Element]())) {
 			let value = try predicate($1)
 			if value {
@@ -23,6 +27,16 @@ public extension Collection {
 			} else {
 				$0.1.append($1)
 			}
+		}
+	}
+
+	/// Iterates through the collection, creating a array for each group you specify via `Enum`. Returns a dictionary of
+	/// `[Element]` arrays, using the `Enum` values returned in predicate as keys
+	func nfurcate<Enum: Hashable>(_ predicate: (Element) throws -> Enum) rethrows -> [Enum: [Element]] {
+		try reduce(into: [Enum: [Element]]()) {
+			let result = try predicate($1)
+
+			$0[result, default: []].append($1)
 		}
 	}
 }
