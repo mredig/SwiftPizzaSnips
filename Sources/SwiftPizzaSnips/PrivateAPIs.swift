@@ -1,3 +1,4 @@
+#if canImport(ObjectiveC)
 import Foundation
 
 #if DEBUG
@@ -128,4 +129,5 @@ public func getProtocolSymbols(for protocol: Protocol?) {
 		print()
 	}
 }
+#endif
 #endif

@@ -1,3 +1,4 @@
+#if canImport(AVFoundation)
 import AVFoundation
 
 @available(iOS 15.0, tvOS 15.0, macOS 12.0, *)
@@ -82,3 +83,4 @@ extension AVMetadataItem: @unchecked Sendable {
 		}
 	}
 }
+#endif
