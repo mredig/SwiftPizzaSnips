@@ -1,7 +1,7 @@
 import XCTest
 import SwiftPizzaSnips
 #if canImport(FoundationNetworking)
-import LinuxSupport
+import SPSLinuxSupport
 #endif
 
 /// These tests all pass on macOS and should replicate functionality on Linux

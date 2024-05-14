@@ -1,6 +1,6 @@
 import Foundation
 #if canImport(FoundationNetworking)
-import LinuxSupport
+import SPSLinuxSupport
 #endif
 
 public extension URL {
