@@ -71,3 +71,45 @@ public extension Optional where Wrapped: ExpressibleByArrayLiteral {
 		self ?? []
 	}
 }
+
+public extension RandomAccessCollection {
+	/// The `predicate` *must* return a result answering whether the proposed element is `greater` than what you're looking for. See description for example:
+	///
+	/// So, if we are looking for `toFind`, the following predicate would be valid:
+	///
+	/// ```swift
+	/// { $0 > toFind }
+	/// ```
+	///
+	/// but
+	///
+	/// ```swift
+	/// { $0 < toFind }
+	/// ```
+	/// would provide invalid results!
+	func bisectToFirstIndex(where predicate: (Element) throws -> Bool) rethrows -> Index? {
+		var intervalStart = startIndex
+		var intervalEnd = endIndex
+
+		while intervalStart != intervalEnd {
+			let intervalLength = distance(from: intervalStart, to: intervalEnd)
+
+			let testIndex: Index
+			guard intervalLength > 1 else {
+				testIndex = intervalStart
+				return try predicate(self[testIndex]) ? testIndex : nil
+			}
+
+			testIndex = index(intervalStart, offsetBy: (intervalLength - 1) / 2)
+
+			if try predicate(self[testIndex]) {
+				intervalEnd = index(after: testIndex)
+			} else {
+				intervalStart = index(after: testIndex)
+			}
+		}
+
+		return nil
+	}
+}
+

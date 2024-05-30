@@ -76,4 +76,17 @@ final class CollectionConvenienceTests: XCTestCase {
 		XCTAssertEqual(even, [0, 2, 4, 6, 8, 10])
 		XCTAssertEqual(odd, [1, 3, 5, 7, 9])
 	}
+
+	func testBinarySearch() throws {
+		for length in 0...100 {
+			let collection = 0...length
+			let targets = (-4)...(length + 4)
+
+			for toFind in targets {
+				let binarySearchIndex = collection.bisectToFirstIndex(where: { $0 > toFind })
+				let expectedIndex = collection.firstIndex { $0 > toFind }
+				XCTAssertEqual(binarySearchIndex, expectedIndex, "Looking for \(toFind) in 0...\(length)")
+			}
+		}
+	}
 }
