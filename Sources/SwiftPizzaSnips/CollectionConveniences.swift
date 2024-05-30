@@ -73,7 +73,9 @@ public extension Optional where Wrapped: ExpressibleByArrayLiteral {
 }
 
 public extension RandomAccessCollection {
-	/// The `predicate` *must* return a result answering whether the proposed element is `greater` than what you're looking for. See description for example:
+	/// If it's not already obvious, this will only provide valid results on a low to high sorted collection.
+	/// Additionally, the `predicate` *must* return a result answering whether the proposed element is `greater` than
+	/// what you're looking for. See discussion for example:
 	///
 	/// So, if we are looking for `toFind`, the following predicate would be valid:
 	///
@@ -112,6 +114,7 @@ public extension RandomAccessCollection {
 		return nil
 	}
 
+	/// If it's not already obvious, this will only provide valid results on a low to high sorted collection.
 	func binarySearchFirstIndex(where predicate: (Element) throws -> BinarySearchComparisonResult) rethrows -> Index? {
 		var intervalStart = startIndex
 		var intervalEnd = endIndex
@@ -141,6 +144,7 @@ public extension RandomAccessCollection {
 		return nil
 	}
 
+	/// If it's not already obvious, this will only provide valid results on a low to high sorted collection.
 	func binarySearchFirstElement(where predicate: (Element) throws -> BinarySearchComparisonResult) rethrows -> Element? {
 		guard let index = try binarySearchFirstIndex(where: predicate) else { return nil }
 		return self[index]
