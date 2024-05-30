@@ -111,5 +111,44 @@ public extension RandomAccessCollection {
 
 		return nil
 	}
+
+	func binarySearchFirstIndex(where predicate: (Element) throws -> BinarySearchComparisonResult) rethrows -> Index? {
+		var intervalStart = startIndex
+		var intervalEnd = endIndex
+
+		while intervalStart != intervalEnd {
+			let intervalLength = distance(from: intervalStart, to: intervalEnd)
+
+			let testIndex: Index
+			guard intervalLength > 1 else {
+				testIndex = intervalStart
+				return try predicate(self[testIndex]) == .proposedElementIsExactMatch ? testIndex : nil
+			}
+
+			testIndex = index(intervalStart, offsetBy: (intervalLength - 1) / 2)
+
+			let result = try predicate(self[testIndex])
+			switch result {
+			case .proposedElementIsLess:
+				intervalStart = index(after: testIndex)
+			case .proposedElementIsExactMatch:
+				return testIndex
+			case .proposedElementIsGreater:
+				intervalEnd = index(after: testIndex)
+			}
+		}
+
+		return nil
+	}
+
+	func binarySearchFirstElement(where predicate: (Element) throws -> BinarySearchComparisonResult) rethrows -> Element? {
+		guard let index = try binarySearchFirstIndex(where: predicate) else { return nil }
+		return self[index]
+	}
 }
 
+public enum BinarySearchComparisonResult {
+	case proposedElementIsLess
+	case proposedElementIsExactMatch
+	case proposedElementIsGreater
+}
