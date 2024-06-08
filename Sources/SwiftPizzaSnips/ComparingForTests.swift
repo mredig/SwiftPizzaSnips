@@ -27,8 +27,8 @@ public enum ComparingForTests {
 	}
 
 	public static func compareFilesInFinder(
-		before: Resource,
-		andAfter after: Resource,
+		withExpectation expectation: Resource,
+		andActualResult result: Resource,
 		inTempDirectory: URL? = nil,
 		contextualInfo: String? = nil,
 		openInFinder: Bool = true
@@ -36,10 +36,10 @@ public enum ComparingForTests {
 		let outDir = inTempDirectory ?? FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
 		try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
 
-		let beforeURL = outDir.appendingPathComponent("before").appendingPathExtension(before.fileExtension)
-		try before.copy(to: beforeURL)
-		let afterURL = outDir.appendingPathComponent("after").appendingPathExtension(after.fileExtension)
-		try after.copy(to: afterURL)
+		let expectationURL = outDir.appendingPathComponent("expectation").appendingPathExtension(expectation.fileExtension)
+		try expectation.copy(to: expectationURL)
+		let resultURL = outDir.appendingPathComponent("result").appendingPathExtension(result.fileExtension)
+		try result.copy(to: resultURL)
 
 		if let contextualInfo {
 			let contextURL = outDir.appendingPathComponent("context").appendingPathExtension("txt")
@@ -48,7 +48,7 @@ public enum ComparingForTests {
 
 		print("Comparing files in \(outDir)")
 		guard openInFinder else { return }
-		NSWorkspace.shared.activateFileViewerSelecting([beforeURL, afterURL])
+		NSWorkspace.shared.activateFileViewerSelecting([expectationURL, resultURL])
 	}
 }
 #endif
