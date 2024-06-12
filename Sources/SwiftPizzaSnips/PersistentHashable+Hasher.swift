@@ -5,8 +5,7 @@ import CryptoKit
 @available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
 public struct PersistentHasher: HashFunction, Withable {
 	public static var blockByteCount: Int {
-		get { Insecure.MD5.blockByteCount }
-		set { Insecure.MD5.blockByteCount = newValue }
+		Insecure.MD5.blockByteCount
 	}
 
 	private var internalHasher = Insecure.MD5()
