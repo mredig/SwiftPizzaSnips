@@ -2,7 +2,7 @@
 import AVFoundation
 
 @available(iOS 15.0, tvOS 15.0, macOS 12.0, *)
-extension AVMetadataItem: @unchecked Sendable {
+extension AVMetadataItem: @unchecked @retroactive Sendable {
 	public var loadDescription: String {
 		get async {
 			let firstLine = "AVMetadataItem:"
