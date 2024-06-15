@@ -31,7 +31,10 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
 		.target(
-			name: "SPSLinuxSupport"),
+			name: "SPSLinuxSupport",
+			swiftSettings: [
+				.enableExperimentalFeature("StrictConcurrency=complete")
+			]),
         .target(
             name: "SwiftPizzaSnips",
 			dependencies: [
@@ -42,6 +45,7 @@ let package = Package(
 			exclude: snipsExcludes,
 			swiftSettings: [
 				.enableUpcomingFeature("BareSlashRegexLiterals"),
+				.enableExperimentalFeature("StrictConcurrency=complete")
 			]),
         .testTarget(
             name: "SwiftPizzaSnipsTests",
