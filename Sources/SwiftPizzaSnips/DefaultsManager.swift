@@ -1,25 +1,28 @@
 import Foundation
+#if canImport(Combine)
+import Combine
+#endif
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-public class DefaultsManager: Withable {
+public final class DefaultsManager: Withable, Sendable {
 	private static let defaults = UserDefaults.standard
 
 	public static let shared = DefaultsManager()
 
-	#if canImport(FoundationNetworking)
-	private init() {}
-	#else
-	private var bag = Bag()
+	#if canImport(Combine)
+	private let swiftUIObjectWillChange = SendableBox<AnyCancellable?>()
+
 	private init() {
-		NotificationCenter
+		self.swiftUIObjectWillChange.value = NotificationCenter
 			.default
 			.publisher(for: UserDefaults.didChangeNotification)
 			.receive(on: RunLoop.main)
 			.sink(receiveValue: { [weak self] _ in
 				self?.objectWillChange.send()
 			})
-			.store(in: &bag)
 	}
+	#else
+	private init() {}
 	#endif
 
 	public static let defaultDecoder = PropertyListDecoder()
@@ -127,7 +130,7 @@ public class DefaultsManager: Withable {
 		reset(key: key)
 	}
 
-	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
+	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable, Sendable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		
@@ -163,7 +166,7 @@ public class DefaultsManager: Withable {
 		}
 	}
 
-	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
+	public struct KeyWithDefault<Value: Sendable, StoredValue: PropertyListCodable>: RawRepresentable, Sendable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		public var reset: DefaultsReset<Value, StoredValue> {
@@ -209,14 +212,14 @@ public class DefaultsManager: Withable {
 		}
 	}
 
-	public struct DefaultsReset<V, SV: PropertyListCodable> {
+	public struct DefaultsReset<V: Sendable, SV: PropertyListCodable>: Sendable {
 		let resetValue: V
 		let key: KeyWithDefault<V, SV>
 	}
 
-	public struct Transform<Input, Stored: PropertyListCodable> {
-		public typealias GetTransform = (Stored) throws -> Input?
-		public typealias SetTransform = (Input) throws -> Stored?
+	public struct Transform<Input, Stored: PropertyListCodable>: Sendable {
+		public typealias GetTransform = @Sendable (Stored) throws -> Input?
+		public typealias SetTransform = @Sendable (Input) throws -> Stored?
 
 		public let get: GetTransform?
 		public let set: SetTransform?
@@ -234,27 +237,19 @@ import SwiftUI
 extension DefaultsManager: ObservableObject {
 	public subscript <Value, StoredValue: PropertyListCodable>(binding key: Key<Value, StoredValue>) -> Binding<Value?> {
 		.init(
-			get: {
-				self[key]
-			},
-			set: {
-				self[key] = $0
-			})
+			get: { self[key] },
+			set: { self[key] = $0 })
 	}
 
 	public subscript <Value, StoredValue: PropertyListCodable>(binding key: KeyWithDefault<Value, StoredValue>) -> Binding<Value> {
 		.init(
-			get: {
-				self[key]
-			},
-			set: {
-				self[key] = $0
-			})
+			get: { self[key] },
+			set: { self[key] = $0 })
 	}
 }
 #endif
 
-public protocol PropertyListCodable {}
+public protocol PropertyListCodable: Sendable {}
 extension String: PropertyListCodable {}
 extension Data: PropertyListCodable {}
 extension Bool: PropertyListCodable {}
