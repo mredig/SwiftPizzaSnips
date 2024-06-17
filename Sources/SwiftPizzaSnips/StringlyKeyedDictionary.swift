@@ -7,17 +7,25 @@ import Foundation
  Simply create a type that conforms to `RawRepresentable` with `String` as the `RawValue`, create all your keys as
  static values on that type, then wrap your dictionary in a `StringlyKeyedDictionary`
  */
-public struct StringlyKeyedDictionary<StringlyKey, Value>: ExpressibleByDictionaryLiteral, Withable
+public struct StringlyKeyedDictionary<StringlyKey, Value>: RawRepresentable, ExpressibleByDictionaryLiteral, Withable
 where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 
-	public var dictionary: [String: Value]
+	public var rawValue: [String: Value]
+	public var dictionary: [String: Value] {
+		get { rawValue }
+		set { rawValue = newValue }
+	}
 
 	public init(dictionary: [String: Value], type: StringlyKey.Type) {
-		self.dictionary = dictionary
+		self.rawValue = dictionary
 	}
 
 	public init(dictionary: [String: Value]) {
 		self.init(dictionary: dictionary, type: StringlyKey.self)
+	}
+
+	public init(rawValue: [String: Value]) {
+		self.init(dictionary: rawValue)
 	}
 
 	public init(dictionaryLiteral elements: (StringlyKey, Value)...) {
