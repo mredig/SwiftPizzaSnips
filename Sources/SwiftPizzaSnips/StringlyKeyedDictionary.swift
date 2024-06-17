@@ -36,3 +36,8 @@ where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 		}
 	}
 }
+
+extension StringlyKeyedDictionary: Codable where Value: Codable {}
+extension StringlyKeyedDictionary: Equatable where Value: Equatable {}
+extension StringlyKeyedDictionary: Hashable where Value: Hashable {}
+extension StringlyKeyedDictionary: Sendable where Value: Sendable {}
