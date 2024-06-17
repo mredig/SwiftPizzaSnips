@@ -45,7 +45,16 @@ where StringlyKey: RawRepresentable, StringlyKey.RawValue == String {
 	}
 }
 
-extension StringlyKeyedDictionary: Codable where Value: Codable {}
+extension StringlyKeyedDictionary: Codable where Value: Codable {
+	public init(from decoder: any Decoder) throws {
+		let dict = try [String: Value].init(from: decoder)
+		self.init(rawValue: dict)
+	}
+
+	public func encode(to encoder: any Encoder) throws {
+		try rawValue.encode(to: encoder)
+	}
+}
 extension StringlyKeyedDictionary: Equatable where Value: Equatable {}
 extension StringlyKeyedDictionary: Hashable where Value: Hashable {}
 extension StringlyKeyedDictionary: Sendable where Value: Sendable {}

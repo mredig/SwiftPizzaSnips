@@ -77,4 +77,30 @@ final class StringlyKeyedDictionaryTests: XCTestCase {
 		let testing: StringlyKeyedDictionary<Keysss, Any> = [:]
 		XCTAssertNil(testing[.foo])
 	}
+
+	func testStringKeyedCodable() throws {
+		let starterDict = [
+			"foo": 5,
+			"bar": 10,
+			"baz": 15
+		]
+
+		let keyedDict = StringlyKeyedDictionary(dictionary: starterDict, type: Keysss.self)
+
+		let encoder = JSONEncoder().with {
+			$0.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+		}
+		let data = try encoder.encode(keyedDict)
+
+		let expectedJSON = """
+			{"bar":10,"baz":15,"foo":5}
+			"""
+
+		XCTAssertEqual(String(decoding: data, as: UTF8.self), expectedJSON)
+
+		let decoder = JSONDecoder()
+		let decodedDict = try decoder.decode(StringlyKeyedDictionary<Keysss, Int>.self, from: data)
+
+		XCTAssertEqual(keyedDict, decodedDict)
+	}
 }
