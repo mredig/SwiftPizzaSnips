@@ -6,7 +6,7 @@ public enum ComparingForTests {
 	public enum Resource {
 		case data(Data, fileExtension: String)
 		case url(URL)
-		static func codable<E: Encodable>(_ inData: E, encodedBy encoder: JSONEncoder = .init()) throws -> Resource {
+		public static func codable<E: Encodable>(_ inData: E, encodedBy encoder: JSONEncoder = .init()) throws -> Resource {
 			let data = try encoder.encode(inData)
 			return .data(data, fileExtension: "json")
 		}
