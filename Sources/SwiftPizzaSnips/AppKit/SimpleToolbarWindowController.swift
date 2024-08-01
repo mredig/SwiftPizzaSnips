@@ -12,12 +12,16 @@ public class SimpleToolbarWindowController: NSWindowController {
 	public let toolbar: NSToolbar
 
 	public init(toolbarIdentifier: NSToolbar.Identifier, windowConfig: (NSWindow) throws -> Void) rethrows {
-		self.toolbar = NSToolbar(identifier: toolbarIdentifier)
+		let toolbar = NSToolbar(identifier: toolbarIdentifier)
+		self.toolbar = toolbar
 
 		let newWindow = NSWindow()
 		try windowConfig(newWindow)
 
 		super.init(window: newWindow)
+
+		toolbar.delegate = self
+		newWindow.toolbar = toolbar
 	}
 	
 	required init?(coder: NSCoder) {
