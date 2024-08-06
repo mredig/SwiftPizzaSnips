@@ -52,6 +52,6 @@ public extension DefaultsManager {
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager.KeyWithDefault where Value == Int, StoredValue == Int {
 	static let defaultsVersion = Self(
-		rawValue: "com.pizzaSnips.defaultsVersion",
+		"com.pizzaSnips.defaultsVersion",
 		defaultValue: -1)
 }
