@@ -1,6 +1,6 @@
 import Foundation
 
-@available(macOS 10.15, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 public enum RateLimiter {
 	public enum Duration  {
 		case seconds(Double)
