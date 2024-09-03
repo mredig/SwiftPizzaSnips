@@ -26,6 +26,7 @@ final class RateLimiterTests: XCTestCase {
 		XCTAssertEqual(twoNanoSeconds.nanoseconds, 2)
 	}
 
+	@available(iOS 15, tvOS 15, watchOS 10, *)
 	func testRateLimitDebounce() async throws {
 		let id = RateLimiter.ID("foo")
 
@@ -49,6 +50,7 @@ final class RateLimiterTests: XCTestCase {
 		print("iterations: \(iterations)")
 	}
 
+	@available(iOS 15, tvOS 15, watchOS 10, *)
 	func testRateLimitThrottle() async throws {
 		let id = RateLimiter.ID("foo")
 

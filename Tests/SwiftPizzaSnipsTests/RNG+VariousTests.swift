@@ -16,6 +16,7 @@ final class RNGVariousTests: XCTestCase {
 		XCTAssertEqual(random.toHexString(), expected)
 	}
 
+	@available(iOS 16, tvOS 16, watchOS 10, *)
 	func testRandomStream() throws {
 		var rng: any RandomNumberGenerator = SeedableRNG(seed: 665544)
 

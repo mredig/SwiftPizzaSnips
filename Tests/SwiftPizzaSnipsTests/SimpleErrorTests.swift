@@ -2,9 +2,12 @@ import XCTest
 import SwiftPizzaSnips
 #if canImport(AppKit)
 import AppKit
+#endif
+#if canImport(RegexBuilder)
 import RegexBuilder
 #endif
 
+@available(iOS 16, tvOS 16, watchOS 10, *)
 final class SimpleErrorTests: XCTestCase {
 	private static let suggestedRecovery = "You're holding it wrong"
 

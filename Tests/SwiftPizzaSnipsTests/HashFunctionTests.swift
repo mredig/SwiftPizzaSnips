@@ -3,6 +3,7 @@ import SwiftPizzaSnips
 #if canImport(CryptoKit)
 import CryptoKit
 
+@available(iOS 13.2, tvOS 13.2, watchOS 10, *)
 final class HashFunctionTests: XCTestCase {
 	func testHashTrueBool() throws {
 		let numTrueBool: Bool = true
@@ -60,6 +61,7 @@ final class HashFunctionTests: XCTestCase {
 	}
 
 	#if arch(arm64) // see Float16 docs
+	@available(iOS 14, tvOS 14, watchOS 10, *)
 	func testFloat16() throws {
 		let numFloat16: Float16 = 1387
 

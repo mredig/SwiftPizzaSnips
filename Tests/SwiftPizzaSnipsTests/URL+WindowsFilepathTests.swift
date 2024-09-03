@@ -1,6 +1,7 @@
 import XCTest
 import SwiftPizzaSnips
 
+@available(iOS 16, tvOS 16, watchOS 10, *)
 final class URLWindowsFilepathTests: XCTestCase {
 	func testURLWindowsFilepath() throws {
 		let winFilepath = ##"C:\Users\Administrator\Documents\bitcoin key.docx"##

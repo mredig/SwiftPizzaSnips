@@ -5,7 +5,9 @@ import SwiftPizzaSnips
 // Note: Many of these tests are just confirming that they provide consistent hashes. If it's found that a value is
 // incorrect, but consistent, that's *kind* of a bug? Kind of? But not really, as long as it achieves consistency...
 // It would just mean that it'd be harder to independently verify the hash external to this library.
+@available(iOS 13.2, tvOS 13.2, watchOS 10, *)
 final class PersistentHashableTests: XCTestCase {
+	@available(iOS 14, tvOS 14, watchOS 10, *)
 	func testHashFunctionNumbers() throws {
 		let numTrueBool: Bool = true
 		let numFalseBool: Bool = false

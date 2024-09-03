@@ -100,6 +100,7 @@ final class EmailValidationTests: XCTestCase {
 		XCTAssertThrowsError(try emailResult.get())
 	}
 
+	@available(macOS 13, iOS 16, tvOS 16, watchOS 10, *)
 	func testCodingEmail() throws {
 		let encoder = JSONEncoder()
 		let decoder = JSONDecoder()

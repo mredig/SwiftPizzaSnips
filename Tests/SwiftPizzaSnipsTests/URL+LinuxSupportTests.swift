@@ -5,6 +5,7 @@ import SPSLinuxSupport
 #endif
 
 /// These tests all pass on macOS and should replicate functionality on Linux
+@available(iOS 16, tvOS 16, watchOS 10, *)
 final class URLLinuxSupportTests: XCTestCase {
 
 	func testFilePathInit() throws {
