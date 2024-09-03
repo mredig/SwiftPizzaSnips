@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public protocol Withable {
 	associatedtype TSelf
@@ -69,3 +72,9 @@ extension Data: Withable {}
 extension Slice: Withable {}
 
 extension Optional: Withable {}
+
+// MARK: misc
+#if canImport(UIKit)
+@available(iOS 14.0, *)
+extension UICollectionLayoutListConfiguration: Withable {}
+#endif
