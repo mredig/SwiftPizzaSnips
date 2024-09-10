@@ -52,8 +52,7 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 
 	func testNotifyingWithOneKey() throws {
 		var results: [Which<Int?>] = []
-		let aID = "aID"
-		defaults.registerNotifications(for: .testNotificationNullableAKey, withID: aID) { newValue in
+		defaults.registerNotifications(for: .testNotificationNullableAKey) { newValue in
 			results.append(.a(newValue))
 		}
 
@@ -72,13 +71,11 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 
 	func testNotifyingWithTwoKeys() throws {
 		var results: [Which<Int?>] = []
-		let aID = "aID"
-		defaults.registerNotifications(for: .testNotificationNullableAKey, withID: aID) { newValue in
+		defaults.registerNotifications(for: .testNotificationNullableAKey) { newValue in
 			results.append(.a(newValue))
 		}
 
-		let bID = "bID"
-		defaults.registerNotifications(for: .testNotificationNullableBKey, withID: bID) { newValue in
+		defaults.registerNotifications(for: .testNotificationNullableBKey) { newValue in
 			results.append(.b(newValue))
 		}
 
@@ -102,13 +99,11 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 
 	func testNotifyingWithTwoKeysAndTwoSubs() throws {
 		var results: [Which<Int?>] = []
-		let aID = "aID"
-		defaults.registerNotifications(for: .testNotificationNullableAKey, withID: aID) { newValue in
+		let aHandle = defaults.registerNotifications(for: .testNotificationNullableAKey) { newValue in
 			results.append(.a(newValue))
 		}
 
-		let bID = "bID"
-		defaults.registerNotifications(for: .testNotificationNullableBKey, withID: bID) { newValue in
+		defaults.registerNotifications(for: .testNotificationNullableBKey) { newValue in
 			results.append(.b(newValue))
 		}
 
@@ -118,15 +113,14 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 		defaults[.testNotificationNullableBKey] = 29
 		defaults[.testNotificationNullableAKey] = 15
 
-		let a2ID = "a2ID"
-		defaults.registerNotifications(for: .testNotificationNullableAKey, withID: a2ID) { newValue in
+		defaults.registerNotifications(for: .testNotificationNullableAKey) { newValue in
 			results.append(.a(newValue))
 		}
 
 		defaults[.testNotificationNullableAKey] = 1
 		defaults[.testNotificationNullableBKey] = 2
 
-		defaults.deregisterNotifications(for: .testNotificationNullableAKey, withID: aID)
+		defaults.deregisterNotifications(for: aHandle)
 		defaults[.testNotificationNullableAKey] = 3
 		defaults[.testNotificationNullableBKey] = 4
 
@@ -148,16 +142,12 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 
 	func testNotifyingWithDefaultKeyCombination() throws {
 		var results: [Which<Int>] = []
-		let aID = "aID"
-		defaults.registerNotifications(for: .testNotificationDefaultValueAKey, withID: aID) { newValue in
+		defaults.registerNotifications(for: .testNotificationDefaultValueAKey) { newValue in
 			results.append(.a(newValue))
-			print("a \(newValue)")
 		}
 
-		let bID = "bID"
-		defaults.registerNotifications(for: .testNotificationDefaultValueBKey, withID: bID) { newValue in
+		defaults.registerNotifications(for: .testNotificationDefaultValueBKey) { newValue in
 			results.append(.b(newValue))
-			print("b \(newValue)")
 		}
 
 		defaults[.testNotificationDefaultValueAKey] = 0
@@ -169,16 +159,14 @@ final class DefaultsManagerNotificationTests: XCTestCase {
 		defaults[.testNotificationDefaultValueAKey] = 15
 		defaults[.testNotificationDefaultValueBKey] = 150
 
-		let a2ID = "a2ID"
-		defaults.registerNotifications(for: .testNotificationDefaultValueAKey, withID: a2ID) { newValue in
+		let a2Handle = defaults.registerNotifications(for: .testNotificationDefaultValueAKey) { newValue in
 			results.append(.a(newValue))
-			print("a2 \(newValue)")
 		}
 
 		defaults[.testNotificationDefaultValueAKey] = 1
 		defaults[.testNotificationDefaultValueBKey] = 2
 
-		defaults.deregisterNotifications(for: .testNotificationDefaultValueAKey, withID: aID)
+		defaults.deregisterNotifications(for: a2Handle)
 		defaults[.testNotificationDefaultValueAKey] = 3
 		defaults[.testNotificationDefaultValueBKey] = 4
 		defaults.reset(key: .testNotificationDefaultValueAKey)

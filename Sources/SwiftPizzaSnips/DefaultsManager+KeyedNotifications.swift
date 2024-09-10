@@ -2,57 +2,66 @@ import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension DefaultsManager {
-	public typealias NotificationID = String
+	public typealias NotificationID = UUID
 	public typealias RawKey = String
 
 	private static let lock = NSLock()
 	private static var keyedNotifications: [RawKey: [NotificationID: NotificationStore]] = [:]
+	private static var idsAndKeys: [NotificationID: RawKey] = [:]
 
 	private struct NotificationStore {
-		let id: NotificationID
+		let id: NotificationID = .init()
 		let block: AnyUpdateAction
 		let key: AnyKey
+
+		var handle: NotificationHandle {
+			NotificationHandle(id: id)
+		}
 	}
 
+	public struct NotificationHandle: Hashable {
+		let id: NotificationID
+	}
+
+	@discardableResult
 	public func registerNotifications<T, S: PropertyListCodable>(
 		for key: Key<T, S>,
-		withID id: NotificationID,
 		_ block: @escaping (T?) -> Void
-	) {
+	) -> NotificationHandle {
 		let anyKey = AnyKey(key)
-		registerNotifications(for: anyKey, withID: id, block)
+		return registerNotifications(for: anyKey, block)
 	}
 
+	@discardableResult
 	public func registerNotifications<T, S: PropertyListCodable>(
 		for key: KeyWithDefault<T, S>,
-		withID id: String,
 		_ block: @escaping (T) -> Void
-	) {
+	) -> NotificationHandle {
 		let newKey = AnyKey(key)
-		registerNotifications(for: newKey, withID: id, block)
+		return registerNotifications(for: newKey, block)
 	}
 
 	private func registerNotifications<T>(
 		for key: AnyKey,
-		withID id: NotificationID,
 		_ block: @escaping (T) -> Void
-	) {
+	) -> NotificationHandle {
 		Self.lock.withLock {
 			let updateAction = UpdateAction(action: block)
-			let store = NotificationStore(id: id, block: updateAction, key: key)
-			Self.keyedNotifications[key.rawValue, default: [:]][id] = store
+			let store = NotificationStore(block: updateAction, key: key)
+			let handle = store.handle
+			Self.keyedNotifications[key.rawValue, default: [:]][handle.id] = store
+			Self.idsAndKeys[handle.id] = key.rawValue
+			return handle
 		}
 	}
 
-	public func deregisterNotifications<T, S: PropertyListCodable>(for key: Key<T, S>, withID id: String) {
+	public func deregisterNotifications(for handle: NotificationHandle) {
 		Self.lock.withLock {
-			Self.keyedNotifications[key.rawValue, default: [:]][id] = nil
+			guard
+				let rawKey = Self.idsAndKeys[handle.id]
+			else { return }
+			Self.keyedNotifications[rawKey]?[handle.id] = nil
 		}
-	}
-
-	public func deregisterNotifications<T, S: PropertyListCodable>(for key: KeyWithDefault<T, S>, withID id: String) {
-		let newKey = Key<T, S>(key.rawValue)
-		deregisterNotifications(for: newKey, withID: id)
 	}
 
 	func getNotificationStores<T, S: PropertyListCodable>(for key: Key<T, S>) -> [(T?) -> Void] {
