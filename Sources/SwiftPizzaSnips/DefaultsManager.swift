@@ -69,6 +69,14 @@ public class DefaultsManager: Withable {
 	}
 
 	public func setValue<Value, StoredValue: PropertyListCodable>(_ value: Value?, for key: Key<Value, StoredValue>) {
+		let notifications = getNotificationStores(for: key)
+		var success = true
+		defer {
+			if success {
+				notifications.forEach { $0(value) }
+			}
+		}
+
 		guard let value else {
 			Self.defaults.removeObject(forKey: key.rawValue)
 			return
@@ -79,6 +87,7 @@ public class DefaultsManager: Withable {
 				let data = try setTransform(value)
 				Self.defaults.set(data, forKey: key.rawValue)
 			} catch {
+				success = false
 				print("Error converting value for key \(key) to data: \(error)")
 			}
 		} else {
@@ -119,7 +128,7 @@ public class DefaultsManager: Withable {
 		reset(key: key)
 	}
 
-	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable, Withable {
+	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable, KeyProtocol, Withable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		
@@ -155,7 +164,7 @@ public class DefaultsManager: Withable {
 		}
 	}
 
-	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable, Withable {
+	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable, KeyProtocol, Withable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		public var reset: DefaultsReset<Value, StoredValue> {
