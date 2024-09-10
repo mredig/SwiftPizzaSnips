@@ -251,3 +251,20 @@ extension Optional: PropertyListCodable where Wrapped: PropertyListCodable {}
 
 extension Array: PropertyListCodable where Element: PropertyListCodable {}
 extension Dictionary: PropertyListCodable where Key: PropertyListCodable, Value: PropertyListCodable {}
+
+extension Int8: PropertyListCodable {}
+extension Int16: PropertyListCodable {}
+extension Int32: PropertyListCodable {}
+extension Int64: PropertyListCodable {}
+
+extension UInt8: PropertyListCodable {}
+extension UInt16: PropertyListCodable {}
+extension UInt32: PropertyListCodable {}
+extension UInt64: PropertyListCodable {}
+extension UInt: PropertyListCodable {}
+
+// untested
+//@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+//extension UInt128: PropertyListCodable {}
+//@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+//extension Int128: PropertyListCodable {}

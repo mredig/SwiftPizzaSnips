@@ -11,6 +11,14 @@ final class DefaultsManagerTests: XCTestCase {
 	static let transformableTestValueNilKey = "com.pizzaSnips.transformableTestValueNil"
 	static let transformableTestValueDefaultKey = "com.pizzaSnips.transformableTestValueDefault"
 	static let asymettricalTransformableTestValueDefaultKey = "com.pizzaSnips.asymettricalTransformableTestValueDefault"
+	static let int8NumberKey = "com.pizzaSnips.int8NumberKey"
+	static let int16NumberKey = "com.pizzaSnips.int16NumberKey"
+	static let int32NumberKey = "com.pizzaSnips.int32NumberKey"
+	static let int64NumberKey = "com.pizzaSnips.int64NumberKey"
+	static let uint8NumberKey = "com.pizzaSnips.uint8NumberKey"
+	static let uint16NumberKey = "com.pizzaSnips.uint16NumberKey"
+	static let uint32NumberKey = "com.pizzaSnips.uint32NumberKey"
+	static let uint64NumberKey = "com.pizzaSnips.uint64NumberKey"
 	static let allKeys = [
 		testValueNilKey,
 		testValueValueKey,
@@ -19,6 +27,14 @@ final class DefaultsManagerTests: XCTestCase {
 		transformableTestValueNilKey,
 		transformableTestValueDefaultKey,
 		asymettricalTransformableTestValueDefaultKey,
+		int8NumberKey,
+		int16NumberKey,
+		int32NumberKey,
+		int64NumberKey,
+		uint8NumberKey,
+		uint16NumberKey,
+		uint32NumberKey,
+		uint64NumberKey,
 	]
 
 	static let tValuePeter = TransformableValue(name: "Peter", age: 31, favoriteColor: "Green")
@@ -209,6 +225,114 @@ final class DefaultsManagerTests: XCTestCase {
 		_ = defaults[reset: .doubleValueTest] // <-- this is the alt
 		XCTAssertEqual(expectedValue, defaults[.doubleValueTest])
 	}
+
+	func testInt8() throws {
+		let expectedValue: Int8 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.int8NumberValue])
+
+		defaults[.int8NumberValue] = 0
+		XCTAssertEqual(0, defaults[.int8NumberValue])
+
+		defaults.reset(key: .int8NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.int8NumberValue])
+	}
+
+	func testInt16() throws {
+		let expectedValue: Int16 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.int16NumberValue])
+
+		defaults[.int16NumberValue] = 0
+		XCTAssertEqual(0, defaults[.int16NumberValue])
+
+		defaults.reset(key: .int16NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.int16NumberValue])
+	}
+
+	func testInt32() throws {
+		let expectedValue: Int32 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.int32NumberValue])
+
+		defaults[.int32NumberValue] = 0
+		XCTAssertEqual(0, defaults[.int32NumberValue])
+
+		defaults.reset(key: .int32NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.int32NumberValue])
+	}
+
+	func testInt64() throws {
+		let expectedValue: Int64 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.int64NumberValue])
+
+		defaults[.int64NumberValue] = 0
+		XCTAssertEqual(0, defaults[.int64NumberValue])
+
+		defaults.reset(key: .int64NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.int64NumberValue])
+	}
+
+	func testUInt8() throws {
+		let expectedValue: UInt8 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.uint8NumberValue])
+
+		defaults[.uint8NumberValue] = 0
+		XCTAssertEqual(0, defaults[.uint8NumberValue])
+
+		defaults.reset(key: .uint8NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.uint8NumberValue])
+	}
+
+	func testUInt16() throws {
+		let expectedValue: UInt16 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.uint16NumberValue])
+
+		defaults[.uint16NumberValue] = 0
+		XCTAssertEqual(0, defaults[.uint16NumberValue])
+
+		defaults.reset(key: .uint16NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.uint16NumberValue])
+	}
+
+	func testUInt32() throws {
+		let expectedValue: UInt32 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.uint32NumberValue])
+
+		defaults[.uint32NumberValue] = 0
+		XCTAssertEqual(0, defaults[.uint32NumberValue])
+
+		defaults.reset(key: .uint32NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.uint32NumberValue])
+	}
+
+	func testUInt64() throws {
+		let expectedValue: UInt64 = .max
+
+		XCTAssertEqual(expectedValue, defaults[.uint64NumberValue])
+
+		defaults[.uint64NumberValue] = 0
+		XCTAssertEqual(0, defaults[.uint64NumberValue])
+
+		defaults.reset(key: .uint64NumberValue)
+		XCTAssertEqual(expectedValue, defaults[.uint64NumberValue])
+	}
+
+	func testUInt() throws {
+		let expectedValue: UInt = .max
+
+		XCTAssertEqual(expectedValue, defaults[.uintNumberValue])
+
+		defaults[.uintNumberValue] = 0
+		XCTAssertEqual(0, defaults[.uintNumberValue])
+
+		defaults.reset(key: .uintNumberValue)
+		XCTAssertEqual(expectedValue, defaults[.uintNumberValue])
+	}
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -272,6 +396,61 @@ extension DefaultsManager.KeyWithDefault where Value == [String], StoredValue ==
 					$0.append($1)
 				}
 		})
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == Int8, StoredValue == Value {
+	static let int8NumberValue = Self(
+		DefaultsManagerTests.int8NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == Int16, StoredValue == Value {
+	static let int16NumberValue = Self(
+		DefaultsManagerTests.int16NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == Int32, StoredValue == Value {
+	static let int32NumberValue = Self(
+		DefaultsManagerTests.int32NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == Int64, StoredValue == Value {
+	static let int64NumberValue = Self(
+		DefaultsManagerTests.int64NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == UInt8, StoredValue == Value {
+	static let uint8NumberValue = Self(
+		DefaultsManagerTests.uint8NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == UInt16, StoredValue == Value {
+	static let uint16NumberValue = Self(
+		DefaultsManagerTests.uint16NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == UInt32, StoredValue == Value {
+	static let uint32NumberValue = Self(
+		DefaultsManagerTests.uint32NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == UInt64, StoredValue == Value {
+	static let uint64NumberValue = Self(
+		DefaultsManagerTests.uint64NumberKey,
+		defaultValue: .max)
+}
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+extension DefaultsManager.KeyWithDefault where Value == UInt, StoredValue == Value {
+	static let uintNumberValue = Self(
+		DefaultsManagerTests.uint64NumberKey,
+		defaultValue: .max)
 }
 
 struct TransformableValue: Codable, Hashable {
