@@ -102,21 +102,13 @@ public class DefaultsManager: Withable {
 	}
 
 	public subscript<Value, StoredValue: PropertyListCodable>(key: Key<Value, StoredValue>) -> Value? {
-		get {
-			getValue(for: key)
-		}
-		set {
-			setValue(newValue, for: key)
-		}
+		get { getValue(for: key) }
+		set { setValue(newValue, for: key) }
 	}
 
 	public subscript<Value, StoredValue: PropertyListCodable>(key: KeyWithDefault<Value, StoredValue>) -> Value {
-		get {
-			getValue(for: key)
-		}
-		set {
-			setValue(newValue, for: key)
-		}
+		get { getValue(for: key) }
+		set { setValue(newValue, for: key) }
 	}
 
 	public subscript<Value, StoredValue: PropertyListCodable>(defaultValue key: KeyWithDefault<Value, StoredValue>) -> Value {
@@ -234,22 +226,14 @@ import SwiftUI
 extension DefaultsManager: ObservableObject {
 	public subscript <Value, StoredValue: PropertyListCodable>(binding key: Key<Value, StoredValue>) -> Binding<Value?> {
 		.init(
-			get: {
-				self[key]
-			},
-			set: {
-				self[key] = $0
-			})
+			get: { self[key] },
+			set: { self[key] = $0 })
 	}
 
 	public subscript <Value, StoredValue: PropertyListCodable>(binding key: KeyWithDefault<Value, StoredValue>) -> Binding<Value> {
 		.init(
-			get: {
-				self[key]
-			},
-			set: {
-				self[key] = $0
-			})
+			get: { self[key] },
+			set: { self[key] = $0 })
 	}
 }
 #endif
