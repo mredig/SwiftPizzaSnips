@@ -59,10 +59,10 @@ public class DefaultsManager: Withable {
 	}
 
 	public func setValue<Value, StoredValue: PropertyListCodable>(_ value: Value?, for key: KeyWithDefault<Value, StoredValue>) {
-		var newKey = Key<Value, StoredValue>(key.rawValue)
-
-		if let transform = key.transform {
-			newKey = newKey.withTransform(transform)
+		let newKey = Key<Value, StoredValue>(key.rawValue).with {
+			if let transform = key.transform {
+				$0 = $0.withTransform(transform)
+			}
 		}
 
 		setValue(value, for: newKey)
@@ -119,7 +119,7 @@ public class DefaultsManager: Withable {
 		reset(key: key)
 	}
 
-	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable {
+	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable, Withable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		
@@ -135,7 +135,7 @@ public class DefaultsManager: Withable {
 		}
 
 		public init(_ key: String, storedValueType: StoredValue.Type) {
-			self.rawValue = key
+			self.init(key)
 		}
 
 		@available(*, deprecated, message: "Confusing. Use init(_:, storedValueType:)")
@@ -155,7 +155,7 @@ public class DefaultsManager: Withable {
 		}
 	}
 
-	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable {
+	public struct KeyWithDefault<Value, StoredValue: PropertyListCodable>: RawRepresentable, Withable {
 		public let rawValue: String
 		public var key: String { rawValue }
 		public var reset: DefaultsReset<Value, StoredValue> {
