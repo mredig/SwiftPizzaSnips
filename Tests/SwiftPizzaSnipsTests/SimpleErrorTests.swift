@@ -93,7 +93,7 @@ final class SimpleErrorTests: XCTestCase {
 		}
 	}
 
-	#if canImport(AppKit)
+	#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 	func testAlertConversionNoSuggestion() throws {
 		do {
 			throw SimpleError(message: "Sample")
