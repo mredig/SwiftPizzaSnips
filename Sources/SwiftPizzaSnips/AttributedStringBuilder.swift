@@ -10,43 +10,78 @@ import UIKit
 @available(macOS 12, iOS 15, tvOS 15, *)
 @resultBuilder
 public struct AttributedStringBuilder {
-	public static func buildBlock(_ components: AttributedStringComponent...) -> AttributedString {
+	public protocol Snip {
+		func snippetToAttributedString() -> AttributedString
+	}
+
+	public static func buildFinalResult(_ component: any Snip) -> AttributedString {
+		component.snippetToAttributedString()
+	}
+
+	public static func buildBlock(_ components: Snip...) -> Snip {
 		components
 			.map {
-				var container = AttributeContainer()
-				container.font = $0.font
-				container.foregroundColor = $0.color
-				return AttributedString($0.rawValue, attributes: container)
+				$0.snippetToAttributedString()
 			}
 			.reduce(into: AttributedString(), { $0.append($1) })
 	}
 
-	public static func buildEither(first component: AttributedString) -> AttributedString {
+	public static func buildEither(first component: Snip) -> Snip {
 		component
 	}
 
-	public static func buildEither(second component: AttributedString) -> AttributedString {
+	public static func buildEither(second component: Snip) -> Snip {
 		component
 	}
 
-	public static func buildOptional(_ component: AttributedString?) -> AttributedString {
+	public static func buildOptional(_ component: Snip?) -> Snip {
 		component ?? AttributedString()
 	}
 
-	public static func buildArray(_ components: [AttributedString]) -> AttributedString {
-		components.reduce(into: AttributedString(), { $0.append($1) })
+	public static func buildArray(_ components: [Snip]) -> Snip {
+		components.reduce(into: AttributedString(), { $0.append($1.snippetToAttributedString()) })
+	}
+
+	public static func buildPartialBlock(first: Snip) -> Snip {
+		first
+	}
+
+	public static func buildPartialBlock(accumulated: Snip, next: Snip) -> Snip {
+		accumulated.snippetToAttributedString().with {
+			$0.append(next.snippetToAttributedString())
+		}
 	}
 }
 
 @available(macOS 12, iOS 15, tvOS 15, *)
-extension AttributedString {
+extension AttributedString: AttributedStringBuilder.Snip, Withable {
 	public init(@AttributedStringBuilder builder: () -> AttributedString) {
 		self = builder()
 	}
+
+	public func snippetToAttributedString() -> AttributedString {
+		self
+	}
 }
 
+@available(macOS 12, iOS 15, tvOS 15, *)
+extension AttributedStringBuilder.Snip where Self: StringProtocol {
+	public func snippetToAttributedString() -> AttributedString {
+		AttributedString(self)
+	}
+}
+
+@available(macOS 12, iOS 15, tvOS 15, *)
+extension String: AttributedStringBuilder.Snip {}
+
+@available(macOS 12, iOS 15, tvOS 15, *)
+extension Substring: AttributedStringBuilder.Snip {}
+
+
+@available(macOS 12, iOS 15, tvOS 15, *)
 public typealias ASComponent = AttributedStringComponent
-public struct AttributedStringComponent: RawRepresentable, ExpressibleByStringInterpolation, ExpressibleByStringLiteral, Withable {
+@available(macOS 12, iOS 15, tvOS 15, *)
+public struct AttributedStringComponent: RawRepresentable, ExpressibleByStringInterpolation, ExpressibleByStringLiteral, Withable, AttributedStringBuilder.Snip {
 	public var rawValue: String
 
 	var fontSize: Double?
@@ -63,7 +98,7 @@ public struct AttributedStringComponent: RawRepresentable, ExpressibleByStringIn
 		color: OSColor? = nil
 	) {
 		self.rawValue = rawValue
-		self.fontDescriptor = font?.fontDescriptor ?? OSFont.systemFont(ofSize: OSFont.systemFontSize).fontDescriptor
+		self.fontDescriptor = font?.fontDescriptor
 		self.color = color
 	}
 
@@ -121,6 +156,20 @@ public struct AttributedStringComponent: RawRepresentable, ExpressibleByStringIn
 		}
 		new.fontDescriptor = baseDescriptor.withSymbolicTraits(traits)
 		return new
+	}
+
+	public func snippetToAttributedString() -> AttributedString {
+		let container = AttributeContainer().with {
+			if let font = fontDescriptor
+				.map({ OSFont(descriptor: $0, size: fontSize ?? OSFont.systemFontSize) }) {
+				$0.font = font
+			}
+			if let color = color {
+				$0.foregroundColor = color
+			}
+		}
+
+		return AttributedString(rawValue, attributes: container)
 	}
 }
 #endif

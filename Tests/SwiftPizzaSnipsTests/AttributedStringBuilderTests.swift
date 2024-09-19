@@ -20,9 +20,29 @@ final class AttributedStringBuilderTests: XCTestCase {
 
 		let runs = Array(attStr.runs)
 		XCTAssertEqual(String(attStr.characters), "foobarbaz")
-		XCTAssertTrue(runs[0].description.contains("Regular 13"))
-		XCTAssertTrue(runs[1].description.contains("RegularItalic 13"))
+		XCTAssertFalse(runs[0].description.contains("Font"))
+		XCTAssertTrue(runs[1].description.contains("Oblique 13"))
 		XCTAssertTrue(runs[2].description.contains("Bold "))
 		XCTAssertTrue(runs[2].description.contains("sRGB "))
+	}
+
+	func testAttributedStringBuilderOptional() throws {
+		let bar: String? = "bar"
+
+		let attStr = AttributedString(builder: {
+			ASComponent("foo")
+
+			if let bar {
+				ASComponent(bar)
+					.withItalics()
+					.withColor(.secondaryLabelColor)
+			}
+		})
+
+		let runs = Array(attStr.runs)
+		XCTAssertEqual(String(attStr.characters), "foobar")
+		XCTAssertFalse(runs[0].description.contains("Font"))
+		XCTAssertTrue(runs[1].description.contains("Oblique 13"))
+		XCTAssertTrue(runs[1].description.contains("Catalog "))
 	}
 }

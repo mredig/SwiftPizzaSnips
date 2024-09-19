@@ -78,3 +78,8 @@ extension Optional: Withable {}
 @available(iOS 14.0, tvOS 14, *)
 extension UICollectionLayoutListConfiguration: Withable {}
 #endif
+
+#if !os(watchOS)
+@available(macOS 12, iOS 15, tvOS 15, *)
+extension AttributeContainer: Withable {}
+#endif
