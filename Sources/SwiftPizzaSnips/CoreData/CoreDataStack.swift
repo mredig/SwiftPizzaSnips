@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8, *)
 public class CoreDataStack: Withable {
 
 	public static let didResetRegisteredTypesNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypesNotification")

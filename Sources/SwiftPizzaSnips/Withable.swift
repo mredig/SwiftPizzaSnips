@@ -8,7 +8,7 @@ public protocol Withable {
 
 	@discardableResult
 	func with(_ block: (_ instance: inout TSelf) throws -> Void) rethrows -> TSelf
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 	func asyncWith(_ block: (_ instance: inout TSelf) async throws -> Void) async rethrows -> TSelf
 }
 
@@ -20,7 +20,7 @@ public extension Withable {
 		return new
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 	@discardableResult
 	func asyncWith(_ block: (_ instance: inout Self) async throws -> Void) async rethrows -> Self {
 		var new = self
@@ -49,7 +49,7 @@ extension Int64: Withable {}
 extension UInt64: Withable {}
 extension Float: Withable {}
 #if arch(arm64) // see Float16 docs
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7, *)
 extension Float16: Withable {}
 #endif
 #if arch(x86_64)
@@ -62,7 +62,7 @@ extension ClosedRange: Withable {}
 
 extension String: Withable {}
 extension Substring: Withable {}
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, *)
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 extension Regex: Withable {}
 
 extension Array: Withable {}
@@ -74,7 +74,7 @@ extension Slice: Withable {}
 extension Optional: Withable {}
 
 // MARK: misc
-#if canImport(UIKit)
-@available(iOS 14.0, *)
+#if canImport(UIKit) && !os(watchOS)
+@available(iOS 14.0, tvOS 14, *)
 extension UICollectionLayoutListConfiguration: Withable {}
 #endif

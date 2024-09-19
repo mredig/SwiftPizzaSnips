@@ -2,12 +2,12 @@ import Foundation
 #if canImport(CryptoKit)
 import CryptoKit
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 public protocol PersistentHashable {
 	func hash(persistentlyInto hasher: inout PersistentHashable.Hasher)
 }
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 public extension PersistentHashable {
 	typealias Hasher = PersistentHasher
 	typealias Hash = Hasher.PersistentDigest
@@ -19,86 +19,86 @@ public extension PersistentHashable {
 	}
 }
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Date: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(timeIntervalSinceReferenceDate)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Bool: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Int: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension UInt: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Int8: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension UInt8: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Int16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension UInt16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Int32: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension UInt32: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Int64: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension UInt64: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Float: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
 #if arch(arm64) // see Float16 docs
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7, *)
 extension Float16: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
@@ -119,19 +119,19 @@ extension Float16: PersistentHashable {
 //	}
 //}
 //#endif
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Double: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Decimal: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(description)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Range: PersistentHashable where Bound: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update("Range:")
@@ -139,7 +139,7 @@ extension Range: PersistentHashable where Bound: PersistentHashable {
 		upperBound.hash(persistentlyInto: &hasher)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension ClosedRange: PersistentHashable where Bound: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update("ClosedRange:")
@@ -147,26 +147,26 @@ extension ClosedRange: PersistentHashable where Bound: PersistentHashable {
 		upperBound.hash(persistentlyInto: &hasher)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension String: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Substring: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(String(self))
 	}
 }
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Array: PersistentHashable where Element: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		self.forEach { $0.hash(persistentlyInto: &hasher) }
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Dictionary: PersistentHashable where Key: PersistentHashable & Comparable, Value: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		sorted(by: { $0.key < $1.key} )
@@ -176,27 +176,27 @@ extension Dictionary: PersistentHashable where Key: PersistentHashable & Compara
 			}
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Set: PersistentHashable where Element: PersistentHashable & Comparable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		sorted()
 			.forEach { $0.hash(persistentlyInto: &hasher) }
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Data: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		hasher.update(self)
 	}
 }
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Slice: PersistentHashable where Base.Element: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		forEach { $0.hash(persistentlyInto: &hasher) }
 	}
 }
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension Optional: PersistentHashable where Wrapped: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHashable.Hasher) {
 		switch self {

@@ -1,6 +1,6 @@
 import Foundation
 
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, *)
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 extension URL {
 	/// A simple, naive implementation of converting Winblows filepaths to URLs. Should work in most cases, but I'm
 	/// certain there are edge cases that I didn't think of.

@@ -1,8 +1,8 @@
 #if canImport(AVFoundation)
 import AVFoundation
 
-@available(iOS 15.0, tvOS 15.0, macOS 12.0, *)
-extension AVMetadataItem: @unchecked Sendable {
+@available(iOS 15.0, tvOS 15.0, macOS 12.0, watchOS 8, *)
+extension AVMetadataItem: @unchecked @retroactive Sendable {
 	public var loadDescription: String {
 		get async {
 			let firstLine = "AVMetadataItem:"

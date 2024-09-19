@@ -1,6 +1,6 @@
 import Foundation
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 public class DefaultsManager: Withable {
 	private static let defaults = UserDefaults.standard
 
@@ -231,7 +231,7 @@ public class DefaultsManager: Withable {
 
 #if canImport(SwiftUI)
 import SwiftUI
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension DefaultsManager: ObservableObject {
 	public subscript <Value, StoredValue: PropertyListCodable>(binding key: Key<Value, StoredValue>) -> Binding<Value?> {
 		.init(

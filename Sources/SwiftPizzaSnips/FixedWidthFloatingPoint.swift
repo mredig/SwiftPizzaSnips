@@ -26,7 +26,7 @@ public extension FixedWidthFloatingPoint {
 extension Float: FixedWidthFloatingPoint {}
 extension Double: FixedWidthFloatingPoint {}
 #if arch(arm64) // see Float16 docs
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7, *)
 extension Float16: FixedWidthFloatingPoint {}
 #endif
 #if arch(x86_64)

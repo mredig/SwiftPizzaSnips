@@ -7,6 +7,8 @@ import AppKit
 #endif
 import Combine
 
+#if !os(watchOS)
+
 @available(macOS 10.15.1, iOS 13.0, tvOS 13.0, *)
 public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
 
@@ -135,4 +137,5 @@ public class FetchedResultObserver<Result: NSManagedObject>: NSObject, NSFetched
 #if canImport(SwiftUI)
 @available(macOS 10.15.1, iOS 13.0, tvOS 13.0, *)
 extension FetchedResultObserver: ObservableObject {}
+#endif
 #endif

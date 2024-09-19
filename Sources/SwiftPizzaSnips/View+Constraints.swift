@@ -1,14 +1,8 @@
-#if !canImport(FoundationNetworking)
+#if !canImport(FoundationNetworking) && !os(watchOS)
 #if os(macOS)
 import AppKit
-
-public typealias OSView = NSView
-public typealias ConstraintPriority = NSLayoutConstraint.Priority
 #elseif os(iOS) || os(tvOS)
 import UIKit
-
-public typealias OSView = UIView
-public typealias ConstraintPriority = UILayoutPriority
 #endif
 
 

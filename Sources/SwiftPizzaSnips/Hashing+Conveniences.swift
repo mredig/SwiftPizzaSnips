@@ -2,14 +2,14 @@ import Foundation
 #if canImport(CryptoKit)
 import CryptoKit
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension Digest {
 	public func toHexString() -> String {
 		Data(self).toHexString()
 	}
 }
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension HashFunction {
 	/// Generates a hash streaming from a file without loading all the data into memory. Defaults to a 10 MB buffer.
 	public static func hash(fileStream input: URL, bufferSizeBytes: Int = 1024 * 1024 * 10) throws -> Digest {

@@ -2,7 +2,7 @@ import Foundation
 #if canImport(CryptoKit)
 import CryptoKit
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 public extension HashFunction {
 	mutating func update<Num: FixedWidthInteger>(number: Num) {
 		let buffer = UnsafeMutableBufferPointer<Num>.allocate(capacity: 1)

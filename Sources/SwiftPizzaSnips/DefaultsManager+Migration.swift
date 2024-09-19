@@ -1,6 +1,6 @@
 import Foundation
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 public extension DefaultsManager {
 	private static var migrations: [Migration] = []
 
@@ -49,7 +49,7 @@ public extension DefaultsManager {
 	}
 }
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension DefaultsManager.KeyWithDefault where Value == Int, StoredValue == Int {
 	static let defaultsVersion = Self(
 		"com.pizzaSnips.defaultsVersion",

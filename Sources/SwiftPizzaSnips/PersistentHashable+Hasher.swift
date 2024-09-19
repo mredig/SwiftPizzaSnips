@@ -2,7 +2,7 @@ import Foundation
 #if canImport(CryptoKit)
 import CryptoKit
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 public struct PersistentHasher: HashFunction, Withable {
 	public static var blockByteCount: Int {
 		Insecure.MD5.blockByteCount
@@ -54,7 +54,7 @@ public struct PersistentHasher: HashFunction, Withable {
 	}
 }
 
-@available(macOS 10.15, iOS 13.2, tvOS 13.2, *)
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension PersistentHasher {
 	public struct PersistentDigest: CryptoKit.Digest {
 		private let internalDigest: Insecure.MD5Digest

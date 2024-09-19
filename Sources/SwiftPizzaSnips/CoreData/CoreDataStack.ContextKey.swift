@@ -1,6 +1,6 @@
 import Foundation
 
-@available(iOS 15.0, tvOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, tvOS 15.0, macOS 12.0, watchOS 8, *)
 public extension CoreDataStack {
 	struct ContextKey: RawRepresentable, Hashable, ExpressibleByStringInterpolation {
 		public static let global: ContextKey = "coredatastack.contextkey.global"
