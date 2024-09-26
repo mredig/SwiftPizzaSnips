@@ -44,21 +44,20 @@ extension AsyncThrowingStream: AsyncContinuationSequence where Failure == any Er
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension AsyncContinuationSequence {
-	public static func duplicateStream<ASeq: AsyncSequence>(
+	public func duplicateStream(
 		count: Int,
-		_ inStream: ASeq,
 		bufferingPolicy: BufferingPolicy
-	) -> [Self] where ASeq.Element == Element, Continuation.Element == Element, Continuation.Failure == Failure {
+	) -> [Self] where Continuation.Element == Element, Continuation.Failure == Failure {
 		var out: [(stream: Self, continuation: Self.Continuation)] = []
 
 		for _ in 0..<count {
-			let (newStream, newCont) = makeStream(bufferingPolicy: bufferingPolicy)
+			let (newStream, newCont) = Self.makeStream(bufferingPolicy: bufferingPolicy)
 			out.append((newStream, newCont))
 		}
 
 		Task {
 			do {
-				for try await item in inStream {
+				for try await item in self {
 					out.forEach { $0.continuation.yield(item) }
 				}
 				out.forEach { $0.continuation.finish(throwing: nil) }
