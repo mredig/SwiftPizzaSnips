@@ -7,6 +7,7 @@ import AppKit
 import UIKit
 #endif
 
+#if !canImport(FoundationNetworking)
 @available(macOS 12, iOS 15, tvOS 15, *)
 @resultBuilder
 public struct AttributedStringBuilder {
@@ -172,4 +173,5 @@ public struct AttributedStringComponent: RawRepresentable, ExpressibleByStringIn
 		return AttributedString(rawValue, attributes: container)
 	}
 }
+#endif
 #endif
