@@ -3,6 +3,7 @@ public protocol ContinProt: Sendable {
 	associatedtype Element
 	associatedtype YieldResult
 	associatedtype Failure: Error
+	associatedtype BufferingPolicy
 	@discardableResult
 	func yield(_ value: Element) -> YieldResult
 	@discardableResult
@@ -11,10 +12,10 @@ public protocol ContinProt: Sendable {
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
-public protocol AsyncContinuationSequence: AsyncSequence {
+public protocol AsyncContinuationSequence: AsyncSequence where Element == Continuation.Element, Failure == Continuation.Failure {
 	associatedtype Continuation: ContinProt
-	associatedtype Failure
-	associatedtype BufferingPolicy
+	associatedtype Failure = Continuation.Failure
+	associatedtype BufferingPolicy = Continuation.BufferingPolicy
 
 	static func makeStream(bufferingPolicy: BufferingPolicy) -> (Self, Self.Continuation)
 }
@@ -47,7 +48,7 @@ extension AsyncContinuationSequence {
 	public func duplicateStream(
 		count: Int,
 		bufferingPolicy: BufferingPolicy
-	) -> [Self] where Continuation.Element == Element, Continuation.Failure == Failure {
+	) -> [Self] {
 		var out: [(stream: Self, continuation: Self.Continuation)] = []
 
 		for _ in 0..<count {
