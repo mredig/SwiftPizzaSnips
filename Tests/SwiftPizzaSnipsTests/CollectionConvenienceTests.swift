@@ -29,6 +29,8 @@ final class CollectionConvenienceTests: XCTestCase {
 		XCTAssertEqual(2, arr[optional: 1])
 		XCTAssertEqual(3, arr[optional: 2])
 		XCTAssertNil(arr[optional: 3])
+		XCTAssertNil(arr[optional: -1])
+		XCTAssertNil(arr[optional: -3])
 	}
 
 	func testOptionalIndexingContiguous() {
@@ -38,6 +40,8 @@ final class CollectionConvenienceTests: XCTestCase {
 		XCTAssertEqual(2, arr[optional: 1])
 		XCTAssertEqual(3, arr[optional: 2])
 		XCTAssertNil(arr[optional: 3])
+		XCTAssertNil(arr[optional: -1])
+		XCTAssertNil(arr[optional: -3])
 	}
 
 	func testEmptyIsNil() {
