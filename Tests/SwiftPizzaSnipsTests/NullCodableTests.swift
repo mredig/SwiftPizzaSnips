@@ -21,7 +21,7 @@ struct NullCodableTests {
 		static let encoder = JSONEncoder().with {
 			$0.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
 		}
-		static let decocder = JSONDecoder()
+		static let decoder = JSONDecoder()
 	}
 
 	@Test
@@ -43,7 +43,7 @@ struct NullCodableTests {
 	@Test
 	func testNullDecodingWithValue() throws {
 		let expected = TestNullCodable(foo: "asdf", bar: 5)
-		let actual = try TestNullCodable.decocder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithValue)
+		let actual = try TestNullCodable.decoder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithValue)
 
 		#expect(expected == actual)
 	}
@@ -51,7 +51,7 @@ struct NullCodableTests {
 	@Test
 	func testNullDecodingWithNullValue() throws {
 		let expected = TestNullCodable(foo: nil, bar: 5)
-		let actual = try TestNullCodable.decocder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithNull)
+		let actual = try TestNullCodable.decoder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithNull)
 
 		#expect(expected == actual)
 	}
@@ -60,7 +60,7 @@ struct NullCodableTests {
 	func testNullDecodingWithNoValue() throws {
 		#expect(
 			performing: {
-				try TestNullCodable.decocder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithNoValue)
+				try TestNullCodable.decoder.decode(TestNullCodable.self, from: TestNullCodable.sampleJSONWithNoValue)
 			},
 			throws: {
 				guard
