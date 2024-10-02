@@ -41,15 +41,8 @@ public extension Collection {
 	}
 }
 
-public extension Array {
-	subscript(optional index: Int) -> Element? {
-		guard indices.contains(index) else { return nil }
-		return self[index]
-	}
-}
-
-public extension ContiguousArray {
-	subscript(optional index: Int) -> Element? {
+public extension Collection {
+	subscript(optional index: Index) -> Element? {
 		guard indices.contains(index) else { return nil }
 		return self[index]
 	}
