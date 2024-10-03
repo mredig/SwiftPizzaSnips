@@ -5,6 +5,7 @@ import SwiftPizzaSnips
 struct URLRelativeTestsOld {
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLRelativeFilePaths() throws {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
@@ -28,6 +29,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLRelativeMismatchScheme() throws {
 		let urlA = URL(string: "https://he.ho.hum/api/v1/login")!
@@ -44,6 +46,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentDirectoryPair() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
@@ -55,6 +58,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentDirectoryFilePair() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Planets.epub")
@@ -66,6 +70,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentWebURL() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
@@ -79,6 +84,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentFileURL() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
@@ -90,6 +96,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentWithSimpleArray() {
 		let urls = [
@@ -110,6 +117,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentWithMoreComplicatedArray() {
 		let urls = [
@@ -134,6 +142,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testURLParentWithInvalidArray() {
 		let urls = [
@@ -157,6 +166,7 @@ struct URLRelativeTestsOld {
 	}
 
 	@Test
+	@available(*, deprecated)
 	@available(iOS 16.0, *)
 	func testParentCheck() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
