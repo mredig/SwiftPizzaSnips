@@ -24,6 +24,7 @@ struct URLRelativeTests {
 		print(try URL.relativePathComponents(from: urlA, to: urlB))
 
 		#expect(try pathComponents == URL.relativePathComponents(from: urlA, to: urlB))
+		#expect(try path == URL.relativeFilePath(from: urlA, to: urlB))
 	}
 
 	@available(iOS 16.0, *)
@@ -213,5 +214,52 @@ struct URLRelativeTests {
 		}
 
 		#expect(expectedComponents == actual)
+	}
+
+	@Test func testFilePathWithParentOrigin() throws {
+		let currentURL = URL(filePath: "/root/")
+		let urls = [
+			URL(filePath: "/root/Sources/root"),
+			URL(filePath: "/root/Sources/root/foo.swift"),
+			URL(filePath: "/root/Sources/tester/"),
+			URL(filePath: "/root/Sources/tester/main.swift"),
+		]
+
+		let expectedComponents = [
+			["Sources", "root"],
+			["Sources", "root", "foo.swift"],
+			["Sources", "tester"],
+			["Sources", "tester", "main.swift"],
+		]
+			.map { $0.joined(separator: "/") }
+
+		let actual = try urls.map {
+			try URL.relativeFilePath(from: currentURL, to: $0)
+		}
+
+		#expect(expectedComponents == actual)
+	}
+
+	@Test func testFilePathURLWithParentOrigin() throws {
+		let currentURL = URL(filePath: "/root/")
+		let urls = [
+			URL(filePath: "/root/Sources/root"),
+			URL(filePath: "/root/Sources/root/foo.swift"),
+			URL(filePath: "/root/Sources/tester/"),
+			URL(filePath: "/root/Sources/tester/main.swift"),
+		]
+
+		let expected = [
+			URL(filePath: "Sources/root", relativeTo: currentURL),
+			URL(filePath: "Sources/root/foo.swift", relativeTo: currentURL),
+			URL(filePath: "Sources/tester/", relativeTo: currentURL),
+			URL(filePath: "Sources/tester/main.swift", relativeTo: currentURL),
+		]
+
+		let actual = try urls.map {
+			try URL.relativeFilePathURL(from: currentURL, to: $0)
+		}
+
+		#expect(expected == actual)
 	}
 }

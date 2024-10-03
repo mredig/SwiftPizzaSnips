@@ -41,6 +41,27 @@ public extension URL {
 		return accumulator
 	}
 
+	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	static func relativeFilePath(from origin: URL, to destination: URL) throws -> String {
+		try relativePathComponents(from: origin, to: destination).joined(separator: "/")
+	}
+
+	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
+	/// suitable for creating symlinks
+	static func relativeFilePathURL(from origin: URL, to destination: URL) throws -> URL {
+		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *) {
+			return URL(
+				filePath: try relativeFilePath(from: origin, to: destination),
+				directoryHint: destination.hasDirectoryPath ? .isDirectory : .notDirectory,
+				relativeTo: origin)
+		} else {
+			return URL(
+				fileURLWithPath: try relativeFilePath(from: origin, to: destination),
+				isDirectory: destination.hasDirectoryPath,
+				relativeTo: origin)
+		}
+	}
+
 	/// Finds the deepest directory path between two given URLs.
 	///
 	/// Heuristics are used to determine whether a given url is a file or directory url. No filesystem calls are made (at least not intentionally).

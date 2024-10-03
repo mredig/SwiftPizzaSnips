@@ -6,7 +6,11 @@ import SPSLinuxSupport
 public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	/// listed in an array
-	@available(*, deprecated, renamed: "relativePathComponents(from:to:)", message: "Use new version")
+	@available(
+		*,
+		deprecated,
+		renamed: "relativePathComponents(from:to:)",
+		message: "Use new version - note that behavior is slightly different. Make sure to test differences.")
 	static func relativeComponents(from origin: URL, to destination: URL) throws -> [String] {
 		guard
 			origin.scheme == destination.scheme
@@ -43,14 +47,22 @@ public extension URL {
 	}
 
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
-	@available(*, deprecated, renamed: "...", message: "Use new version")
+	@available(
+		*,
+		deprecated,
+		renamed: "relativeFilePath",
+		message: "Use new version - note that behavior is slightly different. Make sure to test differences.")
 	static func relativePath(from origin: URL, to destination: URL) throws -> String {
 		try relativeComponents(from: origin, to: destination).joined(separator: "/")
 	}
 
 	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
 	/// suitable for creating symlinks
-	@available(*, deprecated, renamed: "...", message: "Use new version")
+	@available(
+		*,
+		deprecated,
+		renamed: "relativeFilePathURL",
+		message: "Use new version - note that behavior is slightly different. Make sure to test differences.")
 	static func relativeFileURL(from origin: URL, to destination: URL) throws -> URL {
 		guard
 			[origin, destination].allSatisfy({ $0.isFileURL })
