@@ -17,14 +17,13 @@ struct URLRelativeTests {
 			"Documents",
 			"Work Docs",
 		]
-		let path = pathComponents.joined(separator: "/")
+		let path = pathComponents.joined(separator: "/") + "/"
 
 		let urlResult = URL(filePath: path, relativeTo: urlA)
 
-		print(try URL.relativePathComponents(from: urlA, to: urlB))
-
 		#expect(try pathComponents == URL.relativePathComponents(from: urlA, to: urlB))
 		#expect(try path == URL.relativeFilePath(from: urlA, to: urlB))
+		#expect(try urlResult == URL.relativeFilePathURL(from: urlA, to: urlB))
 	}
 
 	@available(iOS 16.0, *)
@@ -228,7 +227,7 @@ struct URLRelativeTests {
 		let expectedComponents = [
 			["Sources", "root"],
 			["Sources", "root", "foo.swift"],
-			["Sources", "tester"],
+			["Sources", "tester/"],
 			["Sources", "tester", "main.swift"],
 		]
 			.map { $0.joined(separator: "/") }

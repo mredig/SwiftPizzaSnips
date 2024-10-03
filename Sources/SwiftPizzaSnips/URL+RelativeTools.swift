@@ -43,7 +43,10 @@ public extension URL {
 
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	static func relativeFilePath(from origin: URL, to destination: URL) throws -> String {
-		try relativePathComponents(from: origin, to: destination).joined(separator: "/")
+		try relativePathComponents(from: origin, to: destination).joined(separator: "/").with {
+			guard destination.hasDirectoryPath else { return }
+			$0.append("/")
+		}
 	}
 
 	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
@@ -52,7 +55,7 @@ public extension URL {
 		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *) {
 			return URL(
 				filePath: try relativeFilePath(from: origin, to: destination),
-				directoryHint: destination.hasDirectoryPath ? .isDirectory : .notDirectory,
+				directoryHint: destination.hasDirectoryPath ? .isDirectory : .inferFromPath,
 				relativeTo: origin)
 		} else {
 			return URL(
@@ -78,7 +81,7 @@ public extension URL {
 		guard pathA.isFileURL else { throw .oneOrBothURLsNotFilepathURL }
 
 		guard pathA.pathComponents != pathB.pathComponents else {
-			return [pathA, pathA].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
+			return [pathA, pathB].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
 		}
 
 		let zipped = zip(pathA.pathComponents, pathB.pathComponents)
