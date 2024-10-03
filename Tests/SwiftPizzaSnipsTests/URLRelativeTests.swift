@@ -37,11 +37,11 @@ struct URLRelativeTests {
 		#expect(
 			performing: {
 				try URL.relativePathComponents(from: urlA, to: urlB)
-		},
+			},
 			throws: {
 				guard let error = $0 as? URL.RelativePathError else { return false }
 				return URL.RelativePathError.mismatchedURLScheme == error
-		})
+			})
 	}
 
 	@available(iOS 16.0, *)
@@ -361,6 +361,53 @@ struct URLRelativeTests {
 			relativeTo: urlA.deletingLastPathComponent())
 		#expect(url == urlExpectation)
 		#expect(url.standardizedFileURL == urlExpectation.standardizedFileURL)
+	}
 
+	@Test func testSameDirA() async throws {
+		let url = URL(filePath: "/a/b/c/d")
+
+		let urlAsDir = URL(filePath: "/a/b/c/")
+
+		let parent = try URL.deepestCommonDirectory(between: url, and: url)
+		#expect(parent == urlAsDir)
+
+		let components = try URL.relativePathComponents(from: url, to: url)
+		let componentsExpectation: [String] = []
+		#expect(components == componentsExpectation)
+
+		let path = try URL.relativeFilePath(from: url, to: url)
+		#expect(path == "")
+
+		let relativeURL = try URL.relativeFilePathURL(from: url, to: url)
+		let urlExpectation = URL(
+			filePath: "",
+			directoryHint: .isDirectory,
+			relativeTo: urlAsDir)
+		#expect(relativeURL == urlExpectation)
+		#expect(relativeURL.standardizedFileURL == urlExpectation.standardizedFileURL)
+	}
+
+	@Test func testSameDirB() async throws {
+		let url = URL(filePath: "/a/b/c/")
+
+		let urlAsDir = url
+
+		let parent = try URL.deepestCommonDirectory(between: url, and: url)
+		#expect(parent == urlAsDir)
+
+		let components = try URL.relativePathComponents(from: url, to: url)
+		let componentsExpectation: [String] = []
+		#expect(components == componentsExpectation)
+
+		let path = try URL.relativeFilePath(from: url, to: url)
+		#expect(path == "")
+
+		let relativeURL = try URL.relativeFilePathURL(from: url, to: url)
+		let urlExpectation = URL(
+			filePath: "",
+			directoryHint: .isDirectory,
+			relativeTo: urlAsDir)
+		#expect(relativeURL == urlExpectation)
+		#expect(relativeURL.standardizedFileURL == urlExpectation.standardizedFileURL)
 	}
 }
