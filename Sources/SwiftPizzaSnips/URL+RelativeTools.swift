@@ -134,11 +134,19 @@ public extension URL {
 		}
 
 		let commonPath = "/" + pathAccumulator.joined(separator: "/")
+		let result: URL
 		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *) {
-			return URL(filePath: commonPath, directoryHint: .isDirectory)
+			result = URL(filePath: commonPath, directoryHint: .isDirectory)
 		} else {
-			return URL(fileURLWithPath: commonPath, isDirectory: true)
+			result = URL(fileURLWithPath: commonPath, isDirectory: true)
 		}
+		if result.pathComponents == pathA.pathComponents {
+			pathA = result
+		}
+		if result.pathComponents == pathB.pathComponents {
+			pathB = result
+		}
+		return result
 	}
 
 	/// The same as `deepestCommonDirectory(between:and:)` except compares between an entire array of URLs.

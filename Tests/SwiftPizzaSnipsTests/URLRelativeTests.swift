@@ -332,4 +332,21 @@ struct URLRelativeTests {
 		#expect(url.standardizedFileURL == urlExpectation.standardizedFileURL)
 
 	}
+
+	@Test func testOriginGoingShallower() async throws {
+		let urlA = URL(filePath: "/a/b/c/d/e/f")
+		let urlB = URL(filePath: "/a/b/c/d")
+
+		let urlBasDir = URL(filePath: "/a/b/c/d", directoryHint: .isDirectory)
+
+
+		let url = try URL.relativeFilePathURL(from: urlA, to: urlB)
+		let urlExpectation = URL(
+			filePath: "..",
+			directoryHint: .isDirectory,
+			relativeTo: urlA.deletingLastPathComponent())
+		#expect(url == urlExpectation)
+		#expect(url.standardizedFileURL == urlExpectation.standardizedFileURL)
+
+	}
 }
