@@ -25,6 +25,7 @@ public extension URL {
 		var originComponents = {
 			var components = origin.standardized.pathComponents
 			guard components != deepestCommonParent.pathComponents else {
+				origin = deepestCommonParent
 				return deepestCommonParent.pathComponents
 			}
 			if origin.hasDirectoryPath == false {

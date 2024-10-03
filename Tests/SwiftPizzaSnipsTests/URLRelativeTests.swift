@@ -303,4 +303,33 @@ struct URLRelativeTests {
 			relativeTo: URL(filePath: "/a/b/c/"))
 		#expect(url == urlExpectation)
 	}
+
+	@Test func testOriginGoingDeeper() async throws {
+		let urlA = URL(filePath: "/a/b/c/d")
+		let urlB = URL(filePath: "/a/b/c/d/e/f")
+
+		let urlAasDir = URL(filePath: "/a/b/c/d", directoryHint: .isDirectory)
+
+		let parent = try URL.deepestCommonDirectory(between: urlA, and: urlB)
+		#expect(parent == urlAasDir)
+
+		let components = try URL.relativePathComponents(from: urlA, to: urlB)
+		let componentsExpectation = [
+			"e",
+			"f",
+		]
+		#expect(components == componentsExpectation)
+
+		let path = try URL.relativeFilePath(from: urlA, to: urlB)
+		#expect(path == "e/f")
+
+		let url = try URL.relativeFilePathURL(from: urlA, to: urlB)
+		let urlExpectation = URL(
+			filePath: "e/f",
+			directoryHint: .notDirectory,
+			relativeTo: urlAasDir)
+		#expect(url == urlExpectation)
+		#expect(url.standardizedFileURL == urlExpectation.standardizedFileURL)
+
+	}
 }
