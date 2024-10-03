@@ -6,6 +6,7 @@ import SPSLinuxSupport
 public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	/// listed in an array
+	@available(*, deprecated, renamed: "relativeURLComponents(from:to:)", message: "Use new version")
 	static func relativeComponents(from origin: URL, to destination: URL) throws -> [String] {
 		guard
 			origin.scheme == destination.scheme
@@ -42,12 +43,14 @@ public extension URL {
 	}
 
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	@available(*, deprecated, renamed: "...", message: "Use new version")
 	static func relativePath(from origin: URL, to destination: URL) throws -> String {
 		try relativeComponents(from: origin, to: destination).joined(separator: "/")
 	}
 
 	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
 	/// suitable for creating symlinks
+	@available(*, deprecated, renamed: "...", message: "Use new version")
 	static func relativeFileURL(from origin: URL, to destination: URL) throws -> URL {
 		guard
 			[origin, destination].allSatisfy({ $0.isFileURL })
@@ -63,6 +66,7 @@ public extension URL {
 	/// `pathA` and `pathB` must both be file scheme URLs and point to a directory
 	/// (enforced via the soft heuristics `.hasDirectoryPath`). If it appears to point to a file, the last component will
 	/// be removed.
+	@available(*, deprecated, renamed: "deepestCommonDirectory", message: "Be careful - the behavior is SLIGHTLY changed to be more correct")
 	static func commonParentDirectoryURL(between pathA: URL, and pathB: URL) -> URL? {
 		var pathA = pathA
 		var pathB = pathB
@@ -105,6 +109,7 @@ public extension URL {
 		}
 	}
 
+	@available(*, deprecated, renamed: "deepestCommonDirectory", message: "Be careful - the behavior is SLIGHTLY changed to be more correct")
 	static func commonParentDirectoryURL(from urls: [URL]) -> URL? {
 		guard urls.count > 1 else { return urls.first }
 		var urls = urls
