@@ -1,8 +1,20 @@
 import Testing
+import Foundation
 import SwiftPizzaSnips
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#endif
 
 struct EnvironmentManagerTests {
-	@Test func testEnvironmentManager() {
+	#if os(Linux)
+	init() {
+		setenv("FOO", "bar", 1)
+	}
+	#endif
+
+	@Test func existingValue() {
 		let keys: [EnvironmentManager.Key] = [
 			.path,
 			.tmpdir,
@@ -17,8 +29,15 @@ struct EnvironmentManagerTests {
 
 		#expect(EnvironmentManager.shared[.foo] == "bar")
 	}
+
+	@Test func newValue() {
+		setenv("BAZ", "asdf", 1)
+
+		#expect(EnvironmentManager.shared[.baz] == "asdf")
+	}
 }
 
 extension EnvironmentManager.Key {
 	static let foo: Self = "FOO"
+	static let baz: Self = "BAZ"
 }

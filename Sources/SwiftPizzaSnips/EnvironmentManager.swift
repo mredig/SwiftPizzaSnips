@@ -1,7 +1,7 @@
 import Foundation
 
 public class EnvironmentManager {
-	private static let environment = ProcessInfo.processInfo.environment
+	private static var environment: [String: String] { ProcessInfo.processInfo.environment }
 
 	public static let shared = EnvironmentManager()
 
