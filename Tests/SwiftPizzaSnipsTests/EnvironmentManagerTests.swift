@@ -1,8 +1,8 @@
-import XCTest
+import Testing
 import SwiftPizzaSnips
 
-final class EnvironmentManagerTests: XCTestCase {
-	func testEnvironmentManager() {
+struct EnvironmentManagerTests {
+	@Test func testEnvironmentManager() {
 		let keys: [EnvironmentManager.Key] = [
 			.path,
 			.tmpdir,
@@ -13,9 +13,9 @@ final class EnvironmentManagerTests: XCTestCase {
 			.cfUserTextEncoding,
 		]
 
-		keys.forEach { print(EnvironmentManager.shared[$0]) }
+		keys.forEach { print(EnvironmentManager.shared[$0] as Any) }
 
-		XCTAssertEqual(EnvironmentManager.shared[.foo], "bar")
+		#expect(EnvironmentManager.shared[.foo] == "bar")
 	}
 }
 
