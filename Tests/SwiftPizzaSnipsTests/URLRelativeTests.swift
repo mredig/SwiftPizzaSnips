@@ -34,14 +34,9 @@ struct URLRelativeTests {
 		let urlA = URL(string: "https://he.ho.hum/api/v1/login")!
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 
-		#expect(
-			performing: {
-				try URL.relativePathComponents(from: urlA, to: urlB)
-			},
-			throws: {
-				guard let error = $0 as? URL.RelativePathError else { return false }
-				return URL.RelativePathError.mismatchedURLScheme == error
-			})
+		#expect(throws: URL.RelativePathError.mismatchedURLScheme, performing: {
+			try URL.relativePathComponents(from: urlA, to: urlB)
+		})
 	}
 
 	@available(iOS 16.0, *)
@@ -65,30 +60,17 @@ struct URLRelativeTests {
 		#expect(expectedParent == parent)
 	}
 
-	@Test
 	@available(iOS 16.0, *)
-	func testURLParentWebURL() throws {
+	@Test func testURLParentWebURL() throws {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(string: "https://foo.com")!
 
-		#expect(
-			performing: {
-				try URL.deepestCommonDirectory(between: urlA, and: urlB)
-			},
-			throws: {
-				guard let error = $0 as? URL.RelativePathError else { return false }
-				return error == .mismatchedURLScheme
-			}
-		)
-		#expect(
-			performing: {
-				try URL.deepestCommonDirectory(between: urlB, and: urlA)
-			},
-			throws: {
-				guard let error = $0 as? URL.RelativePathError else { return false }
-				return error == .mismatchedURLScheme
-			}
-		)
+		#expect(throws: URL.RelativePathError.mismatchedURLScheme, performing: {
+			try URL.deepestCommonDirectory(between: urlA, and: urlB)
+		})
+		#expect(throws: URL.RelativePathError.mismatchedURLScheme, performing: {
+			try URL.deepestCommonDirectory(between: urlB, and: urlA)
+		})
 	}
 
 	@Test
@@ -146,9 +128,8 @@ struct URLRelativeTests {
 		#expect(expectedParent == parent)
 	}
 
-	@Test
 	@available(iOS 16.0, *)
-	func testURLParentWithInvalidArray() throws {
+	@Test func testURLParentWithInvalidArray() throws {
 		let urls = [
 			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design"),
 			URL(string: "https://foo.com")!,
@@ -165,15 +146,9 @@ struct URLRelativeTests {
 			URL(filePath: "/Users/nobody/Desktop/Documents/School/Physics/Homework/Assignment1.docx"),
 		]
 
-		#expect(
-			performing: {
-				try URL.deepestCommonDirectory(from: urls)
-			},
-			throws: {
-				guard let error = $0 as? URL.RelativePathError else { return false }
-				return error == .mismatchedURLScheme
-			}
-		)
+		#expect(throws: URL.RelativePathError.mismatchedURLScheme, performing: {
+			try URL.deepestCommonDirectory(from: urls)
+		})
 	}
 
 	@available(iOS 16.0, *)

@@ -35,13 +35,9 @@ struct URLRelativeTestsOld {
 		let urlA = URL(string: "https://he.ho.hum/api/v1/login")!
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 
-		#expect(
-			performing: {
-				try URL.relativeComponents(from: urlA, to: urlB)
-		},
-			throws: {
-				guard let error = $0 as? URL.RelativePathError else { return false }
-				return URL.RelativePathError.mismatchedURLScheme == error
+
+		#expect(throws: URL.RelativePathError.mismatchedURLScheme, performing: {
+			try URL.relativeComponents(from: urlA, to: urlB)
 		})
 	}
 
