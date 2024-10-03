@@ -44,7 +44,7 @@ public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	static func relativeFilePath(from origin: URL, to destination: URL) throws -> String {
 		try relativePathComponents(from: origin, to: destination).joined(separator: "/").with {
-			guard destination.hasDirectoryPath else { return }
+			guard destination.hasDirectoryPath, $0.isOccupied else { return }
 			$0.append("/")
 		}
 	}

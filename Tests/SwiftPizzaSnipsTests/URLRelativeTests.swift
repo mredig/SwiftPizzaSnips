@@ -261,4 +261,39 @@ struct URLRelativeTests {
 
 		#expect(expected == actual)
 	}
+
+	@Test func testWithDirectoryFileMismatch() async throws {
+		let urlA = URL(filePath: "/a/b/c")
+		let urlB = URL(filePath: "/a/b/c/")
+
+		let parent = try URL.deepestCommonDirectory(between: urlA, and: urlB)
+		#expect(parent == urlB)
+
+		let components = try URL.relativePathComponents(from: urlA, to: urlB)
+		#expect(components == [])
+
+		let path = try URL.relativeFilePath(from: urlA, to: urlB)
+		#expect(path == "")
+
+		let url = try URL.relativeFilePathURL(from: urlA, to: urlB)
+		#expect(url == urlB)
+	}
+
+	@Test func testWithDirectoryFileMismatchInverted() async throws {
+		let urlA = URL(filePath: "/a/b/c/")
+		let urlB = URL(filePath: "/a/b/c")
+
+		let parent = try URL.deepestCommonDirectory(between: urlA, and: urlB)
+		#expect(parent == urlB)
+
+		let components = try URL.relativePathComponents(from: urlA, to: urlB)
+		#expect(components == [])
+
+		let path = try URL.relativeFilePath(from: urlA, to: urlB)
+		#expect(path == "")
+
+		let url = try URL.relativeFilePathURL(from: urlA, to: urlB)
+		#expect(url == urlB)
+	}
+
 }
