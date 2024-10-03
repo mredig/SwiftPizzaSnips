@@ -1,6 +1,8 @@
 import XCTest
 import SwiftPizzaSnips
 
+#if !os(Linux)
+
 final class PrivateAPITests: XCTestCase {
 	func testDemoMethodGetting() {
 		getAllMethodNames(for: NSClassFromString("_NSDiffableDataSourceState"))
@@ -32,3 +34,4 @@ final class PrivateAPITests: XCTestCase {
 		getProtocolSymbols(for: NSProtocolFromString("_NSDiffableDataSourceState"))
 	}
 }
+#endif

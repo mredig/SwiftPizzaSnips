@@ -1,6 +1,7 @@
 import XCTest
 import SwiftPizzaSnips
 
+#if !os(Linux)
 @available(iOS 15, *)
 final class AttributedStringBuilderTests: XCTestCase {
 	func testAttributedStringBuilder() throws {
@@ -46,3 +47,4 @@ final class AttributedStringBuilderTests: XCTestCase {
 		XCTAssertTrue(runs[1].description.contains("Catalog "))
 	}
 }
+#endif
