@@ -123,6 +123,54 @@ public extension URL {
 		return common
 	}
 
+	/// Finds the deepest directory path between two given URLs.
+	///
+	/// Heuristics are used to determine whether a given url is a file or directory url. No filesystem calls are made (at least not intentionally).
+	/// However, if the two paths are identical apart from one being a directory and the other being a file (`/foo/bar` vs `/foo/bar/`)
+	/// the last component being a directory will determine that that component *is* in fact a directory.
+	///
+	/// Throws `RelativePathError.mismatchedURLScheme` if the urls are of different schemes (You can't compare an `https`
+	/// and `file` url against each other.
+	static func deepestCommonDirectory(between pathA: URL, and pathB: URL) throws(RelativePathError) -> URL {
+		guard pathA.scheme == pathB.scheme else { throw .mismatchedURLScheme }
+
+		guard pathA.pathComponents != pathB.pathComponents else {
+			return [pathA, pathA].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
+		}
+
+		let zipped = zip(pathA.pathComponents, pathB.pathComponents)
+
+		var pathAccumulator: [String] = []
+		for (a, b) in zipped {
+			guard a == b else { break }
+			pathAccumulator.append(a)
+		}
+
+		if pathAccumulator.first == "/" {
+			pathAccumulator.popFirst()
+		}
+
+		let commonPath = "/" + pathAccumulator.joined(separator: "/")
+		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *) {
+			return URL(filePath: commonPath, directoryHint: .isDirectory)
+		} else {
+			return URL(fileURLWithPath: commonPath, isDirectory: true)
+		}
+	}
+
+	static func deepestCommonDirectoryURL(from urls: [URL]) -> URL? {
+		guard urls.count > 1 else { return urls.first }
+		var urls = urls
+
+		var common = urls.popLast()
+
+		for url in urls {
+			guard let previous = common else { return nil }
+			common = try? deepestCommonDirectory(between: previous, and: url)
+		}
+		return common
+	}
+
 	func isAParentOf(_ url: URL) -> Bool {
 		var new = self
 		if hasDirectoryPath == false {
