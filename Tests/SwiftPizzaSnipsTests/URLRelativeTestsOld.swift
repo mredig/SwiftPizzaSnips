@@ -2,7 +2,7 @@ import Testing
 import Foundation
 import SwiftPizzaSnips
 
-struct URLRelativeTests {
+struct URLRelativeTestsOld {
 
 	@Test
 	@available(iOS 16.0, *)
