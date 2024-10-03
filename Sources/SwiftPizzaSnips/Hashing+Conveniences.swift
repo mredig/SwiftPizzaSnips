@@ -1,6 +1,11 @@
 import Foundation
-#if canImport(CryptoKit)
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
 import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 extension Digest {

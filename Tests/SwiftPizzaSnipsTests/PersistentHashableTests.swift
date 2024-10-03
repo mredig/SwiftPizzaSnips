@@ -1,6 +1,12 @@
 import XCTest
 import SwiftPizzaSnips
-#if canImport(CryptoKit)
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
+import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
 
 // Note: Many of these tests are just confirming that they provide consistent hashes. If it's found that a value is
 // incorrect, but consistent, that's *kind* of a bug? Kind of? But not really, as long as it achieves consistency...

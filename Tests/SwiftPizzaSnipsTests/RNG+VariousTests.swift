@@ -1,6 +1,12 @@
 import XCTest
-import CryptoKit
 import SwiftPizzaSnips
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
+import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
 
 final class RNGVariousTests: XCTestCase {
 	func testRandomData() throws {
@@ -67,3 +73,4 @@ final class RNGVariousTests: XCTestCase {
 		XCTAssertEqual("43412d135e6b57ed9f441a2f40169fce", md5.finalize().toHexString())
 	}
 }
+#endif

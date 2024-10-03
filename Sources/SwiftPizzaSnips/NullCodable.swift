@@ -35,13 +35,22 @@ extension NullCodable: Sendable where T: Sendable {}
 extension NullCodable: Equatable where T: Equatable {}
 extension NullCodable: Hashable where T: Hashable {}
 extension NullCodable: Withable where T: Withable {}
+
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
+import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
+
 @available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension NullCodable: PersistentHashable where T: PersistentHashable {
 	public func hash(persistentlyInto hasher: inout PersistentHasher) {
 		hasher.update(wrappedValue)
 	}
 }
-
+#endif
 
 extension NullCodable: ExpressibleByUnicodeScalarLiteral where T: ExpressibleByUnicodeScalarLiteral {
 	public init(unicodeScalarLiteral value: T.UnicodeScalarLiteralType) {

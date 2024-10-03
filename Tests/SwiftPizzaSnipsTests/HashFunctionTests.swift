@@ -1,7 +1,12 @@
 import XCTest
 import SwiftPizzaSnips
-#if canImport(CryptoKit)
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
 import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
 
 @available(iOS 13.2, tvOS 13.2, watchOS 10, *)
 final class HashFunctionTests: XCTestCase {

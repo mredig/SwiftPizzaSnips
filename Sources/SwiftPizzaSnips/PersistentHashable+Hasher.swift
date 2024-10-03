@@ -1,6 +1,11 @@
 import Foundation
-#if canImport(CryptoKit)
+#if canImport(Crypto)
+import Crypto
+#elseif canImport(CryptoKit)
 import CryptoKit
+#endif
+
+#if canImport(CryptoKit) || canImport(Crypto)
 
 @available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 public struct PersistentHasher: HashFunction, Withable {
