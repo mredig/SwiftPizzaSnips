@@ -1,47 +1,50 @@
-import XCTest
+import Foundation
+import Testing
 import SwiftPizzaSnips
 #if canImport(FoundationNetworking)
 import SPSLinuxSupport
 #endif
 
 /// These tests all pass on macOS and should replicate functionality on Linux
-@available(iOS 16, tvOS 16, watchOS 10, *)
-final class URLLinuxSupportTests: XCTestCase {
+struct URLLinuxSupportTests {
 
-	func testFilePathInit() throws {
+	@available(iOS 16, tvOS 16, watchOS 10, *)
+	@Test func testFilePathInit() throws {
 		let binPath = "/bin"
 
 		var binURL = URL(filePath: binPath, directoryHint: .inferFromPath)
-		XCTAssertEqual("/bin", binURL.path())
-		XCTAssertFalse(binURL.hasDirectoryPath)
+		#expect("/bin" == binURL.path())
+		#expect(binURL.hasDirectoryPath == false)
 
 		binURL = URL(filePath: binPath, directoryHint: .checkFileSystem)
-		XCTAssertEqual("/bin/", binURL.path())
-		XCTAssertTrue(binURL.hasDirectoryPath)
+		#expect("/bin/" == binURL.path())
+		#expect(binURL.hasDirectoryPath)
 
 		binURL = URL(filePath: binPath, directoryHint: .isDirectory)
-		XCTAssertEqual("/bin/", binURL.path())
-		XCTAssertTrue(binURL.hasDirectoryPath)
+		#expect("/bin/" == binURL.path())
+		#expect(binURL.hasDirectoryPath)
 
 		binURL = URL(filePath: binPath, directoryHint: .notDirectory)
-		XCTAssertEqual("/bin", binURL.path())
-		XCTAssertFalse(binURL.hasDirectoryPath)
+		#expect("/bin" == binURL.path())
+		#expect(binURL.hasDirectoryPath == false)
 	}
 
-	func testPathMethod() throws {
+	@available(iOS 16, tvOS 16, watchOS 10, *)
+	@Test func testPathMethod() throws {
 		var samplePath = "/Users/nobody/Documents/My Stuff/"
 
 		let samplePathEncoded = samplePath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
 
 		let sampleURL = URL(filePath: samplePath)
-		XCTAssertEqual(sampleURL.path(), samplePathEncoded)
-		XCTAssertEqual(sampleURL.path(percentEncoded: true), samplePathEncoded)
-		XCTAssertEqual(sampleURL.path(percentEncoded: false), samplePath)
+		#expect(sampleURL.path() == samplePathEncoded)
+		#expect(sampleURL.path(percentEncoded: true) == samplePathEncoded)
+		#expect(sampleURL.path(percentEncoded: false) == samplePath)
 		samplePath.removeLast()
-		XCTAssertEqual(sampleURL.path, samplePath)
+		#expect(sampleURL.path == samplePath)
 	}
 
-	func testAppending() throws {
+	@available(iOS 16, tvOS 16, watchOS 10, *)
+	@Test func testAppending() throws {
 		let baseURL = URL(filePath: "/Users/nobody")
 		var url = baseURL
 
@@ -56,28 +59,28 @@ final class URLLinuxSupportTests: XCTestCase {
 		let queryItems = "/Users/nobody?foo=1&bar=2"
 
 		url.append(component: "Desktop")
-		XCTAssertEqual(url.path, oneDirExpected)
-		XCTAssertEqual(url.path(), oneDirExpected)
+		#expect(url.path == oneDirExpected)
+		#expect(url.path() == oneDirExpected)
 
 		url = baseURL
 		url.append(components: "Desktop", "Junk", "Other Stuff", "Not In Here/")
-		XCTAssertEqual(url.path, moreDirExpected)
-		XCTAssertEqual(url.path(percentEncoded: false), moreDirExpected + "/")
-		XCTAssertEqual(url.path(percentEncoded: true), moreDirExpectedEncoded)
+		#expect(url.path == moreDirExpected)
+		#expect(url.path(percentEncoded: false) == moreDirExpected + "/")
+		#expect(url.path(percentEncoded: true) == moreDirExpectedEncoded)
 
 		url = baseURL
 		url.append(components: "Desktop", "Junk", "Other Stuff", "Not In Here", "secrets.txt")
-		XCTAssertEqual(url.path, fileExpected)
-		XCTAssertEqual(url.path(percentEncoded: false), fileExpected)
-		XCTAssertEqual(url.path(percentEncoded: true), fileExpectedEncoded)
+		#expect(url.path == fileExpected)
+		#expect(url.path(percentEncoded: false) == fileExpected)
+		#expect(url.path(percentEncoded: true) == fileExpectedEncoded)
 
 		url = baseURL
 		url.append(queryItems: [
 			URLQueryItem(name: "foo", value: "1"),
 			URLQueryItem(name: "bar", value: "2"),
 		])
-		XCTAssertEqual(url.absoluteString, "file://" + queryItems)
-		XCTAssertEqual(url.path, baseURL.path)
-		XCTAssertEqual(url.path(), baseURL.path)
+		#expect(url.absoluteString == "file://" + queryItems)
+		#expect(url.path == baseURL.path)
+		#expect(url.path() == baseURL.path)
 	}
 }
