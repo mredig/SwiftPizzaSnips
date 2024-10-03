@@ -1,9 +1,11 @@
-import XCTest
+import Testing
+import Foundation
 import SwiftPizzaSnips
 
-@available(iOS 16.0, *)
-final class URLRelativeTests: XCTestCase {
+struct URLRelativeTests {
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLRelativeFilePaths() throws {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
@@ -20,58 +22,75 @@ final class URLRelativeTests: XCTestCase {
 
 		let urlResult = URL(filePath: path, relativeTo: urlA)
 
-		try XCTAssertEqual(pathComponents, URL.relativeComponents(from: urlA, to: urlB))
-		try XCTAssertEqual(path, URL.relativePath(from: urlA, to: urlB))
-		try XCTAssertEqual(urlResult, URL.relativeFileURL(from: urlA, to: urlB))
+		#expect(try pathComponents == URL.relativeComponents(from: urlA, to: urlB))
+		#expect(try path == URL.relativePath(from: urlA, to: urlB))
+		#expect(try urlResult == URL.relativeFileURL(from: urlA, to: urlB))
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLRelativeMismatchScheme() throws {
 		let urlA = URL(string: "https://he.ho.hum/api/v1/login")!
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 
-		XCTAssertThrowsError(try URL.relativeComponents(from: urlA, to: urlB)) { error in
-			XCTAssertEqual(URL.RelativePathError.mismatchedURLScheme, error as? URL.RelativePathError)
-		}
+		#expect(
+			performing: {
+				try URL.relativeComponents(from: urlA, to: urlB)
+		},
+			throws: {
+				guard let error = $0 as? URL.RelativePathError else { return false }
+				return URL.RelativePathError.mismatchedURLScheme == error
+		})
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentDirectoryPair() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 		let expectedParent = URL(filePath: "/Users/nobody/")
 
 		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
-		XCTAssertEqual(expectedParent, parent)
+		#expect(expectedParent == parent)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentDirectoryFilePair() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Planets.epub")
 		let urlB = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Stars.epub")
 		let expectedParent = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/")
 
 		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
-		XCTAssertEqual(expectedParent, parent)
+		#expect(expectedParent == parent)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentWebURL() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(string: "https://foo.com")!
 
 		let parentA = URL.commonParentDirectoryURL(between: urlA, and: urlB)
-		XCTAssertNil(parentA)
+		#expect(parentA == nil)
 
 		let parentB = URL.commonParentDirectoryURL(between: urlB, and: urlA)
-		XCTAssertNil(parentB)
+		#expect(parentB == nil)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentFileURL() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 		let expectedParent = URL(filePath: "/Users/nobody/")
 
 		let parent = URL.commonParentDirectoryURL(between: urlA, and: urlB)
-		XCTAssertEqual(expectedParent, parent)
+		#expect(expectedParent == parent)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentWithSimpleArray() {
 		let urls = [
 			URL(filePath: "/Users/nobody/Documents", directoryHint: .isDirectory),
@@ -87,9 +106,11 @@ final class URLRelativeTests: XCTestCase {
 		let expectedParent = URL(filePath: "/Users/nobody/")
 
 		let parent = URL.commonParentDirectoryURL(from: urls)
-		XCTAssertEqual(expectedParent, parent)
+		#expect(expectedParent == parent)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentWithMoreComplicatedArray() {
 		let urls = [
 			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design"),
@@ -109,9 +130,11 @@ final class URLRelativeTests: XCTestCase {
 		let expectedParent = URL(filePath: "/Users/nobody/Desktop/")
 
 		let parent = URL.commonParentDirectoryURL(from: urls)
-		XCTAssertEqual(expectedParent, parent)
+		#expect(expectedParent == parent)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testURLParentWithInvalidArray() {
 		let urls = [
 			URL(filePath: "/Users/nobody/Desktop/Stuff/WorkProjects/2022/Q1/Design"),
@@ -130,9 +153,11 @@ final class URLRelativeTests: XCTestCase {
 		]
 
 		let parent = URL.commonParentDirectoryURL(from: urls)
-		XCTAssertNil(parent)
+		#expect(parent == nil)
 	}
 
+	@Test
+	@available(iOS 16.0, *)
 	func testParentCheck() {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
@@ -141,13 +166,13 @@ final class URLRelativeTests: XCTestCase {
 		let urlE = URL(filePath: "/Users/nobody/file.txt")
 		let urlF = URL(filePath: "/Users/nobody/De")
 
-		XCTAssertFalse(urlB.isAParentOf(urlA), "urlB.isAParentOf(urlA) failed")
-		XCTAssertTrue(urlC.isAParentOf(urlA), "urlC.isAParentOf(urlA) failed")
-		XCTAssertFalse(urlA.isAParentOf(urlB), "urlA.isAParentOf(urlB) failed")
-		XCTAssertFalse(urlA.isAParentOf(urlC), "urlA.isAParentOf(urlC) failed")
-		XCTAssertFalse(urlA.isAParentOf(urlD), "urlA.isAParentOf(urlD) failed")
-		XCTAssertTrue(urlD.isAParentOf(urlA), "urlD.isAParentOf(urlA) failed")
-		XCTAssertFalse(urlE.isAParentOf(urlA), "urlE.isAParentOf(urlA) failed")
-		XCTAssertFalse(urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
+		#expect(false == urlB.isAParentOf(urlA), "urlB.isAParentOf(urlA) failed")
+		#expect(true == urlC.isAParentOf(urlA), "urlC.isAParentOf(urlA) failed")
+		#expect(false == urlA.isAParentOf(urlB), "urlA.isAParentOf(urlB) failed")
+		#expect(false == urlA.isAParentOf(urlC), "urlA.isAParentOf(urlC) failed")
+		#expect(false == urlA.isAParentOf(urlD), "urlA.isAParentOf(urlD) failed")
+		#expect(true == urlD.isAParentOf(urlA), "urlD.isAParentOf(urlA) failed")
+		#expect(false == urlE.isAParentOf(urlA), "urlE.isAParentOf(urlA) failed")
+		#expect(false == urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
 	}
 }
