@@ -59,7 +59,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) == nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip4 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "999.1.3.2"
@@ -72,7 +73,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) == nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip4 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "091.056.034.002"
@@ -80,7 +82,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) == nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip4 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "123.45.67.89."
@@ -98,7 +101,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) != nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip6 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "FE80::0202:B3FF:FE1E:8329"
@@ -106,7 +110,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) != nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip6 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "[2001:db8::1]:80"
@@ -124,7 +129,8 @@ struct IPAddressValidationTests {
 		#expect(IP6Address(rawValue: ipAddr) != nil)
 		#expect(IPAddress(rawValue: ipAddr) != nil)
 		guard case .ip6 = IPAddress(rawValue: ipAddr) else {
-			throw TestError.fail("Not the right case")
+			Issue.record("Not the right case")
+			return
 		}
 
 		ipAddr = "i'll bribe you to say i'm an ip address!"
