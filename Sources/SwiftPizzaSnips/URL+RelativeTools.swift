@@ -29,6 +29,7 @@ public extension URL {
 				return deepestCommonParent.pathComponents
 			}
 			if origin.hasDirectoryPath == false {
+				origin.deleteLastPathComponent()
 				_ = components.popLast()
 			}
 			return components

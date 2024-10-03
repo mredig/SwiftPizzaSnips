@@ -9,7 +9,7 @@ struct URLRelativeTests {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
 		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
 
-		let pathComponents = [
+		let expectedPathComponents = [
 			"..",
 			"..",
 			"..",
@@ -17,13 +17,16 @@ struct URLRelativeTests {
 			"Documents",
 			"Work Docs",
 		]
-		let path = pathComponents.joined(separator: "/") + "/"
+		let expectedPath = expectedPathComponents.joined(separator: "/") + "/"
+		let expectedURLResult = URL(filePath: expectedPath, relativeTo: urlA.deletingLastPathComponent())
 
-		let urlResult = URL(filePath: path, relativeTo: urlA)
+		let pathComponents = try URL.relativePathComponents(from: urlA, to: urlB)
+		let relativePath = try URL.relativeFilePath(from: urlA, to: urlB)
+		let relativeURL = try URL.relativeFilePathURL(from: urlA, to: urlB)
 
-		#expect(try pathComponents == URL.relativePathComponents(from: urlA, to: urlB))
-		#expect(try path == URL.relativeFilePath(from: urlA, to: urlB))
-		#expect(try urlResult == URL.relativeFilePathURL(from: urlA, to: urlB))
+		#expect(expectedPathComponents == pathComponents)
+		#expect(expectedPath == relativePath)
+		#expect(expectedURLResult == relativeURL)
 	}
 
 	@available(iOS 16.0, *)
@@ -339,6 +342,17 @@ struct URLRelativeTests {
 
 		let urlBasDir = URL(filePath: "/a/b/c/d", directoryHint: .isDirectory)
 
+		let parent = try URL.deepestCommonDirectory(between: urlA, and: urlB)
+		#expect(parent == urlBasDir)
+
+		let components = try URL.relativePathComponents(from: urlA, to: urlB)
+		let componentsExpectation = [
+			"..",
+		]
+		#expect(components == componentsExpectation)
+
+		let path = try URL.relativeFilePath(from: urlA, to: urlB)
+		#expect(path == "../")
 
 		let url = try URL.relativeFilePathURL(from: urlA, to: urlB)
 		let urlExpectation = URL(
