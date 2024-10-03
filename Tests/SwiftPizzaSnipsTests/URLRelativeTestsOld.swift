@@ -164,25 +164,4 @@ struct URLRelativeTestsOld {
 		let parent = URL.commonParentDirectoryURL(from: urls)
 		#expect(parent == nil)
 	}
-
-	@Test
-	@available(*, deprecated)
-	@available(iOS 16.0, *)
-	func testParentCheck() {
-		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
-		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
-		let urlC = URL(filePath: "/Users/nobody/")
-		let urlD = URL(filePath: "/Users/nobody")
-		let urlE = URL(filePath: "/Users/nobody/file.txt")
-		let urlF = URL(filePath: "/Users/nobody/De")
-
-		#expect(false == urlB.isAParentOf(urlA), "urlB.isAParentOf(urlA) failed")
-		#expect(true == urlC.isAParentOf(urlA), "urlC.isAParentOf(urlA) failed")
-		#expect(false == urlA.isAParentOf(urlB), "urlA.isAParentOf(urlB) failed")
-		#expect(false == urlA.isAParentOf(urlC), "urlA.isAParentOf(urlC) failed")
-		#expect(false == urlA.isAParentOf(urlD), "urlA.isAParentOf(urlD) failed")
-		#expect(true == urlD.isAParentOf(urlA), "urlD.isAParentOf(urlA) failed")
-		#expect(false == urlE.isAParentOf(urlA), "urlE.isAParentOf(urlA) failed")
-		#expect(false == urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
-	}
 }

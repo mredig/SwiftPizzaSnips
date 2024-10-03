@@ -6,7 +6,7 @@ import SPSLinuxSupport
 public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	/// listed in an array
-	@available(*, deprecated, renamed: "relativeURLComponents(from:to:)", message: "Use new version")
+	@available(*, deprecated, renamed: "relativePathComponents(from:to:)", message: "Use new version")
 	static func relativeComponents(from origin: URL, to destination: URL) throws -> [String] {
 		guard
 			origin.scheme == destination.scheme

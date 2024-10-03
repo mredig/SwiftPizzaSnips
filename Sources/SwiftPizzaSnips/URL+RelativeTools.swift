@@ -3,7 +3,44 @@ import Foundation
 import SPSLinuxSupport
 #endif
 
+@available(macOS 10.15, *)
 public extension URL {
+	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	/// listed in an array
+	static func relativePathComponents(from origin: URL, to destination: URL) throws -> [String] {
+		let deepestCommonParent = try deepestCommonDirectory(between: origin, and: destination)
+
+		var originComponents = {
+			var components = origin.standardized.pathComponents
+			guard components != deepestCommonParent.pathComponents else {
+				return deepestCommonParent.pathComponents
+			}
+			if origin.hasDirectoryPath == false {
+				_ = components.popLast()
+			}
+			return components
+		}()
+
+		let commonParentComponents = deepestCommonParent.standardized.pathComponents
+		let destinationComponents = destination.standardized.pathComponents
+
+		var accumulator: [String] = []
+		while originComponents != commonParentComponents {
+			accumulator.append("..")
+			_ = originComponents.popLast()
+		}
+
+		while originComponents != destinationComponents {
+			guard
+				let destinationComponent = destinationComponents[optional: originComponents.count]
+			else { break }
+			originComponents.append(destinationComponent)
+			accumulator.append(destinationComponent)
+		}
+
+		return accumulator
+	}
+
 	/// Finds the deepest directory path between two given URLs.
 	///
 	/// Heuristics are used to determine whether a given url is a file or directory url. No filesystem calls are made (at least not intentionally).
@@ -89,7 +126,9 @@ public extension URL {
 			return url.path.hasPrefix(new.path)
 		}
 	}
+}
 
+public extension URL {
 	// sourcery:localizedError
 	enum RelativePathError: Error {
 		case mismatchedURLScheme

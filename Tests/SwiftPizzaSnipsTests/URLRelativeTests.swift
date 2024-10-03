@@ -3,6 +3,44 @@ import Foundation
 import SwiftPizzaSnips
 
 struct URLRelativeTests {
+
+	@available(iOS 16.0, *)
+	@Test func testURLRelativeFilePaths() throws {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+
+		let pathComponents = [
+			"..",
+			"..",
+			"..",
+			"..",
+			"Documents",
+			"Work Docs",
+		]
+		let path = pathComponents.joined(separator: "/")
+
+		let urlResult = URL(filePath: path, relativeTo: urlA)
+
+		print(try URL.relativePathComponents(from: urlA, to: urlB))
+
+		#expect(try pathComponents == URL.relativePathComponents(from: urlA, to: urlB))
+	}
+
+	@available(iOS 16.0, *)
+	@Test func testURLRelativeMismatchScheme() throws {
+		let urlA = URL(string: "https://he.ho.hum/api/v1/login")!
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+
+		#expect(
+			performing: {
+				try URL.relativePathComponents(from: urlA, to: urlB)
+		},
+			throws: {
+				guard let error = $0 as? URL.RelativePathError else { return false }
+				return URL.RelativePathError.mismatchedURLScheme == error
+		})
+	}
+
 	@available(iOS 16.0, *)
 	@Test func testURLParentDirectoryPair() throws {
 		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi")
@@ -133,5 +171,47 @@ struct URLRelativeTests {
 				return error == .mismatchedURLScheme
 			}
 		)
+	}
+
+	@available(iOS 16.0, *)
+	@Test func testParentCheck() {
+		let urlA = URL(filePath: "/Users/nobody/Desktop/Stuff/Downloads/Books/SciFi/Spaceships.epub")
+		let urlB = URL(filePath: "/Users/nobody/Documents/Work Docs/")
+		let urlC = URL(filePath: "/Users/nobody/")
+		let urlD = URL(filePath: "/Users/nobody")
+		let urlE = URL(filePath: "/Users/nobody/file.txt")
+		let urlF = URL(filePath: "/Users/nobody/De")
+
+		#expect(false == urlB.isAParentOf(urlA), "urlB.isAParentOf(urlA) failed")
+		#expect(true == urlC.isAParentOf(urlA), "urlC.isAParentOf(urlA) failed")
+		#expect(false == urlA.isAParentOf(urlB), "urlA.isAParentOf(urlB) failed")
+		#expect(false == urlA.isAParentOf(urlC), "urlA.isAParentOf(urlC) failed")
+		#expect(false == urlA.isAParentOf(urlD), "urlA.isAParentOf(urlD) failed")
+		#expect(true == urlD.isAParentOf(urlA), "urlD.isAParentOf(urlA) failed")
+		#expect(false == urlE.isAParentOf(urlA), "urlE.isAParentOf(urlA) failed")
+		#expect(false == urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
+	}
+
+	@Test func testPathComponentsWithParentOrigin() throws {
+		let currentURL = URL(filePath: "/root/")
+		let urls = [
+			URL(filePath: "/root/Sources/root"),
+			URL(filePath: "/root/Sources/root/foo.swift"),
+			URL(filePath: "/root/Sources/tester/"),
+			URL(filePath: "/root/Sources/tester/main.swift"),
+		]
+
+		let expectedComponents = [
+			["Sources", "root"],
+			["Sources", "root", "foo.swift"],
+			["Sources", "tester"],
+			["Sources", "tester", "main.swift"],
+		]
+
+		let actual = try urls.map {
+			try URL.relativePathComponents(from: currentURL, to: $0)
+		}
+
+		#expect(expectedComponents == actual)
 	}
 }
