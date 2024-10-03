@@ -8,7 +8,19 @@ public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	/// listed in an array
 	static func relativePathComponents(from origin: URL, to destination: URL) throws -> [String] {
-		let deepestCommonParent = try deepestCommonDirectory(between: origin, and: destination)
+		var origin = origin
+		var destination = destination
+		return try _relativePathComponents(from: &origin, to: &destination)
+	}
+
+	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	/// listed in an array
+	static private func _relativePathComponents(from origin: inout URL, to destination: inout URL) throws -> [String] {
+
+
+		let deepestCommonParent = try _deepestCommonDirectory(
+			between: &origin,
+			and: &destination)
 
 		var originComponents = {
 			var components = origin.standardized.pathComponents
@@ -43,8 +55,18 @@ public extension URL {
 
 	/// provides the relative path needed to walk from `origin` to `destination` with individual directories
 	static func relativeFilePath(from origin: URL, to destination: URL) throws -> String {
-		try relativePathComponents(from: origin, to: destination).joined(separator: "/").with {
-			guard destination.hasDirectoryPath, $0.isOccupied else { return }
+		var origin = origin
+		var destination = destination
+		return try _relativeFilePath(from: &origin, to: &destination)
+	}
+
+		/// provides the relative path needed to walk from `origin` to `destination` with individual directories
+	static private func _relativeFilePath(from origin: inout URL, to destination: inout URL) throws -> String {
+		return try _relativePathComponents(
+			from: &origin,
+			to: &destination)
+		.joined(separator: "/").with {
+			guard $0.isOccupied, destination.hasDirectoryPath else { return }
 			$0.append("/")
 		}
 	}
@@ -52,14 +74,17 @@ public extension URL {
 	/// provides the relative path needed to walk from `origin` to `destination` as a relative url.
 	/// suitable for creating symlinks
 	static func relativeFilePathURL(from origin: URL, to destination: URL) throws -> URL {
+		var origin = origin
+		var destination = destination
+
 		if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *) {
 			return URL(
-				filePath: try relativeFilePath(from: origin, to: destination),
+				filePath: try _relativeFilePath(from: &origin, to: &destination),
 				directoryHint: destination.hasDirectoryPath ? .isDirectory : .inferFromPath,
 				relativeTo: origin)
 		} else {
 			return URL(
-				fileURLWithPath: try relativeFilePath(from: origin, to: destination),
+				fileURLWithPath: try _relativeFilePath(from: &origin, to: &destination),
 				isDirectory: destination.hasDirectoryPath,
 				relativeTo: origin)
 		}
@@ -77,11 +102,22 @@ public extension URL {
 	/// Currently requires that each path is a `file://` scheme url. This isn't an inherent requirement and could be resolved with a bit
 	/// more effort, but this is the simplest path forward currently. As a result, `.oneOrBothURLsNotFilepathURL` is thrown if this occurs.
 	static func deepestCommonDirectory(between pathA: URL, and pathB: URL) throws(RelativePathError) -> URL {
+		var pathA = pathA
+		var pathB = pathB
+
+		return try _deepestCommonDirectory(between: &pathA, and: &pathB)
+	}
+
+	static private func _deepestCommonDirectory(between pathA: inout URL, and pathB: inout URL) throws(RelativePathError) -> URL {
+
 		guard pathA.scheme == pathB.scheme else { throw .mismatchedURLScheme }
 		guard pathA.isFileURL else { throw .oneOrBothURLsNotFilepathURL }
 
 		guard pathA.pathComponents != pathB.pathComponents else {
-			return [pathA, pathB].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
+			let matchingDir = [pathA, pathB].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
+			pathA = matchingDir
+			pathB = matchingDir
+			return matchingDir
 		}
 
 		let zipped = zip(pathA.pathComponents, pathB.pathComponents)
