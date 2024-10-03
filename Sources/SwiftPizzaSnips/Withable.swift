@@ -70,6 +70,8 @@ extension Dictionary: Withable {}
 extension Set: Withable {}
 extension Data: Withable {}
 extension Slice: Withable {}
+extension URL: Withable {}
+extension URLComponents: Withable {}
 
 extension Optional: Withable {}
 

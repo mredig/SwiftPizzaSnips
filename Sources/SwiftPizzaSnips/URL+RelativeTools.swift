@@ -131,8 +131,12 @@ public extension URL {
 	///
 	/// Throws `RelativePathError.mismatchedURLScheme` if the urls are of different schemes (You can't compare an `https`
 	/// and `file` url against each other.
+	///
+	/// Currently requires that each path is a `file://` scheme url. This isn't an inherent requirement and could be resolved with a bit
+	/// more effort, but this is the simplest path forward currently. As a result, `.oneOrBothURLsNotFilepathURL` is thrown if this occurs.
 	static func deepestCommonDirectory(between pathA: URL, and pathB: URL) throws(RelativePathError) -> URL {
 		guard pathA.scheme == pathB.scheme else { throw .mismatchedURLScheme }
+		guard pathA.isFileURL else { throw .oneOrBothURLsNotFilepathURL }
 
 		guard pathA.pathComponents != pathB.pathComponents else {
 			return [pathA, pathA].first(where: { $0.hasDirectoryPath }) ?? pathA.deletingLastPathComponent()
@@ -158,15 +162,31 @@ public extension URL {
 		}
 	}
 
-	static func deepestCommonDirectoryURL(from urls: [URL]) -> URL? {
-		guard urls.count > 1 else { return urls.first }
+	/// The same as `deepestCommonDirectory(between:and:)` except compares between an entire array of URLs.
+	///
+	/// In addition to any errors the other method can throw, this can additionally throw `.requiresANonEmptyArray` if the array is empty.
+	///
+	/// If you provide only a single url, the url will just evaluate (via `.hasDirectoryPath`) and return that url
+	/// (deleting the last component if it's not a directory)
+	static func deepestCommonDirectory(from urls: [URL]) throws(RelativePathError) -> URL {
+		guard urls.isOccupied else { throw .requiresANonEmptyArray }
+		guard urls.count > 1 else {
+			let loneURL = urls[0]
+			if loneURL.hasDirectoryPath {
+				return loneURL
+			} else {
+				return loneURL.deletingLastPathComponent()
+			}
+		}
 		var urls = urls
 
-		var common = urls.popLast()
+		guard
+			var common = urls.popLast()
+		else { throw .requiresANonEmptyArray }
 
 		for url in urls {
-			guard let previous = common else { return nil }
-			common = try? deepestCommonDirectory(between: previous, and: url)
+			let previous = common
+			common = try deepestCommonDirectory(between: previous, and: url)
 		}
 		return common
 	}
@@ -193,6 +213,7 @@ public extension URL {
 	enum RelativePathError: Error {
 		case mismatchedURLScheme
 		case oneOrBothURLsNotFilepathURL
+		case requiresANonEmptyArray
 	}
 }
 
@@ -201,6 +222,7 @@ extension URL.RelativePathError: CustomDebugStringConvertible, LocalizedError {
 		switch self {
 		case .mismatchedURLScheme: "URL.RelativePathError.mismatchedURLScheme"
 		case .oneOrBothURLsNotFilepathURL: "URL.RelativePathError.oneOrBothURLsNotFilepathURL"
+		case .requiresANonEmptyArray: "URL.RelativePathError.requiresANonEmptyArray"
 		}
 	}
 
