@@ -36,10 +36,10 @@ extension NullCodable: Equatable where T: Equatable {}
 extension NullCodable: Hashable where T: Hashable {}
 extension NullCodable: Withable where T: Withable {}
 
-#if canImport(Crypto)
-import Crypto
-#elseif canImport(CryptoKit)
+#if canImport(CryptoKit)
 import CryptoKit
+#elseif canImport(Crypto)
+import Crypto
 #endif
 
 #if canImport(CryptoKit) || canImport(Crypto)
