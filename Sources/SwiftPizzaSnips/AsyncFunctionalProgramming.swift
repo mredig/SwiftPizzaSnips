@@ -32,6 +32,25 @@ public extension Sequence {
 		return accumulator
 	}
 
+	func asyncConcurrentMap<T>(_ transform: @escaping @Sendable (Element) async throws -> T) async rethrows -> [T] {
+		try await withThrowingTaskGroup(of: (index: Int, result: T).self) { group in
+			for (index, element) in self.enumerated() {
+				group.addTask {
+					let altered = try await transform(element)
+					return (index, altered)
+				}
+			}
+
+			var accumulator: [Int: T] = [:]
+			for try await result in group {
+				accumulator[result.index] = result.result
+			}
+
+			let sorted = accumulator.sorted { $0.key < $1.key }
+			return sorted.map(\.value)
+		}
+	}
+
 	func asyncCompactMap<T>(transform: (Element) async throws -> T?) async rethrows -> [T] {
 		let stream = asyncStream()
 
