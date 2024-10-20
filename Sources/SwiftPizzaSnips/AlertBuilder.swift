@@ -31,6 +31,12 @@ public struct Alert: Sendable, Hashable {
 
 	public var actions: [Action]
 
+	public init(title: String, message: String, actions: [Action]) {
+		self.title = title
+		self.message = message
+		self.actions = actions
+	}
+
 	#if canImport(AppKit)
 	@MainActor
 	public func createAlert() -> NSAlert {
