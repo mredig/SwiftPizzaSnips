@@ -136,6 +136,20 @@ public struct Alert: Sendable, Hashable {
 
 		private let actionID = UUID()
 
+		#if canImport(AppKit)
+		public init(title: String, isDefault: Bool = false, action: @escaping @Sendable @MainActor () -> Void) {
+			self.title = title
+			self.isDefault = isDefault
+			self.action = action
+		}
+		#elseif canImport(UIKit)
+		public init(title: String, isDefault: Bool = false, action: ActionStyle) {
+			self.title = title
+			self.isDefault = isDefault
+			self.action = action
+		}
+		#endif
+
 		public nonisolated static func == (lhs: Alert.Action, rhs: Alert.Action) -> Bool {
 			#if canImport(AppKit)
 			lhs.title == rhs.title
