@@ -7,7 +7,7 @@ import UIKit
 #if canImport(AppKit) || canImport(UIKit)
 @available(iOS 16.0, *)
 @MainActor
-public struct Alert: Sendable, Hashable {
+public struct Alert: Sendable, Hashable, Withable {
 	#if canImport(AppKit)
 	public typealias OSAlert = NSAlert
 	public typealias Severity = NSAlert.Style
@@ -31,7 +31,7 @@ public struct Alert: Sendable, Hashable {
 
 	public var actions: [Action]
 
-	public init(title: String, message: String, actions: [Action]) {
+	public init(title: String, message: String, actions: [Action] = []) {
 		self.title = title
 		self.message = message
 		self.actions = actions
@@ -90,7 +90,7 @@ public struct Alert: Sendable, Hashable {
 	#endif
 
 	#if canImport(AppKit)
-	public struct SuppressionButtonOption: Sendable, Hashable {
+	public struct SuppressionButtonOption: Sendable, Hashable, Withable {
 		public static let hide = SuppressionButtonOption()
 		public static func show(onSubmit: @escaping OnSubmit) -> SuppressionButtonOption {
 			SuppressionButtonOption(onSubmit: onSubmit)
@@ -123,7 +123,7 @@ public struct Alert: Sendable, Hashable {
 	#endif
 
 	@MainActor
-	public struct Action: Sendable, Hashable {
+	public struct Action: Sendable, Hashable, Withable {
 		public var title: String
 
 		#if canImport(AppKit)
@@ -137,13 +137,13 @@ public struct Alert: Sendable, Hashable {
 		private let actionID = UUID()
 
 		#if canImport(AppKit)
-		public init(title: String, isDefault: Bool = false, action: @escaping @Sendable @MainActor () -> Void) {
+		public init(title: String, isDefault: Bool = false, action: @escaping @Sendable @MainActor () -> Void = {}) {
 			self.title = title
 			self.isDefault = isDefault
 			self.action = action
 		}
 		#elseif canImport(UIKit)
-		public init(title: String, isDefault: Bool = false, action: ActionStyle) {
+		public init(title: String, isDefault: Bool = false, action: ActionStyle = .void({})) {
 			self.title = title
 			self.isDefault = isDefault
 			self.action = action
