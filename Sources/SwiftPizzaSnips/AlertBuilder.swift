@@ -143,9 +143,9 @@ public struct Alert: Sendable, Hashable, Withable {
 			self.action = action
 		}
 		#elseif canImport(UIKit)
-		public init(title: String, isDefault: Bool = false, action: ActionStyle = .void({})) {
+		public init(title: String, style: UIAlertAction.Style = .default, action: ActionStyle = .void({})) {
 			self.title = title
-			self.isDefault = isDefault
+			self.style = style
 			self.action = action
 		}
 		#endif
