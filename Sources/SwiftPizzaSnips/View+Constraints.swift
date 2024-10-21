@@ -15,6 +15,7 @@ public extension OSView {
 	func constrain(
 		_ childView: OSView,
 		inset: NSDirectionalEdgeInsets = .zero,
+		safeAreaDirections: DirectionalToggle = .none,
 		priorities: DirectionalEdgeConstraintPriorities = .required,
 		directions: DirectionalToggle = .all) -> [NSLayoutConstraint] {
 			assert(childView.isSubviewOf(self), "\(childView) is not a subview of \(self). Cannot create constraints.")
@@ -24,6 +25,7 @@ public extension OSView {
 			var constraints: [NSLayoutConstraint] = []
 
 			if directions.top == .create {
+				let topAnchor = safeAreaDirections.top == .create ? safeAreaLayoutGuide.topAnchor : topAnchor
 				constraints += [
 					childView.topAnchor.constraint(equalTo: topAnchor, constant: inset.top)
 						.withPriority(priorities.top)
@@ -31,18 +33,21 @@ public extension OSView {
 			}
 
 			if directions.leading == .create {
+				let leadingAnchor = safeAreaDirections.leading == .create ? safeAreaLayoutGuide.leadingAnchor : leadingAnchor
 				constraints += [
 					childView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset.leading)
 						.withPriority(priorities.leading)
 				]
 			}
 			if directions.bottom == .create {
+				let bottomAnchor = safeAreaDirections.bottom == .create ? safeAreaLayoutGuide.bottomAnchor : bottomAnchor
 				constraints += [
 					bottomAnchor.constraint(equalTo: childView.bottomAnchor, constant: inset.bottom)
 						.withPriority(priorities.bottom)
 				]
 			}
 			if directions.trailing == .create {
+				let trailingAnchor = safeAreaDirections.trailing == .create ? safeAreaLayoutGuide.trailingAnchor : trailingAnchor
 				constraints += [
 					trailingAnchor.constraint(equalTo: childView.trailingAnchor, constant: inset.trailing)
 						.withPriority(priorities.trailing)
@@ -179,5 +184,7 @@ extension DirectionalToggle {
 	public static let bottom = DirectionalToggle(uniform: .skip).with { $0.bottom = .create }
 	public static let leading = DirectionalToggle(uniform: .skip).with { $0.leading = .create }
 	public static let trailing = DirectionalToggle(uniform: .skip).with { $0.trailing = .create }
+
+	public static let none = DirectionalToggle(uniform: .skip)
 }
 #endif
