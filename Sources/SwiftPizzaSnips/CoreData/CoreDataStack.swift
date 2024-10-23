@@ -279,10 +279,11 @@ public class CoreDataStack: Withable {
 		try bgContext.performAndWait {
 			let fetchRequest = type.fetchRequest() as NSFetchRequest<NSFetchRequestResult>
 			fetchRequest.resultType = .managedObjectIDResultType
-			let imageDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+			let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+			deleteRequest.resultType = .resultTypeObjectIDs
 
 			if
-				let deleteResult = try bgContext.execute(imageDeleteRequest) as? NSBatchDeleteResult,
+				let deleteResult = try bgContext.execute(deleteRequest) as? NSBatchDeleteResult,
 				let objectIDs = deleteResult.result as? [NSManagedObjectID] {
 
 				NSManagedObjectContext.mergeChanges(
