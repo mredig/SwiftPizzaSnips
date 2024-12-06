@@ -1,4 +1,4 @@
-#if !canImport(FoundationNetworking) && !os(watchOS)
+#if canImport(AppKit) || canImport(UIKit)
 #if os(macOS)
 import AppKit
 #elseif os(iOS) || os(tvOS)
@@ -195,7 +195,6 @@ extension DirectionalToggle {
 
 	public static let none = DirectionalToggle(uniform: .skip)
 }
-#endif
 
 private protocol AnchorProvider {
 	var topAnchor: NSLayoutYAxisAnchor { get }
@@ -214,5 +213,11 @@ private protocol AnchorProvider {
 
 extension OSView: AnchorProvider {}
 
+#if canImport(AppKit)
 @available(macOS 11, *)
 extension NSLayoutGuide: AnchorProvider {}
+#elseif canImport(UIKit)
+@available(macOS 11, *)
+extension UILayoutGuide: AnchorProvider {}
+#endif
+#endif
