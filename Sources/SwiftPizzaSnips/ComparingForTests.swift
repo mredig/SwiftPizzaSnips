@@ -6,9 +6,30 @@ public enum ComparingForTests {
 	public enum Resource {
 		case data(Data, fileExtension: String)
 		case url(URL)
-		public static func codable<E: Encodable>(_ inData: E, encodedBy encoder: JSONEncoder = .init()) throws -> Resource {
+		public static func codable<E: Encodable>(_ inData: E, encodedBy encoder: JSONEncoder? = nil) throws -> Resource {
+			let encoder = encoder ?? JSONEncoder().with {
+				$0.outputFormatting = [.prettyPrinted, .sortedKeys]
+			}
 			let data = try encoder.encode(inData)
 			return .data(data, fileExtension: "json")
+		}
+		public static func string(_ value: String) -> Resource {
+			return .data(Data(value.utf8), fileExtension: "txt")
+		}
+		@available(macOS 10.15, *)
+		public static func stringified(_ value: Any) -> Resource {
+			let stringifiedValue = "\(value)"
+			let scanner = Scanner(string: stringifiedValue)
+
+			var out = ""
+			while scanner.isAtEnd == false {
+				guard let chunk = scanner.scanUpToString(", ") else { continue }
+				out.append(chunk)
+				out.append(",\n")
+				_ = scanner.scanString(", ")
+			}
+
+			return .string(out)
 		}
 
 		func copy(to destURL: URL) throws {
