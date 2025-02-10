@@ -170,6 +170,7 @@ struct URLRelativeTests {
 		#expect(false == urlF.isAParentOf(urlA), "urlF.isAParentOf(urlA) failed")
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testPathComponentsWithParentOrigin() throws {
 		let currentURL = URL(filePath: "/root/")
 		let urls = [
@@ -193,6 +194,7 @@ struct URLRelativeTests {
 		#expect(expectedComponents == actual)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testFilePathWithParentOrigin() throws {
 		let currentURL = URL(filePath: "/root/")
 		let urls = [
@@ -217,6 +219,7 @@ struct URLRelativeTests {
 		#expect(expectedComponents == actual)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testFilePathURLWithParentOrigin() throws {
 		let currentURL = URL(filePath: "/root/")
 		let urls = [
@@ -240,6 +243,7 @@ struct URLRelativeTests {
 		#expect(expected == actual)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testWithDirectoryFileMismatch() async throws {
 		let urlA = URL(filePath: "/a/b/c")
 		let urlB = URL(filePath: "/a/b/c/")
@@ -261,6 +265,7 @@ struct URLRelativeTests {
 		#expect(url == urlExpectation)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testWithDirectoryFileMismatchInverted() async throws {
 		let urlA = URL(filePath: "/a/b/c/")
 		let urlB = URL(filePath: "/a/b/c")
@@ -282,6 +287,7 @@ struct URLRelativeTests {
 		#expect(url == urlExpectation)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testOriginGoingDeeper() async throws {
 		let urlA = URL(filePath: "/a/b/c/d")
 		let urlB = URL(filePath: "/a/b/c/d/e/f")
@@ -311,6 +317,7 @@ struct URLRelativeTests {
 
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testOriginGoingShallower() async throws {
 		let urlA = URL(filePath: "/a/b/c/d/e/f")
 		let urlB = URL(filePath: "/a/b/c/d")
@@ -338,6 +345,7 @@ struct URLRelativeTests {
 		#expect(url.standardizedFileURL == urlExpectation.standardizedFileURL)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testSameDirA() async throws {
 		let url = URL(filePath: "/a/b/c/d")
 
@@ -362,6 +370,7 @@ struct URLRelativeTests {
 		#expect(relativeURL.standardizedFileURL == urlExpectation.standardizedFileURL)
 	}
 
+	@available(iOS 16.0, *)
 	@Test func testSameDirB() async throws {
 		let url = URL(filePath: "/a/b/c/")
 

@@ -15,7 +15,11 @@ final class AttributedStringBuilderTests: XCTestCase {
 			ASComponent("baz")
 				.withColor(.brown)
 				.withFontDescriptor {
+					#if os(macOS)
 					$0 = $0.withSymbolicTraits([.bold])
+					#else
+					$0 = $0.withSymbolicTraits([.traitBold]) ?? $0
+					#endif
 				}
 		})
 
@@ -34,9 +38,15 @@ final class AttributedStringBuilderTests: XCTestCase {
 			ASComponent("foo")
 
 			if let bar {
+				#if os(macOS)
 				ASComponent(bar)
 					.withItalics()
 					.withColor(.secondaryLabelColor)
+				#else
+				ASComponent(bar)
+					.withItalics()
+					.withColor(.secondaryLabel)
+				#endif
 			}
 		})
 
