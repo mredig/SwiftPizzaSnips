@@ -1,7 +1,7 @@
 import Foundation
 
 @available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
-public protocol ProgressProvider: AnyObject, CustomStringConvertible {
+public protocol ProgressProvider: AnyObject, CustomStringConvertible, Sendable {
 	var totalUnitCount: UInt64 { get }
 	var completedUnitCount: UInt64 { get }
 	var fractionCompleted: Double { get }
@@ -73,7 +73,7 @@ public protocol ProgressIngress: ProgressFractionIngress & ProgressIntegralIngre
 
 
 @available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
-public final class SimpleProgress: ProgressIngress {
+public final class SimpleProgress: ProgressIngress, @unchecked Sendable {
 	private let lock = NSLock()
 	private let blockLock = NSLock()
 	public let foundationProgress = Progress(totalUnitCount: 1_000_000)
@@ -160,7 +160,7 @@ public final class SimpleProgress: ProgressIngress {
 }
 
 @available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
-public final class MultiProgressTracker: ProgressProvider {
+public final class MultiProgressTracker: ProgressProvider, @unchecked Sendable {
 	private let lock = NSLock()
 	private let blockLock = NSLock()
 	public let foundationProgress = Progress(totalUnitCount: 1_000_000)
