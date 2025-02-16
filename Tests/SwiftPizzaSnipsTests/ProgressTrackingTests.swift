@@ -168,7 +168,7 @@ struct ProgressTrackingTests {
 
 	@Test func onProgressUpdateCallbackMultiProgressTracker() async throws {
 		let tracker = MultiProgressTracker()
-		let child = SimpleProgress()
+		let child = SimpleProgress(totalUnitCount: 500)
 		try tracker.addChildProgress(child, withContributionUnitsAddedToTotal: 100)
 
 		await confirmation { confirm in
@@ -179,5 +179,58 @@ struct ProgressTrackingTests {
 
 			child.updateFractionCompleted(0.5)
 		}
+	}
+
+	@Test("Child progress fractional value clamps")
+	func multiTrackerFractionalValueClamped() throws {
+		let tracker = MultiProgressTracker()
+		let child = SimpleProgress()
+		child.setTotalUnitCount(100)
+		try tracker.addChildProgress(child, withContributionUnitsAddedToTotal: 100)
+
+		child.updateFractionCompleted(-0.5)
+		#expect(child.fractionCompleted == 0.0)
+		#expect(tracker.completedUnitCount == 0)
+		#expect(tracker.fractionCompleted == 0.0)
+
+		child.updateFractionCompleted(1.5)
+		#expect(child.fractionCompleted == 1.0)
+		#expect(tracker.completedUnitCount == 100)
+		#expect(tracker.fractionCompleted == 1.0)
+	}
+
+	// Adjust totals and ensure parent reflects valid progress
+	@Test("Parent total count adjustment reflects valid contributions")
+	func parentTotalReflectsValidContributions() throws {
+		let tracker = MultiProgressTracker()
+		let child = SimpleProgress(fractionCompleted: 0.8, totalUnitCount: 100)
+		let child2 = SimpleProgress(totalUnitCount: 1024)
+
+		try tracker.addChildProgress(child)
+		try tracker.addChildProgress(child2, withContributionUnitsAddedToTotal: 200)
+
+		child2.updateFractionCompleted(0.25)
+
+		#expect(tracker.totalUnitCount == 300)
+		#expect(tracker.completedUnitCount == (80 + 50)) // Clamped
+		#expect(tracker.fractionCompleted == (80 + 50) / 300.0)
+	}
+
+	// Mixed children updating progress
+	@Test("Mixed progress contributions from children")
+	func mixedProgressContributionsPropagateToParent() throws {
+		let tracker = MultiProgressTracker()
+		let child1 = SimpleProgress(totalUnitCount: 50)
+		let child2 = SimpleProgress(totalUnitCount: 150)
+
+		try tracker.addChildProgress(child1, withContributionUnitsAddedToTotal: 50)
+		try tracker.addChildProgress(child2, withContributionUnitsAddedToTotal: 150)
+
+		child1.updateFractionCompleted(0.5) // 25 of 50
+		child2.updateFractionCompleted(0.3) // 45 of 150
+
+		#expect(tracker.totalUnitCount == 200)
+		#expect(tracker.completedUnitCount == 70) // 25 + 45
+		#expect(tracker.fractionCompleted == 70.0 / 200.0)
 	}
 }

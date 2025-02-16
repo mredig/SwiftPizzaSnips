@@ -1,7 +1,7 @@
 import Foundation
 
 @available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
-public protocol ProgressProvider: AnyObject {
+public protocol ProgressProvider: AnyObject, CustomStringConvertible {
 	var totalUnitCount: UInt64 { get }
 	var completedUnitCount: UInt64 { get }
 	var fractionCompleted: Double { get }
@@ -13,6 +13,43 @@ public protocol ProgressProvider: AnyObject {
 
 	/// This should be called automatically on updates. Typically there would be no need to call this yourself, but if you want to here it is.
 	func sendProgressUpdates()
+}
+
+private let fractionFormatter = NumberFormatter().with {
+	$0.numberStyle = .percent
+	$0.maximumFractionDigits = 4
+}
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+extension ProgressProvider {
+	public var superDescription: String {
+		"""
+		\(Self.self): \(completedUnitCount) / \(totalUnitCount) (\(fractionFormatter.string(from: fractionCompleted as NSNumber) ?? ""))
+		"""
+	}
+
+	public var description: String {
+		superDescription
+	}
+}
+
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+fileprivate extension ProgressProvider {
+	func _fractionCompletedValue() -> Double {
+		let fraction = Double(completedUnitCount) / Double(totalUnitCount)
+		if fraction.isNaN || fraction.isSignalingNaN {
+			return 0
+		} else if fraction.isInfinite {
+			return 1
+		}
+
+		return fraction
+	}
+
+	func _updateFoundationProgress() {
+		let total = foundationProgress.totalUnitCount
+		let completed = Int64(fractionCompleted * Double(total))
+		foundationProgress.completedUnitCount = completed
+	}
 }
 
 @available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
@@ -48,7 +85,25 @@ public final class SimpleProgress: ProgressIngress {
 
 	private var updateBlocks: [@Sendable (any ProgressProvider) -> Void] = []
 
-	public init() {}
+	public init(completedUnitCount: UInt64 = 0, totalUnitCount: UInt64 = 0) {
+		lock.lock()
+		defer { lock.unlock() }
+		let comp = min(completedUnitCount, totalUnitCount)
+		let total = max(completedUnitCount, totalUnitCount)
+		self.fractionCompleted = 0
+		self.completedUnitCount = comp
+		self.totalUnitCount = total
+
+		self.fractionCompleted = _fractionCompletedValue()
+		_updateFoundationProgress()
+	}
+
+	public convenience init(fractionCompleted: Double, totalUnitCount: UInt64 = 1_000_000) {
+		let fraction = max(min(fractionCompleted, 1), 0)
+		let completed = fraction * Double(totalUnitCount)
+
+		self.init(completedUnitCount: UInt64(completed), totalUnitCount: totalUnitCount)
+	}
 
 	public func onProgressUpdate(_ action: @escaping @Sendable (any ProgressProvider) -> Void) {
 		blockLock.withLock {
@@ -61,6 +116,7 @@ public final class SimpleProgress: ProgressIngress {
 	}
 
 	public func updateFractionCompleted(_ value: Double) {
+		guard value.isFinite else { return }
 		lock.withLock {
 			let newValue = max(min(value, 1), 0)
 
@@ -78,8 +134,7 @@ public final class SimpleProgress: ProgressIngress {
 
 			completedUnitCount = min(completedUnitCount, total)
 
-			let fraction = Double(completedUnitCount) / Double(total)
-			fractionCompleted = fraction
+			self.fractionCompleted = _fractionCompletedValue()
 			_updateFoundationProgress()
 			sendProgressUpdates()
 		}
@@ -88,17 +143,10 @@ public final class SimpleProgress: ProgressIngress {
 	public func updateCompletedValue(_ value: UInt64) {
 		lock.withLock {
 			completedUnitCount = min(value, totalUnitCount)
-			let fraction = Double(completedUnitCount) / Double(totalUnitCount)
-			fractionCompleted = fraction
+			self.fractionCompleted = _fractionCompletedValue()
 			_updateFoundationProgress()
 			sendProgressUpdates()
 		}
-	}
-
-	private func _updateFoundationProgress() {
-		let total = foundationProgress.totalUnitCount
-		let completed = Int64(fractionCompleted * Double(total))
-		foundationProgress.completedUnitCount = completed
 	}
 
 	/// This will be called automatically on updates. Typically there would be no need to call this yourself, but if you want to here it is.
@@ -123,7 +171,19 @@ public final class MultiProgressTracker: ProgressProvider {
 	private var updateBlocks: [@Sendable (any ProgressProvider) -> Void] = []
 
 	public weak var parent: (any ProgressProvider)?
-	public private(set) var children: [any ProgressProvider] = []
+	public private(set) var children: [(provider: any ProgressProvider, contributionUnits: UInt64)] = []
+
+	public var description: String {
+		let children = children
+			.map { "\($0.provider.description) (\($0.contributionUnits) contributionUnits)"}
+			.joined(separator: "\n")
+			.prefixingLines(with: "\t")
+		return [
+			superDescription,
+			children,
+		]
+			.joined(separator: "\n")
+	}
 
 	public init() {}
 
@@ -134,24 +194,28 @@ public final class MultiProgressTracker: ProgressProvider {
 		progress.parent = self
 
 		let contributionUnits = contributionUnits ?? progress.totalUnitCount
-		let doubleContribUnits = Double(contributionUnits)
 		totalUnitCount += contributionUnits
-		children.append(progress)
+		children.append((progress, contributionUnits))
 		progress.onProgressUpdate { [weak self] _ in
 			guard let self else { return }
 			lock.withLock { [self] in
-				self.completedUnitCount = self.children.reduce(0, { $0 + UInt64($1.fractionCompleted * doubleContribUnits) })
-				self.fractionCompleted = Double(self.completedUnitCount) / Double(self.totalUnitCount)
-				self._updateFoundationProgress()
+				self._updateChildContributions()
 				self.sendProgressUpdates()
 			}
 		}
+		lock.withLock(_updateChildContributions)
 	}
 
 	public func onProgressUpdate(_ action: @escaping @Sendable (any ProgressProvider) -> Void) {
 		blockLock.withLock {
 			updateBlocks.append(action)
 		}
+	}
+
+	private func _updateChildContributions() {
+		completedUnitCount = children.reduce(0, { $0 + UInt64($1.provider.fractionCompleted * Double($1.contributionUnits)) })
+		fractionCompleted = _fractionCompletedValue()
+		_updateFoundationProgress()
 	}
 
 	/// This will be called automatically on updates. Typically there would be no need to call this yourself, but if you want to here it is.
@@ -161,12 +225,6 @@ public final class MultiProgressTracker: ProgressProvider {
 				updateBlock(self)
 			}
 		}
-	}
-
-	private func _updateFoundationProgress() {
-		let total = foundationProgress.totalUnitCount
-		let completed = Int64(fractionCompleted * Double(total))
-		foundationProgress.completedUnitCount = completed
 	}
 
 	public enum Error: Swift.Error {
