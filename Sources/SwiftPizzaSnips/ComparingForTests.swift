@@ -51,6 +51,7 @@ public enum ComparingForTests {
 		}
 	}
 
+	@MainActor
 	public static func compareFilesInFinder(
 		withExpectation expectation: Resource,
 		andActualResult result: Resource,
