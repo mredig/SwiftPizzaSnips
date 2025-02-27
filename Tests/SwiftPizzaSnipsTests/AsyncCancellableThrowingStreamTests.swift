@@ -51,4 +51,30 @@ struct AsyncCancellableThrowingStreamTests {
 
 		#expect([0, 1, 2, 3] == out)
 	}
+
+	@Test func cancelViaAbandon() async throws {
+		try await confirmation { terminatedExpectation in
+			_ = Task {
+				let input = [0, 1, 2, 3, 4, 5, 6]
+
+				let (_, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+
+				continuation.onTermination = { reason in
+					terminatedExpectation()
+					print("Terminated: \(reason)")
+				}
+
+				for num in input {
+					try await Task.sleep(for: .milliseconds(20))
+					guard num < 4 else { return }
+					continuation.yield(num)
+					print(num)
+				}
+			}
+
+			// If we don't wait a bit for the `onTermination` to complete, then `confirmation` will conclude that the
+			// expectation is never called.
+			try await Task.sleep(for: .milliseconds(500))
+		}
+	}
 }
