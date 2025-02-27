@@ -110,10 +110,10 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 		@discardableResult
 		public func yield(
 			with result: __shared sending Result<Element, Failure>
-		) -> YieldResult where Failure == Error {
+		) throws(CancellationError) -> YieldResult where Failure == Error {
 			switch result {
 			case .success(let val):
-				return storage.yield(val)
+				return try storage.yield(val)
 			case .failure(let err):
 				storage.finish(throwing: err)
 				return .terminated
@@ -133,8 +133,8 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 		/// If you call this method repeatedly, each call returns immediately,
 		/// without blocking for any awaiting consumption from the iteration.
 		@discardableResult
-		public func yield() -> YieldResult where Element == Void {
-			storage.yield(())
+		public func yield() throws(CancellationError) -> YieldResult where Element == Void, Failure == Error {
+			try yield(with: .success(()))
 		}
 
 		/// Resume the task awaiting the next iteration point by having it return
@@ -150,8 +150,8 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 		/// This can be called more than once and returns to the caller immediately
 		/// without blocking for any awaiting consumption from the iteration.
 		@discardableResult
-		public func yield(_ value: sending Element) -> YieldResult where Failure == Error {
-			yield(with: .success(value))
+		public func yield(_ value: sending Element) throws(CancellationError) -> YieldResult where Failure == Error {
+			try yield(with: .success(value))
 		}
 
 		/// Resume the task awaiting the next iteration point by having it return
@@ -162,9 +162,9 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 		/// Calling this function more than once has no effect. After calling
 		/// finish, the stream enters a terminal state and doesn't produce any additional
 		/// elements.
-		public func finish(throwing error: __owned Failure? = nil) where Failure == Error {
+		public func finish(throwing error: __owned Failure? = nil) throws(CancellationError) where Failure == Error {
 			if let error {
-				yield(with: .failure(error))
+				try yield(with: .failure(error))
 			} else {
 				storage.finish()
 			}
@@ -193,16 +193,16 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 	}
 
 	final class _Context {
-		let storage: _Storage?
+		let storage: _Storage
 		let produce: () async throws(Failure) -> Element?
 
-		init(storage: _Storage? = nil, produce: @escaping () async throws(Failure) -> Element?) {
+		init(storage: _Storage, produce: @escaping () async throws(Failure) -> Element?) {
 			self.storage = storage
 			self.produce = produce
 		}
 
 		deinit {
-			storage?.cancel()
+			storage.cancel(throwing: nil)
 		}
 	}
 
@@ -270,6 +270,10 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 		let storage = _Storage(limit: limit)
 		context = _Context(storage: storage, produce: storage.next)
 		build(Continuation(storage: storage))
+	}
+
+	public func cancel(throwing failure: Failure? = nil) {
+		context.storage.cancel(throwing: failure)
 	}
 }
 
@@ -404,7 +408,7 @@ extension AsyncCancellableThrowingStream {
 			}
 		}
 
-		@Sendable func cancel() {
+		@Sendable func cancel(throwing failure: Failure?) {
 			lock()
 			// swap out the handler before we invoke it to prevent double cancel
 			let handler = state.onTermination
@@ -414,47 +418,43 @@ extension AsyncCancellableThrowingStream {
 			// handler must be invoked before yielding nil for termination
 			handler?(.cancelled)
 
-			finish()
+			finish(throwing: failure)
 		}
 
-		func yield(_ value: __owned Element) -> Continuation.YieldResult {
+		func yield(_ value: __owned Element) throws(CancellationError) -> Continuation.YieldResult {
 			var result: Continuation.YieldResult
 			lock()
 			let limit = state.limit
 			let count = state.pending.count
+			guard state.terminal == nil else {
+				unlock()
+				throw CancellationError()
+			}
+
 			if let continuation = state.continuation {
+				// I'm not sure this block can actually get reached...
+				// If the pending count > 0, the continuation will be called immediately in next, draining the pending
+				// buffer before getting set to `state`. Contrarily, the continuation will only get set to `state`
+				// if the buffer is empty. I think the only way to reach this would be some exceedingly rare race condition
+				// where the continuation gets set to state, but then the pending buffer gets pounded before the
+				// continuation can be fulfilled... But that also shouldn't be possilbe?
 				if count > 0 {
-					if state.terminal == nil {
-						switch limit {
-						case .unbounded:
-							result = .enqueued(remaining: .max)
+					switch limit {
+					case .unbounded:
+						result = .enqueued(remaining: .max)
+						state.pending.append(value)
+					case .limited(let limitValue):
+						if count < limitValue {
+							result = .enqueued(remaining: limitValue - (count + 1))
 							state.pending.append(value)
-						case .limited(let limitValue):
-							if count < limitValue {
-								result = .enqueued(remaining: limitValue - (count + 1))
-								state.pending.append(value)
-							} else {
-								result = .dropped(value)
-							}
+						} else {
+							result = .dropped(value)
 						}
-					} else {
-						result = .terminated
 					}
 					state.continuation = nil
 					let toSend = state.pending.removeFirst()
 					unlock()
 					continuation.resume(returning: toSend)
-				} else if let terminal = state.terminal {
-					result = .terminated
-					state.continuation = nil
-					state.terminal = .finished
-					unlock()
-					switch terminal {
-					case .finished:
-						continuation.resume(returning: nil)
-					case .failed(let error):
-						continuation.resume(throwing: error)
-					}
 				} else {
 					switch limit {
 					case .unbounded:
@@ -468,21 +468,17 @@ extension AsyncCancellableThrowingStream {
 					continuation.resume(returning: value)
 				}
 			} else {
-				if state.terminal == nil {
-					switch limit {
-					case .unbounded:
-						result = .enqueued(remaining: .max)
+				switch limit {
+				case .unbounded:
+					result = .enqueued(remaining: .max)
+					state.pending.append(value)
+				case .limited(let limitValue):
+					if count < limitValue {
+						result = .enqueued(remaining: limitValue - (count + 1))
 						state.pending.append(value)
-					case .limited(let limitValue):
-						if count < limitValue {
-							result = .enqueued(remaining: limitValue - (count + 1))
-							state.pending.append(value)
-						} else {
-							result = .dropped(value)
-						}
+					} else {
+						result = .dropped(value)
 					}
-				} else {
-					result = .terminated
 				}
 				unlock()
 			}
@@ -560,7 +556,7 @@ extension AsyncCancellableThrowingStream {
 					next($0)
 				}
 			} onCancel: { [cancel] in
-				cancel()
+				cancel(nil)
 			}
 		}
 	}
