@@ -213,4 +213,119 @@ struct AsyncCancellableThrowingStreamTests {
 
 		#expect(input == out)
 	}
+
+	@Test func bufferOverrunFail() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(bufferingPolicy: .limited(10))
+
+		Task {
+			for num in input {
+				let yieldResult = try continuation.yield(num)
+
+				if case .dropped(let value) = yieldResult {
+					while case .dropped = try continuation.yield(value) {
+						try await Task.sleep(for: .milliseconds(5))
+					}
+				}
+			}
+			try continuation.finish()
+		}
+
+		var out: [Int] = []
+
+		try await Task.sleep(for: .milliseconds(10))
+		for try await num in stream {
+			out.append(num)
+		}
+
+		#expect(input == out)
+	}
+
+	@Test func whileLoop() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+
+		Task {
+			for num in input {
+				try await Task.sleep(for: .milliseconds(20))
+				try continuation.yield(num)
+			}
+			try continuation.finish()
+		}
+
+		var out: [Int] = []
+
+		var iterator = stream.makeAsyncIterator()
+		while let num = try await iterator.next() {
+			out.append(num)
+		}
+
+		#expect(input == out)
+	}
+
+	@Test func whileLoopTaskCancelled() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+
+		Task {
+			for num in input {
+				try await Task.sleep(for: .milliseconds(20))
+				try continuation.yield(num)
+			}
+			try continuation.finish()
+		}
+
+		let toStop = Task {
+			var out: [Int] = []
+
+			var iterator = stream.makeAsyncIterator()
+			while let num = try await iterator.next() {
+				out.append(num)
+				print(num)
+			}
+
+			return out
+		}
+
+		Task {
+			try await Task.sleep(for: .milliseconds(19 * 3))
+			toStop.cancel()
+		}
+
+		#expect(try await toStop.value != input)
+	}
+
+	@Test func whileLoopStreamCancelled() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+
+		Task {
+			for num in input {
+				try await Task.sleep(for: .milliseconds(20))
+				try continuation.yield(num)
+			}
+			try continuation.finish()
+		}
+
+		let toStop = Task {
+			var out: [Int] = []
+
+			var iterator = stream.makeAsyncIterator()
+			while let num = try await iterator.next() {
+				out.append(num)
+				print(num)
+			}
+
+			return out
+		}
+
+		Task {
+			try await Task.sleep(for: .milliseconds(19 * 3))
+			stream.cancel(throwing: CancellationError())
+		}
+
+		await #expect(throws: CancellationError.self, performing: {
+			try await toStop.value
+		})
+	}
 }
