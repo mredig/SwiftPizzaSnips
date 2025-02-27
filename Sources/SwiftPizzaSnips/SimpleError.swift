@@ -6,7 +6,7 @@ import Foundation
 /// both discourage you from using this *all* the time as you should instead try to recover from errors in your logic, but in
 /// the event that an error *is* displayed to an end user, help you prioritize which bugs/issues are the most important as
 /// only the users who care the most will reach out.
-public struct SimpleError: Error {
+public struct SimpleError: Error, Sendable, Hashable {
 	public let message: String
 	public let userRecoverySuggestion: String?
 	public let line: Int
