@@ -12,7 +12,7 @@ import Glibc
 ///
 /// Operates very similar to `NSLock`, specifically regarding the requirement that you don't call `.lock()`
 /// without calling `.unlock()` on the same thread, or a deadlock will ensue.
-public class MutexLock: @unchecked Sendable {
+public class MutexLock: @unchecked Sendable, Withable {
 	private var mutex: pthread_mutex_t
 
 	/// Ignored in release builds, but in DEBUG builds will print to console lock and unlock calls and where it was called from when set to `true`.
