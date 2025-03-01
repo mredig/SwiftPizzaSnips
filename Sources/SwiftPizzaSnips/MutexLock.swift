@@ -48,7 +48,7 @@ public class MutexLock: @unchecked Sendable {
 		pthread_mutex_unlock(&mutex)
 	}
 
-	public func withLock<T, F>(block: () throws(F) -> T, file: String = #fileID, line: Int = #line) throws(F) -> T {
+	public func withLock<T, F>(_ block: () throws(F) -> T, file: String = #fileID, line: Int = #line) throws(F) -> T {
 		lock(file: file, line: line)
 		defer { unlock(file: file, line: line) }
 		return try block()
@@ -62,7 +62,7 @@ public class MutexLock: @unchecked Sendable {
 		pthread_mutex_unlock(&mutex)
 	}
 
-	public func withLock<T, F>(block: () throws(F) -> T) throws(F) -> T {
+	public func withLock<T, F>(_ block: () throws(F) -> T) throws(F) -> T {
 		lock()
 		defer { unlock() }
 		return try block()
