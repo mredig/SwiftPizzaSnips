@@ -4,7 +4,7 @@ import SwiftPizzaSnips
 struct AsyncCancellableThrowingStreamTests {
 	@Test func simple() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -25,7 +25,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func throwsError() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -54,7 +54,7 @@ struct AsyncCancellableThrowingStreamTests {
 		try await confirmation { terminatedExpectation in
 			_ = Task {
 				let input = (0..<20).map { $0 }
-				let (_, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+				let (_, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 				continuation.onTermination = { reason in
 					terminatedExpectation()
@@ -77,7 +77,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func cancelViaStreamCallThrowing() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		let continuationShouldError = DelayedExpectation()
 		Task {
@@ -110,9 +110,79 @@ struct AsyncCancellableThrowingStreamTests {
 		continuationShouldError.verify()
 	}
 
+	@Test func cancelViaStreamCallThrowingDefault() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
+
+		let continuationShouldError = DelayedExpectation()
+		Task {
+			var completedSending: [Int] = []
+			do {
+				for num in input {
+					try await Task.sleep(for: .milliseconds(20))
+					try continuation.yield(num)
+					completedSending.append(num)
+				}
+				try continuation.finish()
+			} catch {
+				#expect(completedSending != input)
+				continuationShouldError.fulfill()
+			}
+		}
+
+		Task {
+			try await Task.sleep(for: .milliseconds(19 * 3))
+			stream.cancel()
+		}
+
+		await #expect(throws: CancellationError.self, performing: {
+			for try await num in stream {
+				print(num)
+			}
+		})
+		// need to delay to give the sending continuation a chance to loop around to attempt to send again.
+		try await Task.sleep(for: .milliseconds(40))
+		continuationShouldError.verify()
+	}
+
+	@Test func cancelViaStreamCallThrowingSimpleError() async throws {
+		let input = (0..<20).map { $0 }
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
+
+		let continuationShouldError = DelayedExpectation()
+		Task {
+			var completedSending: [Int] = []
+			do {
+				for num in input {
+					try await Task.sleep(for: .milliseconds(20))
+					try continuation.yield(num)
+					completedSending.append(num)
+				}
+				try continuation.finish()
+			} catch {
+				#expect(completedSending != input)
+				continuationShouldError.fulfill()
+			}
+		}
+
+		Task {
+			try await Task.sleep(for: .milliseconds(19 * 3))
+			stream.cancel(throwing: SimpleError(message: "Foo"))
+		}
+
+		await #expect(throws: SimpleError.self, performing: {
+			for try await num in stream {
+				print(num)
+			}
+		})
+		// need to delay to give the sending continuation a chance to loop around to attempt to send again.
+		try await Task.sleep(for: .milliseconds(40))
+		continuationShouldError.verify()
+	}
+
 	@Test func cancelViaStreamCallNoThrowing() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		let continuationShouldError = DelayedExpectation()
 		Task {
@@ -149,7 +219,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func slowRead() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -170,7 +240,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func slowThenFastRead() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -193,7 +263,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func fastThenSlowFeed() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -216,7 +286,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func bufferOverrunFail() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(bufferingPolicy: .limited(10))
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(bufferingPolicy: .limited(10), errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -243,7 +313,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func whileLoop() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -265,7 +335,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 	@Test func whileLoopTaskCancelled() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -292,12 +362,14 @@ struct AsyncCancellableThrowingStreamTests {
 			toStop.cancel()
 		}
 
-		#expect(try await toStop.value != input)
+		await #expect(throws: CancellationError.self, performing: {
+			_ = try await toStop.value
+		})
 	}
 
 	@Test func whileLoopStreamCancelled() async throws {
 		let input = (0..<20).map { $0 }
-		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream()
+		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
 		Task {
 			for num in input {
@@ -321,7 +393,7 @@ struct AsyncCancellableThrowingStreamTests {
 
 		Task {
 			try await Task.sleep(for: .milliseconds(19 * 3))
-			stream.cancel(throwing: CancellationError())
+			stream.cancel()
 		}
 
 		await #expect(throws: CancellationError.self, performing: {

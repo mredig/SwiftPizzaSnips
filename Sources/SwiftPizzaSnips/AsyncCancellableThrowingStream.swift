@@ -208,6 +208,8 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 
 	let context: _Context
 
+	public var errorOnCancellation: Failure { context.storage.errorOnCancellation }
+
 	/// Constructs an asynchronous stream for an element type, using the
 	/// specified buffering policy and element-producing closure.
 	///
@@ -265,14 +267,19 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 	public init(
 		_ elementType: Element.Type = Element.self,
 		bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded,
+		errorOnCancellation: Failure,
 		_ build: (Continuation) -> Void
 	) where Failure == Error {
-		let storage = _Storage(limit: limit)
+		let storage = _Storage(limit: limit, errorOnCancellation: errorOnCancellation)
 		context = _Context(storage: storage, produce: storage.next)
 		build(Continuation(storage: storage))
 	}
 
-	public func cancel(throwing failure: Failure? = nil) {
+	public func cancel() {
+		cancel(throwing: context.storage.errorOnCancellation)
+	}
+
+	public func cancel(throwing failure: Failure?) {
 		context.storage.cancel(throwing: failure)
 	}
 }
@@ -345,10 +352,11 @@ extension AsyncCancellableThrowingStream {
 	public static func makeStream(
 		of elementType: Element.Type = Element.self,
 		throwing failureType: Failure.Type = Failure.self,
-		bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded
+		bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded,
+		errorOnCancellation: Failure
 	) -> (stream: AsyncCancellableThrowingStream<Element, Failure>, continuation: AsyncCancellableThrowingStream<Element, Failure>.Continuation) where Failure == Error {
 		var continuation: AsyncCancellableThrowingStream<Element, Failure>.Continuation!
-		let stream = AsyncCancellableThrowingStream<Element, Failure>(bufferingPolicy: limit) { continuation = $0 }
+		let stream = AsyncCancellableThrowingStream<Element, Failure>(bufferingPolicy: limit, errorOnCancellation: errorOnCancellation) { continuation = $0 }
 		return (stream: stream, continuation: continuation!)
 	}
 }
@@ -360,6 +368,8 @@ extension AsyncCancellableThrowingStream: @unchecked Sendable where Element: Sen
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension AsyncCancellableThrowingStream {
 	internal final class _Storage: @unchecked Sendable {
+		let errorOnCancellation: Failure
+
 		typealias TerminationHandler = @Sendable (Continuation.Termination) -> Void
 		enum Terminal {
 			case finished
@@ -381,8 +391,9 @@ extension AsyncCancellableThrowingStream {
 		// Stored as a singular structured assignment for initialization
 		var state: State
 
-		init(limit: Continuation.BufferingPolicy) {
+		init(limit: Continuation.BufferingPolicy, errorOnCancellation: Failure) {
 			self.state = State(limit: limit)
+			self.errorOnCancellation = errorOnCancellation
 		}
 
 		deinit {
@@ -556,7 +567,7 @@ extension AsyncCancellableThrowingStream {
 					next($0)
 				}
 			} onCancel: { [cancel] in
-				cancel(nil)
+				cancel(errorOnCancellation)
 			}
 		}
 	}
