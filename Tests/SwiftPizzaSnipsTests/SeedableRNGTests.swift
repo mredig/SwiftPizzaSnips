@@ -1,21 +1,21 @@
-import XCTest
+import Testing
 import SwiftPizzaSnips
 
-final class SeedableRNGTests: XCTestCase {
-	func testRandomNumberGeneration() {
+struct SeedableRNGTests {
+	@Test func testRandomNumberGeneration() {
 		var rng = SeedableRNG(seed: 70, primingIterations: 20)
 
 		let first = Int.random(in: 0...100, using: &rng)
-		XCTAssertEqual(65, first)
+		#expect(65 == first)
 
 		let second = Int.random(in: 0...100, using: &rng)
-		XCTAssertEqual(35, second)
+		#expect(35 == second)
 
 		let third = Double.random(in: -1000...1_000_000, using: &rng)
-		XCTAssertEqual(265821.3033286288, third)
+		#expect(265821.3033286288 == third)
 	}
 
-	func testUniformness() throws {
+	@Test func testUniformness() throws {
 		var rng = SeedableRNG(seed: 0, primingIterations: 20)
 
 		var unique: Set<Int> = []
@@ -24,7 +24,7 @@ final class SeedableRNGTests: XCTestCase {
 			unique.insert(Int.random(in: 0..<100, using: &rng))
 		}
 
-		XCTAssertEqual(61, unique.count)
+		#expect(61 == unique.count)
 
 		var count = 100
 		while unique.count < 100 {
@@ -32,10 +32,10 @@ final class SeedableRNGTests: XCTestCase {
 			unique.insert(Int.random(in: 0..<100, using: &rng))
 		}
 
-		XCTAssertEqual(421, count)
+		#expect(421 == count)
 	}
 
-	func testUniformness2() throws {
+	@Test func testUniformness2() throws {
 		var rng = SeedableRNG(seed: 0)
 		var unique: Set<Int> = []
 		var sysUnique: Set<Int> = []
@@ -68,7 +68,71 @@ final class SeedableRNGTests: XCTestCase {
 
 		let seedAverage = Double(seedCounts.reduce(0, +)) / Double(seedCounts.count)
 		print("average seed to 100: \(seedAverage)")
-		XCTAssertEqual(512.01, seedAverage)
+		#expect(512.01 == seedAverage)
 		print("average sys to 100: \(Double(sysCounts.reduce(0, +)) / Double(sysCounts.count))")
+	}
+
+
+	/// Due to the nature of randomness, it is POSSIBLE for this test to fail, but it shouldn't fail *often*
+	@Test func testUniformness3() throws {
+		var counts: [Int] = []
+		for _ in UInt64(0)..<100 {
+			var rng: RandomNumberGenerator = SeedableRNG(seed: UInt64.random(in: 70..<7000), primingIterations: 20)
+
+			var unique: Set<Int> = []
+			var count = 0
+
+			while unique.count < 1000 {
+				let next = Int.random(in: 0..<1000, using: &rng)
+				unique.insert(next)
+				count += 1
+			}
+
+			counts.append(count)
+		}
+
+		let uniformness = UniformnessStatistics(min: counts.min()!, max: counts.max()!, avg: counts.reduce(0, +) / counts.count)
+
+		let sysUniformness = systemUniformness()
+		print("Seeded uniformness: \(uniformness)")
+		print("System uniformness: \(sysUniformness)")
+
+		func rangeGen(base: Int) -> ClosedRange<Int> {
+			let half = base / 2
+			let lower = base - half
+			let upper = base + half
+			return lower...upper
+		}
+		let acceptedMinRange = rangeGen(base: sysUniformness.min)
+		let acceptedMaxRange = rangeGen(base: sysUniformness.max)
+		let acceptedAvgRange = rangeGen(base: sysUniformness.avg)
+
+		#expect(acceptedMinRange.contains(uniformness.min))
+		#expect(acceptedMaxRange.contains(uniformness.max))
+		#expect(acceptedAvgRange.contains(uniformness.avg))
+	}
+
+	private func systemUniformness() -> UniformnessStatistics<Int> {
+		var counts: [Int] = []
+		for _ in 0..<100 {
+			var unique: Set<Int> = []
+			var count = 0
+			
+			while unique.count < 1000 {
+				let next = Int.random(in: 0..<1000)
+				unique.insert(next)
+				count += 1
+			}
+			
+			counts.append(count)
+		}
+
+		return UniformnessStatistics(min: counts.min()!, max: counts.max()!, avg: counts.reduce(0, +) / counts.count)
+	}
+
+	private struct UniformnessStatistics<N: Hashable & Comparable & BinaryInteger>: Hashable {
+		let min: N
+		let max: N
+		let avg: N
 	}
 }
