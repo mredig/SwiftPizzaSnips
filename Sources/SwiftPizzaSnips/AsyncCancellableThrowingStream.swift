@@ -170,25 +170,20 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 			}
 		}
 
-		/// A callback to invoke when canceling iteration of an asynchronous
+		/// A callback to invoke when finishing iteration of an asynchronous
 		/// stream.
 		///
-		/// If an `onTermination` callback is set, using task cancellation to
+		/// If an `onFinish` callback is set, using task cancellation to
 		/// terminate iteration of an `AsyncCancellableThrowingStream` results in a call to this
 		/// callback.
 		///
-		/// Canceling an active iteration invokes the `onTermination` callback
+		/// Canceling an active iteration invokes the `onFinish` callback
 		/// first, and then resumes by yielding `nil` or throwing an error from the
 		/// iterator. This means that you can perform needed cleanup in the
 		///  cancellation handler. After reaching a terminal state, the
 		///  `AsyncCancellableThrowingStream` disposes of the callback.
-		public var onTermination: (@Sendable (Termination) -> Void)? {
-			get {
-				return storage.getOnTermination()
-			}
-			nonmutating set {
-				storage.setOnTermination(newValue)
-			}
+		public func onFinish(_ block: @Sendable @escaping (Termination) -> Void) {
+			storage.addOnFinish(block)
 		}
 	}
 
@@ -281,6 +276,10 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 
 	public func cancel(throwing failure: Failure?) {
 		context.storage.cancel(throwing: failure)
+	}
+
+	public func onFinish(_ block: @escaping @Sendable (Continuation.Termination) -> Void) {
+		context.storage.addOnFinish(block)
 	}
 }
 
@@ -381,7 +380,7 @@ extension AsyncCancellableThrowingStream {
 //			var pending = _Deque<Element>()
 			var pending: ContiguousArray<Element> = .init(unsafeUninitializedCapacity: 32, initializingWith: { _, count in count = 0 })
 			let limit: Continuation.BufferingPolicy
-			var onTermination: TerminationHandler?
+			var onFinish: [TerminationHandler] = []
 			var terminal: Terminal?
 
 			init(limit: Continuation.BufferingPolicy) {
@@ -397,37 +396,42 @@ extension AsyncCancellableThrowingStream {
 		}
 
 		deinit {
-			state.onTermination?(.cancelled)
+			runOnFinishBlock(reason: .cancelled)
 		}
 
 		private let streamLock = NSLock()
 		private func lock() { streamLock.lock() }
 		private func unlock() { streamLock.unlock() }
 
-		func getOnTermination() -> TerminationHandler? {
+		private func runOnFinishBlock(reason: Continuation.Termination) {
 			lock()
-			let handler = state.onTermination
+			let handlers = state.onFinish
+			state.onFinish = []
 			unlock()
-			return handler
+
+			_runOnFinishBlocks(handlers, reason: reason)
 		}
 
-		func setOnTermination(_ newValue: TerminationHandler?) {
+		private func _runOnFinishBlocks(_ handlers: [TerminationHandler], reason: Continuation.Termination) {
+			for handler in handlers {
+				handler(reason)
+			}
+		}
+
+		func addOnFinish(_ newValue: @escaping TerminationHandler) {
 			lock()
-			withExtendedLifetime(state.onTermination) {
-				state.onTermination = newValue
+			withExtendedLifetime(state.onFinish) {
+				state.onFinish.append(newValue)
 				unlock()
 			}
 		}
 
 		@Sendable func cancel(throwing failure: Failure?) {
-			lock()
-			// swap out the handler before we invoke it to prevent double cancel
-			let handler = state.onTermination
-			state.onTermination = nil
-			unlock()
-
-			// handler must be invoked before yielding nil for termination
-			handler?(.cancelled)
+			if let failure {
+				runOnFinishBlock(reason: .finished(failure))
+			} else {
+				runOnFinishBlock(reason: .cancelled)
+			}
 
 			finish(throwing: failure)
 		}
@@ -498,8 +502,8 @@ extension AsyncCancellableThrowingStream {
 
 		func finish(throwing error: __owned Failure? = nil) {
 			lock()
-			let handler = state.onTermination
-			state.onTermination = nil
+			let handlers = state.onFinish
+			state.onFinish = []
 			if state.terminal == nil {
 				if let failure = error {
 					state.terminal = .failed(failure)
@@ -513,12 +517,12 @@ extension AsyncCancellableThrowingStream {
 					state.continuation = nil
 					let toSend = state.pending.removeFirst()
 					unlock()
-					handler?(.finished(error))
+					_runOnFinishBlocks(handlers, reason: .finished(error))
 					continuation.resume(returning: toSend)
 				} else if let terminal = state.terminal {
 					state.continuation = nil
 					unlock()
-					handler?(.finished(error))
+					_runOnFinishBlocks(handlers, reason: .finished(error))
 					switch terminal {
 					case .finished:
 						continuation.resume(returning: nil)
@@ -527,11 +531,11 @@ extension AsyncCancellableThrowingStream {
 					}
 				} else {
 					unlock()
-					handler?(.finished(error))
+					_runOnFinishBlocks(handlers, reason: .finished(error))
 				}
 			} else {
 				unlock()
-				handler?(.finished(error))
+				_runOnFinishBlocks(handlers, reason: .finished(error))
 			}
 		}
 

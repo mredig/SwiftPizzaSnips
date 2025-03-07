@@ -56,7 +56,7 @@ struct AsyncCancellableThrowingStreamTests {
 				let input = (0..<20).map { $0 }
 				let (_, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
-				continuation.onTermination = { reason in
+				continuation.onFinish { reason in
 					terminatedExpectation()
 					print("Terminated: \(reason)")
 				}
