@@ -42,6 +42,15 @@ public struct AsyncCancellableThrowingStream<Element, Failure: Error> {
 
 			/// The stream finished as a result of cancellation.
 			case cancelled
+
+			public var finishedOrCancelledError: Error? {
+				switch self {
+				case .finished(let failure):
+					return failure
+				case .cancelled:
+					return CancellationError()
+				}
+			}
 		}
 
 		/// A type that indicates the result of yielding a value to a client, by

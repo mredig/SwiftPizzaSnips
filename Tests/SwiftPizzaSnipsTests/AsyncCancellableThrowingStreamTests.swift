@@ -400,4 +400,42 @@ struct AsyncCancellableThrowingStreamTests {
 			try await toStop.value
 		})
 	}
+
+	@Test func finishCancelled() async throws {
+		let stream = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError()).stream
+
+		await confirmation { finishExpectation in
+			stream.onFinish {
+				guard $0.finishedOrCancelledError is CancellationError else { return }
+				finishExpectation()
+			}
+			stream.cancel()
+		}
+	}
+
+	@Test func finishThrown() async throws {
+		let (stream, cont) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
+
+		try await confirmation { finishExpectation in
+			stream.onFinish {
+				guard $0.finishedOrCancelledError is SimpleError else { return }
+				finishExpectation()
+			}
+
+			try cont.finish(throwing: SimpleError(message: "Foo"))
+		}
+	}
+
+	@Test func finishClean() async throws {
+		let (stream, cont) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
+
+		try await confirmation { finishExpectation in
+			stream.onFinish {
+				guard $0.finishedOrCancelledError == nil else { return }
+				finishExpectation()
+			}
+
+			try cont.finish()
+		}
+	}
 }
