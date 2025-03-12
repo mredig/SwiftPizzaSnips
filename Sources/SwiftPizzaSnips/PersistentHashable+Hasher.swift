@@ -1,8 +1,13 @@
 import Foundation
 #if canImport(CryptoKit)
 import CryptoKit
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
+// This is a stupid workaround because `Digest` alone won't build and therefore needs its module defined... But since the module names differ we need to do this workaround.
+fileprivate typealias CryptoDigest = CryptoKit.Digest
 #elseif canImport(Crypto)
 import Crypto
+// This is a stupid workaround because `Digest` alone won't build and therefore needs its module defined... But since the module names differ we need to do this workaround.
+fileprivate typealias CryptoDigest = Crypto.Digest
 #endif
 
 #if canImport(CryptoKit) || canImport(Crypto)
@@ -61,7 +66,7 @@ public struct PersistentHasher: HashFunction, Withable {
 
 @available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
 extension PersistentHasher {
-	public struct PersistentDigest: CryptoKit.Digest {
+	public struct PersistentDigest: CryptoDigest {
 		private let internalDigest: Insecure.MD5Digest
 
 		public static var byteCount: Int { Insecure.MD5Digest.byteCount }
