@@ -27,6 +27,16 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : {
+        "suites" : [
+          {
+            "name" : "MutexLockTests",
+            "testFunctions" : [
+              "baseline()"
+            ]
+          }
+        ]
+      },
       "target" : {
         "containerPath" : "container:",
         "identifier" : "SwiftPizzaSnipsTests",
@@ -34,5 +44,5 @@
       }
     }
   ],
-  "version" : 1
+  "version" : 2
 }
