@@ -22,5 +22,20 @@ struct MD5ToUUIDTests {
 		let newID = UUID(md5Hash: hash)
 		#expect(newID == expectedHashedID)
 	}
+
+	@Test(arguments: [
+		"asdf",
+		"1",
+		"Never once touched my per diem. I'd go to Craft Service, get some raw veggies, bacon, Cup-A-Soup…baby, I got a stew goin'.",
+	])
+	func simple2(inputValue: String) async throws {
+		var hasher = Insecure.MD5()
+		hasher.update(string: inputValue)
+
+		let hash = hasher.finalize()
+		let newID = UUID(md5Hash: hash)
+		let backConvertedDigest = Insecure.MD5Digest(uuid: newID)
+		#expect(hash == backConvertedDigest)
+	}
 }
 #endif

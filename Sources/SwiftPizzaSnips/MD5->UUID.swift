@@ -34,4 +34,21 @@ extension UUID {
 		))
 	}
 }
+
+@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, *)
+extension Insecure.MD5Digest {
+	public init(uuid: UUID) {
+		let buffer = UnsafeMutableBufferPointer<UUID>.allocate(capacity: 1)
+		buffer[0] = uuid
+		defer {
+			buffer[0] = UUID()
+			buffer.deallocate()
+		}
+
+		let digest = buffer.withMemoryRebound(to: Insecure.MD5Digest.self) { buffer2 in
+			buffer2[0]
+		}
+		self = digest
+	}
+}
 #endif
