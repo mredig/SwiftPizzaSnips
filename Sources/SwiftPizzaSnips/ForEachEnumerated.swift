@@ -1,3 +1,9 @@
+public extension RandomAccessCollection where Index == Int {
+	func forEachEnumerated() -> ForEachEnumeratedSequence<Self> {
+		ForEachEnumeratedSequence(base: self)
+	}
+}
+
 public struct ForEachEnumeratedSequence<Base: RandomAccessCollection>: Sequence where Base.Index == Int {
 	public var base: Base
 
