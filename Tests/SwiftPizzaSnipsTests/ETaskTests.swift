@@ -2,8 +2,8 @@ import Testing
 import SwiftPizzaSnips
 
 struct ETaskTests {
-	@Test func success() async throws {
-		let task = ETask {
+	@Test(arguments: [true, false]) func success(detached: Bool) async throws {
+		let task = createTask(detached: detached) {
 			try await Task.sleep(for: .seconds(0.01))
 
 			return true
@@ -14,10 +14,10 @@ struct ETaskTests {
 		#expect(result == true)
 	}
 
-	@Test func failure() async throws {
+	@Test(arguments: [true, false]) func failure(detached: Bool) async throws {
 		let expectedError = SimpleError(message: "Foo")
 
-		let task = ETask { () async throws(SimpleError) -> Void in
+		let task = createTask(detached: detached) { () async throws(SimpleError) -> Void in
 			throw expectedError
 		}
 
@@ -26,9 +26,9 @@ struct ETaskTests {
 		})
 	}
 
-	@Test func cancel() async throws {
-		let task = ETask {
-			try await Task.sleep(for: .seconds(0.5))
+	@Test(arguments: [true, false]) func cancel(detached: Bool) async throws {
+		let task = createTask(detached: detached) {
+			try await Task.sleep(for: .seconds(2))
 
 			throw SimpleError(message: "Cancel failed")
 		}
@@ -44,5 +44,16 @@ struct ETaskTests {
 			try result.get()
 		})
 		#expect(task.isCancelled == true)
+	}
+
+	private func createTask<Success: Sendable, Failure: Error>(
+		detached: Bool,
+		_ op: @escaping () async throws(Failure) -> Success
+	) -> ETask<Success, Failure> {
+		if detached {
+			ETask.detached(operation: op)
+		} else {
+			ETask(operation: op)
+		}
 	}
 }
