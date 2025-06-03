@@ -7,14 +7,14 @@ public protocol Withable {
 	associatedtype TSelf
 
 	@discardableResult
-	func with(_ block: (_ instance: inout TSelf) throws -> Void) rethrows -> TSelf
+    func with<E: Error>(_ block: (_ instance: inout TSelf) throws(E) -> Void) throws(E) -> TSelf
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
-	func asyncWith(_ block: (_ instance: inout TSelf) async throws -> Void) async rethrows -> TSelf
+	func asyncWith<E: Error>(_ block: (_ instance: inout TSelf) async throws(E) -> Void) async throws(E) -> TSelf
 }
 
 public extension Withable {
 	@discardableResult
-	func with(_ block: (_ instance: inout Self) throws -> Void) rethrows -> Self {
+	func with<E: Error>(_ block: (_ instance: inout Self) throws(E) -> Void) throws(E) -> Self {
 		var new = self
 		try block(&new)
 		return new
@@ -22,7 +22,7 @@ public extension Withable {
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 	@discardableResult
-	func asyncWith(_ block: (_ instance: inout Self) async throws -> Void) async rethrows -> Self {
+	func asyncWith<E: Error>(_ block: (_ instance: inout Self) async throws(E) -> Void) async throws(E) -> Self {
 		var new = self
 		try await block(&new)
 		return new
