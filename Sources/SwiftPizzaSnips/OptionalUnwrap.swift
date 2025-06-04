@@ -23,7 +23,7 @@ public extension Optional {
 		return wrapped
 	}
 
-	func unwrap<E: Error>(or error: E) throws(E) -> Wrapped {
+	func unwrap<E: Error>(orThrow error: E) throws(E) -> Wrapped {
 		guard case .some(let wrapped) = self else {
 			throw error
 		}

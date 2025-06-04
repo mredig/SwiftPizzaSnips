@@ -45,10 +45,10 @@ struct OptionalTests {
 		let b: Any? = nil
 
 		#expect(throws: Never.self, performing: {
-			try a.unwrap(or: SimpleError(message: "No int value"))
+			try a.unwrap(orThrow: SimpleError(message: "No int value"))
 		})
 		#expect(throws: SimpleError.self, performing: {
-			try b.unwrap(or: SimpleError(message: "No int value"))
+			try b.unwrap(orThrow: SimpleError(message: "No int value"))
 		})
 	}
 }
