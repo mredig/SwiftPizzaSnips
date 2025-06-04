@@ -13,13 +13,20 @@ public extension Optional {
 		return wrapped
 	}
 
-	/// For when you are *absolutely* suere there's a value, or the state is so corrupt that it should just exit if
+	/// For when you are *absolutely* sure there's a value, or the state is so corrupt that it should just exit if
 	/// this value doesn't exist.
 	func unwrapOrFatalError(message: String, line: Int = #line, file: String = #file) -> Wrapped {
 		guard case .some(let wrapped) = self else {
 			fatalError("\(file):\(line) - \(message)")
 		}
 
+		return wrapped
+	}
+
+	func unwrap<E: Error>(or error: E) throws(E) -> Wrapped {
+		guard case .some(let wrapped) = self else {
+			throw error
+		}
 		return wrapped
 	}
 
