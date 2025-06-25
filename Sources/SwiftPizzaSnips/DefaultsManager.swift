@@ -229,6 +229,36 @@ public class DefaultsManager: Withable {
 	}
 }
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
+extension DefaultsManager.Key where Value: Codable, StoredValue == Data {
+	public init(autoCodingValueWithKey key: String) {
+		self.init(key)
+
+		self = withTransform(
+			get: {
+				try DefaultsManager.defaultDecoder.decode(Value.self, from: $0)
+			},
+			set: {
+				try DefaultsManager.defaultEncoder.encode($0)
+			})
+	}
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
+extension DefaultsManager.KeyWithDefault where Value: Codable, StoredValue == Data {
+	public init(autoCodingValueWithKey key: String, defaultValue: Value) {
+		self.init(key, defaultValue: defaultValue)
+
+		self = withTransform(
+			get: {
+				try DefaultsManager.defaultDecoder.decode(Value.self, from: $0)
+			},
+			set: {
+				try DefaultsManager.defaultEncoder.encode($0)
+			})
+	}
+}
+
 #if canImport(SwiftUI)
 import SwiftUI
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)

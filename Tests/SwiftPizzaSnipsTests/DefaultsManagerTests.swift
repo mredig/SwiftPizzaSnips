@@ -7,6 +7,8 @@ final class DefaultsManagerTests: XCTestCase {
 	static let testValueValueKey = "com.pizzaSnips.testValueValue"
 	static let doubleValueTestKey = "com.pizzaSnips.doubleTestValue"
 	static let transformableTestValueKey = "com.pizzaSnips.transformableTestValue"
+	static let transformableTestAutoCodingValueKey = "com.pizzaSnips.transformableTestAutoCodingValueKey"
+	static let transformableTestAutoCodingValueWithDefaultKey = "com.pizzaSnips.transformableTestAutoCodingValueWithDefaultKey"
 	static let transformableTestIDKey = "com.pizzaSnips.transformableTestID"
 	static let transformableTestValueNilKey = "com.pizzaSnips.transformableTestValueNil"
 	static let transformableTestValueDefaultKey = "com.pizzaSnips.transformableTestValueDefault"
@@ -24,6 +26,8 @@ final class DefaultsManagerTests: XCTestCase {
 		testValueValueKey,
 		doubleValueTestKey,
 		transformableTestValueKey,
+		transformableTestAutoCodingValueKey,
+		transformableTestAutoCodingValueWithDefaultKey,
 		transformableTestValueNilKey,
 		transformableTestValueDefaultKey,
 		asymettricalTransformableTestValueDefaultKey,
@@ -126,6 +130,12 @@ final class DefaultsManagerTests: XCTestCase {
 		XCTAssertEqual(Self.tValuePeter, defaults[.transformableWithValue])
 	}
 
+	func testDefaultsManagerSetAutoCodableTransformedKeyValue() {
+		defaults[.transformableAutoCodingValue] = Self.tValuePeter
+
+		XCTAssertEqual(Self.tValuePeter, defaults[.transformableAutoCodingValue])
+	}
+
 	func testDefaultsManagerTransformableIDStoredAsString() throws {
 		let id = UUID()
 		defaults[.transformableID] = id
@@ -172,6 +182,18 @@ final class DefaultsManagerTests: XCTestCase {
 
 		defaults.removeValue(for: .transformableDefault)
 		XCTAssertEqual(Self.tValueFrank, defaults[.transformableDefault])
+	}
+
+	func testDefaultsManagerSetAutoCodableTransformedKeyWithDefaultValue() {
+		defaults[.transformableAutoCodingDefaultValue] = Self.tValuePeter
+		XCTAssertEqual(Self.tValuePeter, defaults[.transformableAutoCodingDefaultValue])
+
+		defaults.removeValue(for: .transformableAutoCodingDefaultValue)
+		XCTAssertEqual(Self.tValueViolet, defaults[.transformableAutoCodingDefaultValue])
+	}
+
+	func testDefaultsManagerGetAutoCodableTransformedKeyWithDefaultValue() {
+		XCTAssertEqual(Self.tValueViolet, defaults[.transformableAutoCodingDefaultValue])
 	}
 
 	func testDefaultsManagerSetAsymetricalTransformedKeyWithDefault() {
@@ -359,6 +381,8 @@ extension DefaultsManager.Key where Value == TransformableValue, StoredValue == 
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
+
+	static let transformableAutoCodingValue = Self(autoCodingValueWithKey: DefaultsManagerTests.transformableTestAutoCodingValueKey)
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -382,6 +406,8 @@ extension DefaultsManager.KeyWithDefault where Value == TransformableValue, Stor
 		.withTransform(
 			get: transformableValueTransform.get,
 			set: transformableValueTransform.set)
+
+	static let transformableAutoCodingDefaultValue = Self(autoCodingValueWithKey: DefaultsManagerTests.transformableTestAutoCodingValueWithDefaultKey, defaultValue: DefaultsManagerTests.tValueViolet)
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
