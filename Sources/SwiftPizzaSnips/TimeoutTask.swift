@@ -42,7 +42,7 @@ public struct TimeoutTask<Success: Sendable, Failure: TimedOutError>: Sendable, 
 	) {
 		let timeoutOperation = { () async throws(Failure) -> Success in
 			do {
-				return try await withThrowingTaskGroup { group in
+				return try await withThrowingTaskGroup(of: Success.self) { group in
 					group.addTask {
 						try await operation()
 					}
