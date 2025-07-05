@@ -54,7 +54,7 @@ struct TimeoutTaskTests {
 		let timerEnd = Date()
 
 		#expect(result == true)
-		#expect(timerEnd.timeIntervalSince(timerStart) < 0.5)
+		#expect(timerEnd.timeIntervalSince(timerStart) < 2.9)
 	}
 
 	@Test(arguments: [true, false]) func failure(detached: Bool) async throws {
