@@ -3,6 +3,7 @@ import Foundation
 import SwiftPizzaSnips
 
 struct RateLimiterTests {
+	@available(*, deprecated)
 	@Test func testDurationSeconds() throws {
 		let twoSeconds: RateLimiter.Duration = .seconds(2)
 		let twoMilliSeconds: RateLimiter.Duration = .milliseconds(2)
@@ -15,6 +16,7 @@ struct RateLimiterTests {
 		#expect(twoNanoSeconds.seconds == 0.000_000_002)
 	}
 
+	@available(*, deprecated)
 	@Test func testDurationNanoSeconds() throws {
 		let twoSeconds: RateLimiter.Duration = .seconds(2)
 		let twoMilliSeconds: RateLimiter.Duration = .milliseconds(2)
@@ -27,6 +29,7 @@ struct RateLimiterTests {
 		#expect(twoNanoSeconds.nanoseconds == 2)
 	}
 
+	@available(*, deprecated)
 	@available(iOS 15, tvOS 15, watchOS 10, *)
 	@Test func testRateLimitDebounce() async throws {
 		let id = RateLimiter.ID("foo")
@@ -57,6 +60,7 @@ struct RateLimiterTests {
 	}
 
 	@available(iOS 15, tvOS 15, watchOS 10, *)
+	@available(*, deprecated)
 	@Test func testRateLimitThrottle() async throws {
 		let id = RateLimiter.ID("foo")
 

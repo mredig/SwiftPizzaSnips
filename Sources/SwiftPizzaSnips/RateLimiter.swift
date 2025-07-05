@@ -1,5 +1,6 @@
 import Foundation
 
+@available(*, deprecated, message: "This appears to have been more unreliable than I expected. Use is not recommended.")
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
 public enum RateLimiter {
 	public enum Duration  {
