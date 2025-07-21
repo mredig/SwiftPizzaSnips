@@ -1,4 +1,4 @@
-@available(macOS 13.0, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 6.0, *)
 public struct TimeoutTask<Success: Sendable, Failure: TimedOutError>: Sendable, Hashable {
 	private let underlyingTask: ETask<Success, Failure>
 
