@@ -2,6 +2,7 @@ import Testing
 import SwiftPizzaSnips
 
 struct AsyncCancellableThrowingStreamTests {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func simple() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -23,6 +24,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func throwsError() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -50,6 +52,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect([0, 1, 2, 3] == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func cancelViaAbandon() async throws {
 		try await confirmation { terminatedExpectation in
 			_ = Task {
@@ -75,6 +78,7 @@ struct AsyncCancellableThrowingStreamTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func cancelViaStreamCallThrowing() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -110,6 +114,7 @@ struct AsyncCancellableThrowingStreamTests {
 		continuationShouldError.verify()
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func cancelViaStreamCallThrowingDefault() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -145,6 +150,7 @@ struct AsyncCancellableThrowingStreamTests {
 		continuationShouldError.verify()
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func cancelViaStreamCallThrowingSimpleError() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -180,6 +186,7 @@ struct AsyncCancellableThrowingStreamTests {
 		continuationShouldError.verify()
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func cancelViaStreamCallNoThrowing() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -217,6 +224,7 @@ struct AsyncCancellableThrowingStreamTests {
 		continuationShouldError.verify()
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func slowRead() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -238,6 +246,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func slowThenFastRead() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -261,6 +270,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func fastThenSlowFeed() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -284,6 +294,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func bufferOverrunFail() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(bufferingPolicy: .limited(10), errorOnCancellation: CancellationError())
@@ -311,6 +322,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func whileLoop() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -333,6 +345,7 @@ struct AsyncCancellableThrowingStreamTests {
 		#expect(input == out)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func whileLoopTaskCancelled() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -367,6 +380,7 @@ struct AsyncCancellableThrowingStreamTests {
 		})
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func whileLoopStreamCancelled() async throws {
 		let input = (0..<20).map { $0 }
 		let (stream, continuation) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
@@ -401,6 +415,7 @@ struct AsyncCancellableThrowingStreamTests {
 		})
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func finishCancelled() async throws {
 		let stream = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError()).stream
 
@@ -413,6 +428,7 @@ struct AsyncCancellableThrowingStreamTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func finishThrown() async throws {
 		let (stream, cont) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 
@@ -426,6 +442,7 @@ struct AsyncCancellableThrowingStreamTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func finishClean() async throws {
 		let (stream, cont) = AsyncCancellableThrowingStream<Int, Error>.makeStream(errorOnCancellation: CancellationError())
 

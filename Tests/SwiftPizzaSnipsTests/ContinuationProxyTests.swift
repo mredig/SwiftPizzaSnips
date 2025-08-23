@@ -2,8 +2,7 @@ import Testing
 import SwiftPizzaSnips
 
 struct ContinuationProxyTests {
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func continuationFirstCustomErrorSuccess() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func continuationFirstCustomErrorSuccess() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -31,8 +30,7 @@ struct ContinuationProxyTests {
 		#expect(result == 5)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func resultFirstCustomErrorSuccess() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func resultFirstCustomErrorSuccess() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -61,8 +59,7 @@ struct ContinuationProxyTests {
 	}
 
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func continuationFirstCustomErrorFailure() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func continuationFirstCustomErrorFailure() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -91,8 +88,7 @@ struct ContinuationProxyTests {
 		#expect(continuationProxy.hasCompleted == true)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func resultFirstCustomErrorFailure() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func resultFirstCustomErrorFailure() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -121,8 +117,7 @@ struct ContinuationProxyTests {
 		#expect(continuationProxy.hasCompleted == true)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func resultFirstCustomErrorMultipleResultInvocationsIgnored() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func resultFirstCustomErrorMultipleResultInvocationsIgnored() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -156,8 +151,7 @@ struct ContinuationProxyTests {
 		#expect(result == 10)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func resultFirstCustomErrorMultipleContinuationInvocationsIgnored() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func resultFirstCustomErrorMultipleContinuationInvocationsIgnored() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)
@@ -190,8 +184,7 @@ struct ContinuationProxyTests {
 		#expect(result == 10)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-	@Test func resultFirstCustomErrorMultipleBothInvocationsIgnored() async throws {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)	@Test func resultFirstCustomErrorMultipleBothInvocationsIgnored() async throws {
 		let continuationProxy = ContinuationProxy<Int, AnError>()
 
 		#expect(continuationProxy.needsResult == true)

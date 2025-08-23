@@ -2,6 +2,7 @@ import Testing
 import SwiftPizzaSnips
 
 struct ETaskTests {
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func success(detached: Bool) async throws {
 		let task = createTask(detached: detached) {
 			try await Task.sleep(for: .seconds(0.01))
@@ -14,6 +15,7 @@ struct ETaskTests {
 		#expect(result == true)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func failure(detached: Bool) async throws {
 		let expectedError = SimpleError(message: "Foo")
 
@@ -26,6 +28,7 @@ struct ETaskTests {
 		})
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func cancel(detached: Bool) async throws {
 		let task = createTask(detached: detached) {
 			try await Task.sleep(for: .seconds(2))

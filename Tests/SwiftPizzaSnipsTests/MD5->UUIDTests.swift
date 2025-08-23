@@ -9,6 +9,7 @@ import Crypto
 
 #if canImport(CryptoKit) || canImport(Crypto)
 struct MD5ToUUIDTests {
+	@available(macOS 13.0, iOS 13.2, tvOS 13.2, watchOS 9, *)
 	@Test(arguments: [
 		("asdf", UUID(uuidString: "912EC803-B2CE-49E4-A541-068D495AB570")),
 		("1", UUID(uuidString: "C4CA4238-A0B9-2382-0DCC-509A6F75849B")),
@@ -23,6 +24,7 @@ struct MD5ToUUIDTests {
 		#expect(newID == expectedHashedID)
 	}
 
+	@available(macOS 13.0, iOS 13.2, tvOS 13.2, watchOS 9, *)
 	@Test(arguments: [
 		"asdf",
 		"1",

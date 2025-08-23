@@ -4,6 +4,7 @@ import SwiftPizzaSnips
 
 struct ProgressTrackingTests {
 	// Test all scenarios for fractional range clamping
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Fractional value clamps between 0.0 and 1.0")
 	func fractionValueClamps0To1() {
 		let progress = SimpleProgress()
@@ -19,6 +20,7 @@ struct ProgressTrackingTests {
 	}
 
 	// Test completed count exceeding total
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Completed unit count cannot exceed total")
 	func completedUnitCountCannotExceedTotal() {
 		let progress = SimpleProgress()
@@ -34,6 +36,7 @@ struct ProgressTrackingTests {
 	}
 
 	// Test reducing total unit count to below completed count
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Reducing total count clamps completed count")
 	func totalCannotBeLessThanCompleted() {
 		let progress = SimpleProgress()
@@ -47,6 +50,7 @@ struct ProgressTrackingTests {
 	}
 
 	// Test progress at edge conditions
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Fractional value tested at 0, 0.5, and 1")
 	func fractionalEdgeCases() {
 		let progress = SimpleProgress()
@@ -65,6 +69,7 @@ struct ProgressTrackingTests {
 		#expect(progress.fractionCompleted == 1.0)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func setTotalUnitCount() {
 		let progress = SimpleProgress()
 		progress.setTotalUnitCount(100)
@@ -74,6 +79,7 @@ struct ProgressTrackingTests {
 		#expect(progress.fractionCompleted == 0.0)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func updateCompletedValue() {
 		let progress = SimpleProgress()
 		progress.setTotalUnitCount(100)
@@ -83,6 +89,7 @@ struct ProgressTrackingTests {
 		#expect(progress.fractionCompleted == 0.4)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func updateFractionCompleted() {
 		let progress = SimpleProgress()
 		progress.setTotalUnitCount(100)
@@ -92,6 +99,7 @@ struct ProgressTrackingTests {
 		#expect(progress.fractionCompleted == 0.75)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func markFinished() {
 		let progress = SimpleProgress()
 		progress.setTotalUnitCount(100)
@@ -101,6 +109,7 @@ struct ProgressTrackingTests {
 		#expect(progress.fractionCompleted == 1.0)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func onProgressUpdateCallbackSimpleProgress() async throws {
 		let progress = SimpleProgress()
 		progress.setTotalUnitCount(100)
@@ -115,6 +124,7 @@ struct ProgressTrackingTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func addChildProgress() throws {
 		let tracker = MultiProgressTracker()
 		let child1 = SimpleProgress()
@@ -129,6 +139,7 @@ struct ProgressTrackingTests {
 		#expect(tracker.totalUnitCount == 150)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func childProgressUpdatesReflectedInParent() throws {
 		let tracker = MultiProgressTracker()
 		let child = SimpleProgress()
@@ -141,6 +152,7 @@ struct ProgressTrackingTests {
 		#expect(tracker.fractionCompleted == 40.0 / 100.0)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func childProgressUpdatesReflectedInParent2() throws {
 		let tracker = MultiProgressTracker()
 		let child = SimpleProgress()
@@ -153,6 +165,7 @@ struct ProgressTrackingTests {
 		#expect(tracker.fractionCompleted == 40.0 / 100.0)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func addChildWithExistingParentThrowsError() {
 		let parent1 = MultiProgressTracker()
 		let parent2 = MultiProgressTracker()
@@ -166,6 +179,7 @@ struct ProgressTrackingTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test func onProgressUpdateCallbackMultiProgressTracker() async throws {
 		let tracker = MultiProgressTracker()
 		let child = SimpleProgress(totalUnitCount: 500)
@@ -181,6 +195,7 @@ struct ProgressTrackingTests {
 		}
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Child progress fractional value clamps")
 	func multiTrackerFractionalValueClamped() throws {
 		let tracker = MultiProgressTracker()
@@ -200,6 +215,7 @@ struct ProgressTrackingTests {
 	}
 
 	// Adjust totals and ensure parent reflects valid progress
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Parent total count adjustment reflects valid contributions")
 	func parentTotalReflectsValidContributions() throws {
 		let tracker = MultiProgressTracker()
@@ -217,6 +233,7 @@ struct ProgressTrackingTests {
 	}
 
 	// Mixed children updating progress
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test("Mixed progress contributions from children")
 	func mixedProgressContributionsPropagateToParent() throws {
 		let tracker = MultiProgressTracker()

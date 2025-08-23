@@ -4,6 +4,7 @@ import SwiftPizzaSnips
 
 struct TimeoutTaskTests {
 	// This test is expected to take the whole 1 second
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func asyncUnawareTimesOutStructured(detached: Bool) async throws {
 		let timerStart = Date()
 		let task = createTask(detached: detached, structured: true, timeout: 0.01) { () async throws(TestingError) -> Bool in
@@ -22,6 +23,7 @@ struct TimeoutTaskTests {
     }
 
 	// This test is expected to only take the 0.01 ±a bit timeout duration
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func asyncUnawareTimesOutUnstructured(detached: Bool) async throws {
 		let task = createTask(detached: false, structured: false, timeout: 0.01) { () async throws(TestingError) -> Bool in
 			usleep(1_000_000)
@@ -38,6 +40,7 @@ struct TimeoutTaskTests {
 		})
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func success(detached: Bool) async throws {
 		let timerStart = Date()
 		let task = createTask(detached: detached, structured: true, timeout: 3) { () async throws(TestingError) -> Bool in
@@ -57,6 +60,7 @@ struct TimeoutTaskTests {
 		#expect(timerEnd.timeIntervalSince(timerStart) < 2.9)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func failure(detached: Bool) async throws {
 		let task = createTask(detached: detached, structured: true, timeout: 5) { () async throws(TestingError) -> Void in
 			throw .expected
@@ -67,6 +71,7 @@ struct TimeoutTaskTests {
 		})
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func cancel(detached: Bool) async throws {
 		let task = createTask(detached: detached, structured: true, timeout: 5) { () async throws(TestingError) -> Void in
 			do {
@@ -91,6 +96,7 @@ struct TimeoutTaskTests {
 		#expect(task.isCancelled == true)
 	}
 
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func timeoutReached(detached: Bool) async throws {
 		let task = createTask(detached: detached, structured: true, timeout: 0.2) { () async throws(TestingError) -> Void in
 			do {
@@ -109,7 +115,7 @@ struct TimeoutTaskTests {
 		})
 	}
 
-
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	private func createTask<Success: Sendable, Failure: TimedOutError>(
 		detached: Bool,
 		structured: Bool,
