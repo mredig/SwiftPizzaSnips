@@ -3,12 +3,14 @@ import Foundation
 public extension Optional {
 	/// Often times it's much more convenient or clean to unwrap an optional by throwing
 	func unwrap(_ messageOnFail: String? = nil, line: Int = #line, file: String = #file) throws -> Wrapped {
+		try unwrapOrError(error: OptionalError.nilValue(ofType: Wrapped.self, message: messageOnFail, line: line, file: file))
+	}
+
+	/// Often times it's much more convenient or clean to unwrap an optional by throwing - This variant allows you
+	/// to provide a custom error for better support with typed throws.
+	func unwrapOrError<E: Error>(error: E) throws(E) -> Wrapped {
 		guard case .some(let wrapped) = self else {
-			throw OptionalError.nilValue(
-				ofType: Wrapped.self,
-				message: messageOnFail,
-				line: line,
-				file: file)
+			throw error
 		}
 		return wrapped
 	}
