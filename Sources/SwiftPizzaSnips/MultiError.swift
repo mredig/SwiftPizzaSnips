@@ -30,6 +30,18 @@ extension MultiError: CustomDebugStringConvertible {
 }
 
 extension MultiError: LocalizedError {
+	public var errorDescription: String? {
+		errors.map {
+			guard
+				let localized = $0 as? LocalizedError,
+				let errorDescription = localized.errorDescription
+			else { return "Unknown Error Description" }
+
+			return errorDescription
+		}
+		.joined(separator: "\n\n")
+	}
+
 	public var failureReason: String? {
 		errors
 			.map {
