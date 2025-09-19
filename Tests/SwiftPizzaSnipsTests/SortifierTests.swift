@@ -74,6 +74,48 @@ struct SortifierTests {
 		#expect(wrappedC != wrappedB)
 		#expect(wrappedC != wrappedA)
 	}
+
+	struct BaseMutable: Codable, SortifierTiebreaker {
+		let value: String
+		var mutableValue: Int
+
+		func isLessThanForTiebreak(_ rhs: Self) -> Bool {
+			value < rhs.value
+		}
+	}
+
+	@Test func dynamicMembersWork() async throws {
+		let base = BaseMutable(value: "asdf", mutableValue: 5)
+
+		var sortified = Sortifier(base, sortingValue: 10)
+
+		#expect(sortified.value == "asdf")
+		#expect(sortified.mutableValue == 5)
+		#expect(sortified.wrapped.mutableValue == 5)
+		sortified.mutableValue = 1
+		#expect(sortified.mutableValue == 1)
+		#expect(sortified.wrapped.mutableValue == 1)
+		#expect(sortified.sortingValue == 10)
+	}
+
+	@Test func equatable() async throws {
+		let base = BaseMutable(value: "asdf", mutableValue: 5)
+		let base2 = BaseMutable(value: "asdf", mutableValue: 5)
+		let base3 = BaseMutable(value: "fdsa", mutableValue: 5)
+
+		#expect(base == base2)
+		#expect(base != base3)
+
+		let sortifier = Sortifier(base, sortingValue: 0)
+		let sortifierMatch = Sortifier(base2, sortingValue: 0)
+
+		let sortifierNonMatchSortValue = Sortifier(base, sortingValue: 1)
+		let sortifierNonMatchWrappedValue = Sortifier(base3, sortingValue: 0)
+
+		#expect(sortifier == sortifierMatch)
+		#expect(sortifier != sortifierNonMatchSortValue)
+		#expect(sortifier != sortifierNonMatchWrappedValue)
+	}
 }
 
 extension SortifierTests {
