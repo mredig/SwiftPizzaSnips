@@ -25,7 +25,7 @@ public struct Sortifier<Wrapped: SortifierTiebreaker>: Comparable {
 	public static func == (lhs: Sortifier<Wrapped>, rhs: Sortifier<Wrapped>) -> Bool {
 		lhs.sortingValue == rhs.sortingValue && lhs.wrapped == rhs.wrapped
 	}
-	
+
 	public subscript<T>(dynamicMember member: WritableKeyPath<Wrapped, T>) -> T {
 		get { wrapped[keyPath: member] }
 		set { wrapped[keyPath: member] = newValue }
@@ -47,5 +47,27 @@ extension Sortifier {
 }
 
 extension Sortifier: Hashable where Wrapped: Hashable {}
-extension Sortifier: Encodable where Wrapped: Encodable {}
-extension Sortifier: Decodable where Wrapped: Decodable {}
+extension Sortifier {
+	private enum CodingKeys: String, CodingKey {
+		case sortingValue
+	}
+}
+extension Sortifier: Encodable where Wrapped: Encodable {
+	public func encode(to encoder: any Encoder) throws {
+		var container = encoder.container(keyedBy: CodingKeys.self)
+		try container.encode(self.sortingValue, forKey: .sortingValue)
+
+		try wrapped.encode(to: encoder)
+	}
+}
+extension Sortifier: Decodable where Wrapped: Decodable {
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+
+		let sortingValue = try container.decode(Double.self, forKey: .sortingValue)
+
+		let wrapped = try Wrapped(from: decoder)
+
+		self.init(wrapped, sortingValue: sortingValue)
+	}
+}
