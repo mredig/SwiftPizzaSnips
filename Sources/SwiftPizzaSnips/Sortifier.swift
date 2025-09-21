@@ -71,3 +71,25 @@ extension Sortifier: Decodable where Wrapped: Decodable {
 		self.init(wrapped, sortingValue: sortingValue)
 	}
 }
+
+#if canImport(Foundation)
+import Foundation
+extension Sortifier: DecodableWithConfiguration where Wrapped: Decodable {
+	public struct DecodingConfiguration {
+		public var defaultSortingValue: Double
+
+		public init(defaultSortingValue: Double = .greatestFiniteMagnitude) {
+			self.defaultSortingValue = defaultSortingValue
+		}
+	}
+
+	public init(from decoder: any Decoder, configuration: DecodingConfiguration) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+
+		let sortingValue = try container.decodeIfPresent(Double.self, forKey: .sortingValue) ?? configuration.defaultSortingValue
+		let wrapped = try Wrapped(from: decoder)
+
+		self.init(wrapped, sortingValue: sortingValue)
+	}
+}
+#endif

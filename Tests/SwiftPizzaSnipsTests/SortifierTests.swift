@@ -186,4 +186,17 @@ extension SortifierTests {
 
 		#expect(decoded == expected)
 	}
+
+	@Test func decodeWithConfiguration() async throws {
+		let inData = Data(##"{"value":"foo"}"##.utf8)
+
+		#expect(throws: Error.self, performing: {
+			try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inData)
+		})
+
+		let decoded = try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inData, configuration: .init())
+
+		let expectation = Sortifier(BaseCodable(value: "foo"), sortingValue: .greatestFiniteMagnitude)
+		#expect(decoded == expectation)
+	}
 }
