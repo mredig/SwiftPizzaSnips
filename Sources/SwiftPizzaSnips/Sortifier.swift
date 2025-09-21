@@ -2,6 +2,19 @@ public protocol SortifierTiebreaker: Equatable {
 	func isLessThanForTiebreak(_ rhs: Self) -> Bool
 }
 
+/// Useful when you need to arbitrarily sort data, but want to prevent storing any sorting value directly on the sorted type.
+/// `Sortifier` allows you to
+/// * wrap the base model in a sortable data type
+/// * Encode/Decode said data in a flat structure alongside the sorting value
+/// * retain equatability and hashability of the base type, even when sorting values differ
+///
+/// A potential scenario might be that you want to store ui elements in the order a user determines, unrelated to any
+/// inherent data. The user moves an element and you need to check if the element is already in the list or a new
+/// element. If the element data type stored the sorting value directly, the same element in different positions
+/// would fail an equatibility test.
+///
+/// However, with Sortifier, two `Sortifier<Wrapped>` objects with the same base `Wrapped` value and different
+/// sorting values would evaluate not equal, their base values would still evaluate equal.
 @dynamicMemberLookup
 public struct Sortifier<Wrapped: SortifierTiebreaker>: Comparable {
 
@@ -75,19 +88,44 @@ extension Sortifier: Decodable where Wrapped: Decodable {
 #if canImport(Foundation)
 import Foundation
 extension Sortifier: DecodableWithConfiguration where Wrapped: Decodable {
+	/// When decoding and a `sortingValue` is missing, instead of failing, you can provide either a default value or
+	/// derive a `sortingValue` from the decoded `Wrapped` value
 	public struct DecodingConfiguration {
-		public var defaultSortingValue: Double
+		public var deriveDefaultSortingValueFrom: (Wrapped) -> Double
 
+		/// No derivation, just provide the same default sorting value for anything that doesn't have it explicitly
 		public init(defaultSortingValue: Double = .greatestFiniteMagnitude) {
-			self.defaultSortingValue = defaultSortingValue
+			self.deriveDefaultSortingValueFrom = { _ in defaultSortingValue}
+		}
+
+		/// Given the decoded `wrapped` value, you can derive a `sortingValue` from it.
+		///
+		/// For example, maybe a reasonable default sorting for stored, previously unsorted data is to sort by
+		/// an `id: String` value, so you might do
+		/// ```swift
+		/// DecodingConfiguration { storedData in
+		///		let id = storedData.id // a String
+		///
+		///		var sortValue: Double = 0
+		///		for (offset, letter) in id.enumerated() {
+		///			let multiplier = pow(0.001, Double(offset))
+		///			let letterValue = Double(letter.asciiValue ?? 0)
+		///			sortValue += letterValue * multiplier
+		///		}
+		///		return sortValue
+		/// }
+		public init(deriveSortingValueFrom: @escaping (Wrapped) -> Double) {
+			self.deriveDefaultSortingValueFrom = deriveSortingValueFrom
 		}
 	}
 
 	public init(from decoder: any Decoder, configuration: DecodingConfiguration) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
-		let sortingValue = try container.decodeIfPresent(Double.self, forKey: .sortingValue) ?? configuration.defaultSortingValue
+		let _sortingValue = try container.decodeIfPresent(Double.self, forKey: .sortingValue)
 		let wrapped = try Wrapped(from: decoder)
+
+		let sortingValue = _sortingValue ?? configuration.deriveDefaultSortingValueFrom(wrapped)
 
 		self.init(wrapped, sortingValue: sortingValue)
 	}

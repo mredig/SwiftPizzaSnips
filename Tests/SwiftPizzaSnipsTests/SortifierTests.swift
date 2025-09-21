@@ -187,7 +187,7 @@ extension SortifierTests {
 		#expect(decoded == expected)
 	}
 
-	@Test func decodeWithConfiguration() async throws {
+	@Test func decodeWithConfigurationSimpleDefaultValue() async throws {
 		let inData = Data(##"{"value":"foo"}"##.utf8)
 
 		#expect(throws: Error.self, performing: {
@@ -198,5 +198,37 @@ extension SortifierTests {
 
 		let expectation = Sortifier(BaseCodable(value: "foo"), sortingValue: .greatestFiniteMagnitude)
 		#expect(decoded == expectation)
+	}
+
+	@Test func decodeWithConfigurationDerivedDefaultValue() async throws {
+		let inDataA = Data(##"{"value":"foo"}"##.utf8)
+		let inDataB = Data(##"{"value":"bar"}"##.utf8)
+
+		#expect(throws: Error.self, performing: {
+			try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inDataA)
+		})
+		#expect(throws: Error.self, performing: {
+			try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inDataB)
+		})
+
+		let derivedConfig = Sortifier<BaseCodable>.DecodingConfiguration { base in
+			let value = base.value // a String
+
+			var sortValue: Double = 0
+			for (offset, letter) in value.enumerated() {
+				let multiplier = pow(0.001, Double(offset))
+				let letterValue = Double(letter.asciiValue ?? 0)
+				sortValue += letterValue * multiplier
+			}
+			return sortValue
+		}
+
+		let decodedA = try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inDataA, configuration: derivedConfig)
+		let decodedB = try Self.decoder.decode(Sortifier<BaseCodable>.self, from: inDataB, configuration: derivedConfig)
+
+		let expectationA = Sortifier.init(BaseCodable(value: "foo"), sortingValue: 102.111111)
+		let expectationB = Sortifier.init(BaseCodable(value: "bar"), sortingValue: 98.097114)
+		#expect(abs(decodedA.sortingValue - expectationA.sortingValue) < 0.0001)
+		#expect(abs(decodedB.sortingValue - expectationB.sortingValue) < 0.0001)
 	}
 }
