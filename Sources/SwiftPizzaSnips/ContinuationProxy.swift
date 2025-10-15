@@ -71,6 +71,10 @@ final public class ContinuationProxy<T, E: Error>: @unchecked Sendable {
 
 	public init() {}
 
+	deinit {
+		assert(hasCompleted, "Continuation Proxy (\(self)) was deallocated before being continued. Be sure to resume before discarding.")
+	}
+
 	public func setContinuation(_ continuation: UnsafeContinuation<T, any Error>) {
 		lock.withLock {
 			switch state {
