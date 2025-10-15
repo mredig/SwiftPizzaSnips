@@ -588,4 +588,72 @@ struct TriggeredTaskTests {
 		
 		#expect(results == [2, 4, 6, 8, 10])
 	}
+	
+	// Demonstrates awaiting tasks in task group while starting them in non-sequential order from parallel context
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func coordinateTasksStartedInNonSequentialOrder() async throws {
+		let completionOrder = MutexLock()
+		var completions: [Int] = []
+		
+		// Create 5 tasks that record when they complete
+		let tasks = (1...5).map { i in
+			TriggeredTask { () async throws(SimpleError) -> Int in
+				do {
+					try await Task.sleep(for: .milliseconds(20))
+				} catch {
+					throw SimpleError(message: "Sleep failed")
+				}
+				completionOrder.withLock {
+					completions.append(i)
+				}
+				return i
+			}
+		}
+		
+		// Start awaiting tasks in a task group
+		let resultsTask = Task {
+			try await withThrowingTaskGroup(of: Int?.self) { group in
+				for task in tasks {
+					group.addTask {
+						try await task.value
+					}
+				}
+				
+				var results: [Int] = []
+				for try await result in group {
+					if let result = result {
+						results.append(result)
+					}
+				}
+				return results
+			}
+		}
+		
+		// Parallel task starts them in non-sequential order: 3, 1, 5, 2, 4
+		let startOrder = [3, 1, 5, 2, 4]
+		let startTask = Task {
+			for index in startOrder {
+				tasks[index - 1].start()
+				try? await Task.sleep(for: .milliseconds(5)) // Stagger the starts
+			}
+		}
+		
+		_ = await startTask.value
+		let results = try await resultsTask.value
+		
+		// All tasks should complete
+		#expect(results.count == 5)
+		
+		// Completion order should roughly match start order (3, 1, 5, 2, 4)
+		// since they all have the same work duration
+		completionOrder.withLock {
+			#expect(completions.count == 5)
+			// First few should match start order (accounting for concurrency)
+			#expect(completions.contains(3))
+			#expect(completions.contains(1))
+			#expect(completions.contains(5))
+			#expect(completions.contains(2))
+			#expect(completions.contains(4))
+		}
+	}
 }
