@@ -656,4 +656,126 @@ struct TriggeredTaskTests {
 			#expect(completions.contains(4))
 		}
 	}
+	
+	// MARK: - Convenience Methods Tests
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitSuccess() async throws {
+		let task = TriggeredTask { () async throws(SimpleError) -> Int in
+			return 99
+		}
+		
+		let result = try await task.startAndAwait()
+		
+		#expect(result == 99)
+	}
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitFailure() async throws {
+		let expectedError = SimpleError(message: "Convenience error")
+		
+		let task = TriggeredTask { () async throws(SimpleError) -> String in
+			throw expectedError
+		}
+		
+		do {
+			_ = try await task.startAndAwait()
+			Issue.record("Expected task to throw")
+		} catch let TriggeredTask<String, SimpleError>.TriggeredTaskError.failed(error) {
+			#expect(error == expectedError)
+		} catch {
+			Issue.record("Unexpected error: \(error)")
+		}
+	}
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitCancelled() async throws {
+		let task = TriggeredTask { () async throws(SimpleError) -> Int in
+			do {
+				try await Task.sleep(for: .seconds(1))
+			} catch {
+				throw SimpleError(message: "Sleep interrupted")
+			}
+			return 42
+		}
+		
+		task.cancel()
+		
+		do {
+			_ = try await task.startAndAwait()
+			Issue.record("Expected task to throw cancelled")
+		} catch TriggeredTask<Int, SimpleError>.TriggeredTaskError.cancelled {
+			// Expected
+		} catch {
+			Issue.record("Unexpected error: \(error)")
+		}
+	}
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitResultSuccess() async throws {
+		let task = TriggeredTask { () async throws(SimpleError) -> Bool in
+			return true
+		}
+		
+		let result = await task.startAndAwaitResult()
+		
+		switch result {
+		case .success(let value):
+			#expect(value == true)
+		case .failure:
+			Issue.record("Expected success but got failure")
+		}
+	}
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitResultFailure() async throws {
+		let expectedError = SimpleError(message: "Result convenience error")
+		
+		let task = TriggeredTask { () async throws(SimpleError) -> Int in
+			throw expectedError
+		}
+		
+		let result = await task.startAndAwaitResult()
+		
+		switch result {
+		case .success:
+			Issue.record("Expected failure but got success")
+		case .failure(let error):
+			switch error {
+			case .failed(let innerError):
+				#expect(innerError == expectedError)
+			case .cancelled:
+				Issue.record("Expected failed but got cancelled")
+			}
+		}
+	}
+	
+	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
+	@Test func startAndAwaitResultCancelled() async throws {
+		let task = TriggeredTask { () async throws(SimpleError) -> String in
+			do {
+				try await Task.sleep(for: .seconds(1))
+			} catch {
+				throw SimpleError(message: "Sleep interrupted")
+			}
+			return "Done"
+		}
+		
+		task.cancel()
+		
+		let result = await task.startAndAwaitResult()
+		
+		switch result {
+		case .success:
+			Issue.record("Expected cancelled but got success")
+		case .failure(let error):
+			switch error {
+			case .cancelled:
+				// Expected
+				break
+			case .failed:
+				Issue.record("Expected cancelled but got failed")
+			}
+		}
+	}
 }
