@@ -85,8 +85,25 @@ public struct TriggeredTask<Success: Sendable, Failure: Error>: Sendable {
 		continuation.resume()
 	}
 
+	public func startAndAwait() async throws(TriggeredTaskError) -> Success {
+		start()
+		return try await value
+	}
+
+	public func startAndAwaitResult() async -> Result<Success, TriggeredTaskError> {
+		start()
+		return await result
+	}
+
 	public enum TriggeredTaskError: Swift.Error {
 		case cancelled
 		case failed(Failure)
 	}
 }
+
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 6.0, *)
+extension TriggeredTask.TriggeredTaskError: Equatable where Failure: Equatable {}
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 6.0, *)
+extension TriggeredTask.TriggeredTaskError: Hashable where Failure: Hashable {}
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 6.0, *)
+extension TriggeredTask.TriggeredTaskError: Sendable where Failure: Sendable {}
