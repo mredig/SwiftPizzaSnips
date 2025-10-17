@@ -1,3 +1,4 @@
+#if canImport(Foundation)
 public struct ErrorDomain: RawRepEquatable, ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
 	public let rawValue: String
 
@@ -14,19 +15,25 @@ public struct ErrorDomain: RawRepEquatable, ExpressibleByStringLiteral, Expressi
 	}
 }
 
+extension NSError {
+	public var errorDomain: ErrorDomain {
+		ErrorDomain(domain)
+	}
+}
+
 extension ErrorDomain {
 	// MARK: - Foundation & System
-	static let cocoaError = ErrorDomain(NSCocoaErrorDomain)
-	static let urlError = ErrorDomain(NSURLErrorDomain)
-	static let posixError = ErrorDomain(NSPOSIXErrorDomain)
-	static let machError = ErrorDomain(NSMachErrorDomain)
-	static let osStatus = ErrorDomain(NSOSStatusErrorDomain)
+	public static let cocoaError = ErrorDomain(NSCocoaErrorDomain)
+	public static let urlError = ErrorDomain(NSURLErrorDomain)
+	public static let posixError = ErrorDomain(NSPOSIXErrorDomain)
+	public static let machError = ErrorDomain(NSMachErrorDomain)
+	public static let osStatus = ErrorDomain(NSOSStatusErrorDomain)
 }
 
 #if canImport(CloudKit)
 import CloudKit
 extension ErrorDomain {
-	static let cloudKitError = ErrorDomain(CKErrorDomain)
+	public static let cloudKitError = ErrorDomain(CKErrorDomain)
 }
 #endif
 
@@ -34,21 +41,21 @@ extension ErrorDomain {
 import StoreKit
 @available(watchOS 6.2, *)
 extension ErrorDomain {
-	static let storeKitError = ErrorDomain(SKErrorDomain)
+	public static let storeKitError = ErrorDomain(SKErrorDomain)
 }
 #endif
 
 #if canImport(AVFoundation)
 import AVFoundation
 extension ErrorDomain {
-	static let avFoundationError = ErrorDomain(AVFoundationErrorDomain)
+	public static let avFoundationError = ErrorDomain(AVFoundationErrorDomain)
 }
 #endif
 
 #if canImport(CoreLocation)
 import CoreLocation
 extension ErrorDomain {
-	static let locationError = ErrorDomain(kCLErrorDomain)
+	public static let locationError = ErrorDomain(kCLErrorDomain)
 }
 #endif
 
@@ -56,7 +63,7 @@ extension ErrorDomain {
 import Photos
 @available(macOS 10.15, iOS 13, tvOS 13.0, *)
 extension ErrorDomain {
-	static let photosError = ErrorDomain(PHPhotosErrorDomain)
+	public static let photosError = ErrorDomain(PHPhotosErrorDomain)
 }
 #endif
 
@@ -64,14 +71,14 @@ extension ErrorDomain {
 import HealthKit
 @available(macOS 13.0, *)
 extension ErrorDomain {
-	static let healthKitError = ErrorDomain(HKErrorDomain)
+	public static let healthKitError = ErrorDomain(HKErrorDomain)
 }
 #endif
 
 #if canImport(PassKit)
 import PassKit
 extension ErrorDomain {
-	static let passKitError = ErrorDomain(PKPassKitErrorDomain)
+	public static let passKitError = ErrorDomain(PKPassKitErrorDomain)
 }
 #endif
 
@@ -79,7 +86,7 @@ extension ErrorDomain {
 import Speech
 @available(macOS 14, iOS 17, *)
 extension ErrorDomain {
-	static let speechRecognitionError = ErrorDomain(SFSpeechError.errorDomain)
+	public static let speechRecognitionError = ErrorDomain(SFSpeechError.errorDomain)
 }
 #endif
 
@@ -87,78 +94,78 @@ extension ErrorDomain {
 import UserNotifications
 @available(macOS 10.14, *)
 extension ErrorDomain {
-	static let userNotificationsError = ErrorDomain(UNErrorDomain)
+	public static let userNotificationsError = ErrorDomain(UNErrorDomain)
 }
 #endif
 
 #if canImport(CoreBluetooth)
 import CoreBluetooth
 extension ErrorDomain {
-	static let coreBluetoothError = ErrorDomain(CBErrorDomain)
-	static let coreBluetoothATTError = ErrorDomain(CBATTErrorDomain)
+	public static let coreBluetoothError = ErrorDomain(CBErrorDomain)
+	public static let coreBluetoothATTError = ErrorDomain(CBATTErrorDomain)
 }
 #endif
 
 #if canImport(MapKit)
 import MapKit
 extension ErrorDomain {
-	static let mapKitError = ErrorDomain(MKErrorDomain)
+	public static let mapKitError = ErrorDomain(MKErrorDomain)
 }
 #endif
 
 #if canImport(EventKit)
 import EventKit
 extension ErrorDomain {
-	static let eventKitError = ErrorDomain(EKErrorDomain)
+	public static let eventKitError = ErrorDomain(EKErrorDomain)
 }
 #endif
 
 #if canImport(Contacts)
 import Contacts
 extension ErrorDomain {
-	static let contactsError = ErrorDomain(CNErrorDomain)
+	public static let contactsError = ErrorDomain(CNErrorDomain)
 }
 #endif
 
 #if canImport(HomeKit)
 import HomeKit
 extension ErrorDomain {
-	static let homeKitError = ErrorDomain(HMErrorDomain)
+	public static let homeKitError = ErrorDomain(HMErrorDomain)
 }
 #endif
 
 #if canImport(MediaPlayer)
 import MediaPlayer
 extension ErrorDomain {
-	static let mediaPlayerError = ErrorDomain(MPErrorDomain)
+	public static let mediaPlayerError = ErrorDomain(MPErrorDomain)
 }
 #endif
 
 #if canImport(GameKit)
 import GameKit
 extension ErrorDomain {
-	static let gameKitError = ErrorDomain(GKErrorDomain)
+	public static let gameKitError = ErrorDomain(GKErrorDomain)
 }
 #endif
 
 #if canImport(Messages)
 import Messages
 extension ErrorDomain {
-	static let messagesError = ErrorDomain(MSMessagesErrorDomain)
+	public static let messagesError = ErrorDomain(MSMessagesErrorDomain)
 }
 #endif
 
 #if canImport(WatchConnectivity)
 import WatchConnectivity
 extension ErrorDomain {
-	static let watchConnectivityError = ErrorDomain(WCErrorDomain)
+	public static let watchConnectivityError = ErrorDomain(WCErrorDomain)
 }
 #endif
 
 #if canImport(CoreSpotlight) && !os(tvOS)
 import CoreSpotlight
 extension ErrorDomain {
-	static let coreSpotlightError = ErrorDomain(CSIndexErrorDomain)
+	public static let coreSpotlightError = ErrorDomain(CSIndexErrorDomain)
 }
 #endif
 
@@ -166,28 +173,28 @@ extension ErrorDomain {
 import Metal
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
 extension ErrorDomain {
-	static let metalCommandBufferError = ErrorDomain(MTLCommandBufferErrorDomain)
-//	static let metalIOError = ErrorDomain(MTLIOErrorDomain)
-	static let metalCaptureError = ErrorDomain(MTLCaptureErrorDomain)
+	public static let metalCommandBufferError = ErrorDomain(MTLCommandBufferErrorDomain)
+	public static let metalCaptureError = ErrorDomain(MTLCaptureErrorDomain)
 	@available(iOS 14.0, tvOS 14.0, *)
-	static let metalCounterError = ErrorDomain(MTLCounterErrorDomain)
-	static let metalLibraryError = ErrorDomain(MTLLibraryErrorDomain)
+	public static let metalCounterError = ErrorDomain(MTLCounterErrorDomain)
+	public static let metalLibraryError = ErrorDomain(MTLLibraryErrorDomain)
 	@available(macOS 15.0, iOS 18.0, tvOS 18.0, *)
-	static let metalLogStateError = ErrorDomain(MTLLogStateErrorDomain)
-//	static let metal4CommandQueueError = ErrorDomain(MTL4CommandQueueErrorDomain)
+	public static let metalLogStateError = ErrorDomain(MTLLogStateErrorDomain)
 }
 #endif
 
 #if canImport(Vision)
 import Vision
 extension ErrorDomain {
-	static let visionError = ErrorDomain(VNErrorDomain)
+	public static let visionError = ErrorDomain(VNErrorDomain)
 }
 #endif
 
 #if canImport(CoreML)
 import CoreML
 extension ErrorDomain {
-	static let coreMLError = ErrorDomain(MLModelErrorDomain)
+	public static let coreMLError = ErrorDomain(MLModelErrorDomain)
 }
+#endif
+
 #endif
