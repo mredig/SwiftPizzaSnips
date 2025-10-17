@@ -1,4 +1,3 @@
-#if canImport(Foundation)
 public struct ErrorDomain: RawRepEquatable, ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
 	public let rawValue: String
 
@@ -20,7 +19,9 @@ extension NSError {
 		ErrorDomain(domain)
 	}
 }
-
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 extension ErrorDomain {
 	// MARK: - Foundation & System
 	public static let cocoaError = ErrorDomain(NSCocoaErrorDomain)
@@ -195,6 +196,4 @@ import CoreML
 extension ErrorDomain {
 	public static let coreMLError = ErrorDomain(MLModelErrorDomain)
 }
-#endif
-
 #endif
