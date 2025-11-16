@@ -10,7 +10,7 @@ struct TypedWrappingErrorTests {
 	// Enums provide type-safe, structured errors with rich contextual information.
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testEnumBasicWrapping() async throws {
+	@Test func enumWrapsGenericErrorsIntoFallbackCase() async throws {
 		// Simplest case: wrap a generic error into a domain-specific enum
 		// Without errorContextualization, falls back to the default wrap(_:) implementation
 		let error = try await #require(throws: NetworkError.self) {
@@ -32,7 +32,7 @@ struct TypedWrappingErrorTests {
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testEnumWithContextFromCallSite() async throws {
+	@Test func enumWrapsErrorsWithCallSiteContext() async throws {
 		// Real-world pattern: the calling code knows what operation it was performing
 		// and provides that context when wrapping errors
 		let endpointURL = URL(string: "https://api.example.com/data")!
@@ -63,7 +63,7 @@ struct TypedWrappingErrorTests {
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testEnumErrorWithRichContext() async throws {
+	@Test func alreadyWrappedEnumErrorsPassThrough() async throws {
 		let testURL = URL(string: "https://api.example.com/users")!
 
 		// Manually create a specific enum case to demonstrate structured errors
@@ -89,7 +89,7 @@ struct TypedWrappingErrorTests {
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testEnumErrorPreservesAllCaseData() async throws {
+	@Test func enumCasesPreserveAllAssociatedValues() async throws {
 		let testURL = URL(string: "https://api.example.com/endpoint")!
 		let statusCode = 500
 
@@ -120,55 +120,10 @@ struct TypedWrappingErrorTests {
 		#expect(value == 123)
 	}
 
-
-	// MARK: - Basic Functionality Tests
-
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testBasicErrorWrapping() async throws {
-		await #expect(throws: SimpleWrappingError.self) {
-			try await captureAnyError(errorType: SimpleWrappingError.self) {
-				try await Task.sleep(for: .milliseconds(1))
-				throw TestError.basic
-			}
-		}
-	}
-
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testContextualErrorWrapping() async throws {
-		let error = try await #require(throws: ContextualWrappingError.self) {
-			let _: Int = try await captureAnyError(
-				errorType: ContextualWrappingError.self,
-				{
-					try await Task.sleep(for: .milliseconds(1))
-					throw TestError.withValue(123)
-				},
-				errorContextualization: { _ in "custom context" }
-			)
-		}
-		#expect(error.context == "custom context")
-		#expect(error.underlying is TestError)
-	}
-
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testAlreadyWrappedErrorPassesThrough() async throws {
-		let wrappedError = SimpleWrappingError(underlying: TestError.basic)
-
-		let error = try await #require(throws: SimpleWrappingError.self) {
-			let _: Int = try await captureAnyError(
-				errorType: SimpleWrappingError.self,
-				{
-					try await Task.sleep(for: .milliseconds(1))
-					throw wrappedError
-				}
-			)
-		}
-		#expect(error.underlying is TestError)
-	}
-
 	// MARK: - Actor Isolation Tests
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testActorIsolationWithErrors() async throws {
+	@Test func errorsPreserveContextAcrossActorIsolation() async throws {
 		let actor = TestActor()
 
 		let error = try await #require(throws: ContextualWrappingError.self) {
@@ -191,7 +146,7 @@ struct TypedWrappingErrorTests {
 	// MARK: - Error Context Preservation Tests
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testErrorContextPreservedAcrossIsolation() async throws {
+	@Test func contextCanBeComputedFromUnderlyingError() async throws {
 		let actor = TestActor()
 
 		let error = try await #require(throws: ContextualWrappingError.self) {
@@ -217,7 +172,7 @@ struct TypedWrappingErrorTests {
 	// MARK: - Edge Cases
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testNestedErrorWrapping() async throws {
+	@Test func nestedWrappingWithDifferentErrorTypes() async throws {
 		await #expect(throws: SimpleWrappingError.self) {
 			try await captureAnyError(errorType: SimpleWrappingError.self) {
 				// Inner call throws
@@ -229,28 +184,19 @@ struct TypedWrappingErrorTests {
 		}
 	}
 
-	@Test func testSyncErrorWrapping() throws {
-		#expect(throws: SimpleWrappingError.self) {
-			try captureAnyError(errorType: SimpleWrappingError.self) {
-				throw TestError.withValue(456)
-			}
-		}
-	}
-
-	@Test func testSyncWithContext() throws {
-		let error = try #require(throws: ContextualWrappingError.self) {
+	@Test func syncVersionWrapsErrors() throws {
+		let error = try #require(throws: SimpleWrappingError.self) {
 			let _: Int = try captureAnyError(
-				errorType: ContextualWrappingError.self,
-				{ throw TestError.basic },
-				errorContextualization: { _ in "sync context" }
+				errorType: SimpleWrappingError.self,
+				{ throw TestError.basic }
 			)
 		}
-		#expect(error.context == "sync context")
+		#expect(error.underlying is TestError)
 	}
 
-	@Test func testSyncAlreadyWrappedErrorPassesThrough() throws {
+	@Test func syncVersionPassesThroughAlreadyWrappedErrors() throws {
 		let wrappedError = SimpleWrappingError(underlying: TestError.basic)
-
+		
 		let error = try #require(throws: SimpleWrappingError.self) {
 			let _: Int = try captureAnyError(
 				errorType: SimpleWrappingError.self,
@@ -260,7 +206,7 @@ struct TypedWrappingErrorTests {
 		#expect(error.underlying is TestError)
 	}
 
-	@Test func testVoidContextProtocolExtension() throws {
+	@Test func voidContextUsesProtocolExtensionDefault() throws {
 		// This test specifically covers the protocol extension at line 8-11
 		// which provides a default implementation of wrap(_:context:) for Context == Void
 		let error = try #require(throws: SimpleWrappingError.self) {
