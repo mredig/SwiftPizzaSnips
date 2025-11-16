@@ -16,10 +16,6 @@ struct SimpleWrappingError: TypedWrappingError {
 	static func wrap(_ anyError: Error) -> SimpleWrappingError {
 		SimpleWrappingError(underlying: anyError)
 	}
-
-	static func wrap(_ anyError: Error, context: Context) -> SimpleWrappingError {
-		SimpleWrappingError(underlying: anyError)
-	}
 }
 
 struct ContextualWrappingError: TypedWrappingError {

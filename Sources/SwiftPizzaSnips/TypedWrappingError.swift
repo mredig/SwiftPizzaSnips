@@ -5,7 +5,7 @@ public protocol TypedWrappingError: Error {
 	static func wrap(_ anyError: Error, context: Context) -> Self
 }
 
-extension TypedWrappingError where Context == Void {
+public extension TypedWrappingError where Context == Void {
 	static func wrap(_ anyError: Error, context: Context) -> Self {
 		wrap(anyError)
 	}
