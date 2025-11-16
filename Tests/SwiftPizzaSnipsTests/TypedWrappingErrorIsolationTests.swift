@@ -5,28 +5,60 @@ import Foundation
 struct TypedWrappingErrorTests {
 
 	// MARK: - Enum-Based Error Tests
+	
+	// These tests demonstrate the recommended pattern: using enums as TypedWrappingError types.
+	// Enums provide type-safe, structured errors with rich contextual information.
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
-	@Test func testEnumBasedErrorWithContext() async throws {
-		let testURL = URL(string: "https://api.example.com/data")!
+	@Test func testEnumBasicWrapping() async throws {
+		// Simplest case: wrap a generic error into a domain-specific enum
+		// Without errorContextualization, falls back to the default wrap(_:) implementation
+		let error = try await #require(throws: NetworkError.self) {
+			let _: Data = try await captureAnyError(
+				errorType: NetworkError.self,
+				{
+					try await Task.sleep(for: .milliseconds(1))
+					throw TestError.basic  // Generic error
+				}
+			)
+		}
+		
+		// Without contextualization, NetworkError uses .other as the fallback case
+		if case .other(let underlying) = error {
+			#expect(underlying is TestError)
+		} else {
+			Issue.record("Expected .other case")
+		}
+	}
+
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@Test func testEnumWithContextFromCallSite() async throws {
+		// Real-world pattern: the calling code knows what operation it was performing
+		// and provides that context when wrapping errors
+		let endpointURL = URL(string: "https://api.example.com/data")!
 
 		let error = try await #require(throws: NetworkError.self) {
 			let _: String = try await captureAnyError(
 				errorType: NetworkError.self,
 				{
 					try await Task.sleep(for: .milliseconds(1))
+					// Simulate a URLError or other generic networking error
 					throw TestError.basic
 				},
-				errorContextualization: { _ in testURL }
+				errorContextualization: { _ in 
+					// The calling code provides the URL it was trying to fetch
+					// This context is captured from the call site, not the error itself
+					endpointURL 
+				}
 			)
 		}
 
-		// Verify the enum case
+		// With contextualization, the error gets wrapped with the provided URL
 		if case .connectivityIssue(let url, let underlying) = error {
-			#expect(url == testURL)
+			#expect(url == endpointURL)
 			#expect(underlying is TestError)
 		} else {
-			Issue.record("Expected connectivityIssue case")
+			Issue.record("Expected connectivityIssue with context")
 		}
 	}
 
@@ -247,19 +279,33 @@ enum TestError: Error {
 	case withValue(Int)
 }
 
-// Demonstrates using an enum as a TypedWrappingError type.
-// This provides structured, type-safe error cases with rich associated values,
-// allowing errors to carry context-specific information (URL, status codes, durations, etc.)
-// while still wrapping underlying errors.
+/// Example enum-based TypedWrappingError demonstrating the typical/expected pattern.
+///
+/// This enum wraps networking errors with rich, structured context:
+/// - Specific cases for different error scenarios
+/// - Associated values capture relevant details (URLs, status codes, durations)
+/// - Underlying error is always preserved for debugging
+/// - Fallback `.other` case for errors without context
 enum NetworkError: TypedWrappingError {
+	/// Connection failed to reach the server
 	case connectivityIssue(URL, underlying: Error)
+	
+	/// Server returned invalid or unexpected response
 	case invalidResponse(URL, underlying: Error)
+	
+	/// Request exceeded the timeout duration
 	case timeout(URL, duration: TimeInterval, underlying: Error)
+	
+	/// Server returned an HTTP error status code
 	case serverError(URL, statusCode: Int, underlying: Error)
+	
+	/// Fallback for errors without specific context
 	case other(underlying: Error)
 
+	/// The context type that call sites can provide
 	typealias Context = URL
 
+	/// Access the wrapped error from any case
 	var underlying: Error {
 		switch self {
 		case .connectivityIssue(_, let error),
@@ -271,6 +317,7 @@ enum NetworkError: TypedWrappingError {
 		}
 	}
 
+	/// Extract the URL if this error has one
 	var url: URL? {
 		switch self {
 		case .connectivityIssue(let url, _),
@@ -283,13 +330,13 @@ enum NetworkError: TypedWrappingError {
 		}
 	}
 
+	/// Default wrapping without context - uses the fallback `.other` case
 	static func wrap(_ anyError: Error) -> NetworkError {
-		// Default to connectivity issue with a placeholder URL
 		.other(underlying: anyError)
 	}
 
+	/// Wrapping with context from the call site - creates a `.connectivityIssue`
 	static func wrap(_ anyError: Error, context: URL) -> NetworkError {
-		// Use the URL context to create a connectivity issue
 		.connectivityIssue(context, underlying: anyError)
 	}
 }
