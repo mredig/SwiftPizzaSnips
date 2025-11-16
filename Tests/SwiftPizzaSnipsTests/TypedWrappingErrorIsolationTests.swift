@@ -346,4 +346,17 @@ struct TypedWrappingErrorSyncTests {
 		}
 		#expect(error.underlying is TestError)
 	}
+
+	@Test func testVoidContextProtocolExtension() throws {
+		// This test specifically covers the protocol extension at line 8-11
+		// which provides a default implementation of wrap(_:context:) for Context == Void
+		let error = try #require(throws: SimpleWrappingError.self) {
+			let _: Int = try captureAnyError(
+				errorType: SimpleWrappingError.self,
+				{ throw TestError.basic },
+				errorContextualization: { _ in () }  // Explicitly pass Void context
+			)
+		}
+		#expect(error.underlying is TestError)
+	}
 }
