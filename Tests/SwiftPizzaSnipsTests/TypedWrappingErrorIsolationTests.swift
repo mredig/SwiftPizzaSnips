@@ -1,5 +1,6 @@
 import Testing
 import SwiftPizzaSnips
+import Foundation
 
 // MARK: - Test Error Types
 
@@ -30,6 +31,53 @@ struct ContextualWrappingError: TypedWrappingError {
 
 	static func wrap(_ anyError: Error, context: String) -> ContextualWrappingError {
 		ContextualWrappingError(underlying: anyError, context: context)
+	}
+}
+
+// Demonstrates using an enum as a TypedWrappingError type.
+// This provides structured, type-safe error cases with rich associated values,
+// allowing errors to carry context-specific information (URL, status codes, durations, etc.)
+// while still wrapping underlying errors.
+enum NetworkError: TypedWrappingError {
+	case connectivityIssue(URL, underlying: Error)
+	case invalidResponse(URL, underlying: Error)
+	case timeout(URL, duration: TimeInterval, underlying: Error)
+	case serverError(URL, statusCode: Int, underlying: Error)
+	case other(underlying: Error)
+
+	typealias Context = URL
+	
+	var underlying: Error {
+		switch self {
+		case .connectivityIssue(_, let error),
+			 .invalidResponse(_, let error),
+			 .timeout(_, _, let error),
+			 .serverError(_, _, let error),
+			 .other(let error):
+			return error
+		}
+	}
+	
+	var url: URL? {
+		switch self {
+		case .connectivityIssue(let url, _),
+			 .invalidResponse(let url, _),
+			 .timeout(let url, _, _),
+			 .serverError(let url, _, _):
+			return url
+		case .other:
+			return nil
+		}
+	}
+	
+	static func wrap(_ anyError: Error) -> NetworkError {
+		// Default to connectivity issue with a placeholder URL
+		.other(underlying: anyError)
+	}
+
+	static func wrap(_ anyError: Error, context: URL) -> NetworkError {
+		// Use the URL context to create a connectivity issue
+		.connectivityIssue(context, underlying: anyError)
 	}
 }
 
@@ -161,6 +209,88 @@ struct TypedWrappingErrorIsolationTests {
 			)
 		}
 		#expect(error.context == "value was 999")
+	}
+
+	// MARK: - Enum-Based Error Tests
+
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@Test func testEnumBasedErrorWithContext() async throws {
+		let testURL = URL(string: "https://api.example.com/data")!
+		
+		let error = try await #require(throws: NetworkError.self) {
+			let _: String = try await captureAnyError(
+				errorType: NetworkError.self,
+				{
+					try await Task.sleep(for: .milliseconds(1))
+					throw TestError.basic
+				},
+				errorContextualization: { _ in testURL }
+			)
+		}
+		
+		// Verify the enum case
+		if case .connectivityIssue(let url, let underlying) = error {
+			#expect(url == testURL)
+			#expect(underlying is TestError)
+		} else {
+			Issue.record("Expected connectivityIssue case")
+		}
+	}
+
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@Test func testEnumErrorWithRichContext() async throws {
+		let testURL = URL(string: "https://api.example.com/users")!
+		
+		// Manually create a specific enum case to demonstrate structured errors
+		let error = try await #require(throws: NetworkError.self) {
+			let _: Data = try await captureAnyError(
+				errorType: NetworkError.self,
+				{
+					try await Task.sleep(for: .milliseconds(1))
+					// Throw a timeout case directly
+					throw NetworkError.timeout(testURL, duration: 30.0, underlying: TestError.basic)
+				}
+			)
+		}
+		
+		// The already-wrapped error should pass through
+		if case .timeout(let url, let duration, let underlying) = error {
+			#expect(url == testURL)
+			#expect(duration == 30.0)
+			#expect(underlying is TestError)
+		} else {
+			Issue.record("Expected timeout case to pass through")
+		}
+	}
+
+	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@Test func testEnumErrorPreservesAllCaseData() async throws {
+		let testURL = URL(string: "https://api.example.com/endpoint")!
+		let statusCode = 500
+		
+		let error = try await #require(throws: NetworkError.self) {
+			let _: Void = try await captureAnyError(
+				errorType: NetworkError.self,
+				{
+					try await Task.sleep(for: .milliseconds(1))
+					throw NetworkError.serverError(testURL, statusCode: statusCode, underlying: TestError.withValue(123))
+				}
+			)
+		}
+		
+		// Verify all associated values are preserved
+		if case .serverError(let url, let code, let underlying) = error {
+			#expect(url == testURL)
+			#expect(code == statusCode)
+			if let testError = underlying as? TestError,
+			   case .withValue(let value) = testError {
+				#expect(value == 123)
+			} else {
+				Issue.record("Expected underlying TestError.withValue")
+			}
+		} else {
+			Issue.record("Expected serverError case")
+		}
 	}
 
 	// MARK: - Edge Cases
