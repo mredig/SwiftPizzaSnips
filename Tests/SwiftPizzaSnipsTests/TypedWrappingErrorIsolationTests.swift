@@ -5,7 +5,7 @@ import Foundation
 struct TypedWrappingErrorTests {
 
 	// MARK: - Enum-Based Error Tests
-	
+
 	// These tests demonstrate the recommended pattern: using enums as TypedWrappingError types.
 	// Enums provide type-safe, structured errors with rich contextual information.
 
@@ -22,13 +22,13 @@ struct TypedWrappingErrorTests {
 				}
 			)
 		}
-		
+
 		// Without contextualization, NetworkError uses .other as the fallback case
-		if case .other(let underlying) = error {
-			#expect(underlying is TestError)
-		} else {
+		guard case .other(let underlying) = error else {
 			Issue.record("Expected .other case")
+			return
 		}
+		#expect(underlying is TestError)
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -45,21 +45,21 @@ struct TypedWrappingErrorTests {
 					// Simulate a URLError or other generic networking error
 					throw TestError.basic
 				},
-				errorContextualization: { _ in 
+				errorContextualization: { _ in
 					// The calling code provides the URL it was trying to fetch
 					// This context is captured from the call site, not the error itself
-					endpointURL 
+					endpointURL
 				}
 			)
 		}
 
 		// With contextualization, the error gets wrapped with the provided URL
-		if case .connectivityIssue(let url, let underlying) = error {
-			#expect(url == endpointURL)
-			#expect(underlying is TestError)
-		} else {
+		guard case .connectivityIssue(let url, let underlying) = error else {
 			Issue.record("Expected connectivityIssue with context")
+			return
 		}
+		#expect(url == endpointURL)
+		#expect(underlying is TestError)
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -79,13 +79,13 @@ struct TypedWrappingErrorTests {
 		}
 
 		// The already-wrapped error should pass through
-		if case .timeout(let url, let duration, let underlying) = error {
-			#expect(url == testURL)
-			#expect(duration == 30.0)
-			#expect(underlying is TestError)
-		} else {
+		guard case .timeout(let url, let duration, let underlying) = error else {
 			Issue.record("Expected timeout case to pass through")
+			return
 		}
+		#expect(url == testURL)
+		#expect(duration == 30.0)
+		#expect(underlying is TestError)
 	}
 
 	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
@@ -104,18 +104,20 @@ struct TypedWrappingErrorTests {
 		}
 
 		// Verify all associated values are preserved
-		if case .serverError(let url, let code, let underlying) = error {
-			#expect(url == testURL)
-			#expect(code == statusCode)
-			if let testError = underlying as? TestError,
-			   case .withValue(let value) = testError {
-				#expect(value == 123)
-			} else {
-				Issue.record("Expected underlying TestError.withValue")
-			}
-		} else {
+		guard case .serverError(let url, let code, let underlying) = error else {
 			Issue.record("Expected serverError case")
+			return
 		}
+		#expect(url == testURL)
+		#expect(code == statusCode)
+		guard
+			let testError = underlying as? TestError,
+			case .withValue(let value) = testError
+		else {
+			Issue.record("Expected underlying TestError.withValue")
+			return
+		}
+		#expect(value == 123)
 	}
 
 
@@ -289,16 +291,16 @@ enum TestError: Error {
 enum NetworkError: TypedWrappingError {
 	/// Connection failed to reach the server
 	case connectivityIssue(URL, underlying: Error)
-	
+
 	/// Server returned invalid or unexpected response
 	case invalidResponse(URL, underlying: Error)
-	
+
 	/// Request exceeded the timeout duration
 	case timeout(URL, duration: TimeInterval, underlying: Error)
-	
+
 	/// Server returned an HTTP error status code
 	case serverError(URL, statusCode: Int, underlying: Error)
-	
+
 	/// Fallback for errors without specific context
 	case other(underlying: Error)
 
