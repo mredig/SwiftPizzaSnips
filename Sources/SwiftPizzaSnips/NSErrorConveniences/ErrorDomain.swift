@@ -1,3 +1,5 @@
+#if canImport(ObjectiveC)
+
 public struct ErrorDomain: RawRepEquatable, ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
 	public let rawValue: String
 
@@ -196,4 +198,6 @@ import CoreML
 extension ErrorDomain {
 	public static let coreMLError = ErrorDomain(MLModelErrorDomain)
 }
+#endif
+
 #endif

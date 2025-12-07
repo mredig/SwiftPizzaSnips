@@ -1,3 +1,5 @@
+#if canImport(ObjectiveC)
+
 extension NSError {
 	public struct Codes: RawRepEquatable, ExpressibleByIntegerLiteral {
 		public let rawValue: Int
@@ -205,4 +207,6 @@ extension NSError.Codes {
 	// RealityKit doesn't expose a typed error code enum
 	public var asRealityKitCode: Int { rawValue }
 }
+#endif
+
 #endif
