@@ -3,7 +3,7 @@ import CoreData
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8, *)
 extension CoreDataStack {
-	public struct Configuration: Withable {
+	public struct Configuration: Withable, Sendable {
 		public var modelURL: URL
 		public var storeOption: StoreOption = .sql(config: nil)
 		public var mainContextDefaultMergePolicy: NSMergePolicyType = .errorMergePolicyType
@@ -21,14 +21,14 @@ extension CoreDataStack {
 			self.modelURL = modelURL
 		}
 
-		public enum StoreOption: Withable {
+		public enum StoreOption: Withable, Sendable {
 			case inMemory
 			case sql(config: SQLConfiguration?)
 			case custom((NSPersistentContainer) throws -> Void)
 
 			public static let sqlDefaults: Self = .sql(config: nil)
 
-			public struct SQLConfiguration: Withable {
+			public struct SQLConfiguration: Withable, @unchecked Sendable {
 				var storeURL: URL = NSPersistentContainer.defaultDirectoryURL()
 				var modelConfiguration: String?
 

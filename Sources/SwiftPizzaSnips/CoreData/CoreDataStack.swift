@@ -2,7 +2,7 @@ import Foundation
 import CoreData
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8, *)
-public class CoreDataStack: Withable {
+public class CoreDataStack: Withable, @unchecked Sendable {
 
 	public static let didResetRegisteredTypesNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypesNotification")
 	public static let didResetRegisteredTypeNotification = NSNotification.Name("pizzaSnips.didResetRegisteredTypeNotification")
@@ -222,12 +222,18 @@ public class CoreDataStack: Withable {
 		return context
 	}
 
-	public private(set) var registeredModels: [NSManagedObject.Type] = []
+	public var registeredModels: [NSManagedObject.Type] {
+		registeredModelLock.withLock { _registeredModels}
+	}
+	private var _registeredModels: [NSManagedObject.Type] = []
+	private let registeredModelLock = MutexLock()
 	public func registerModel(_ model: NSManagedObject.Type) {
-		guard
-			registeredModels.contains(where: { $0 === model }) == false
-		else { return }
-		registeredModels.append(model)
+		registeredModelLock.withLock {
+			guard
+				_registeredModels.contains(where: { $0 === model }) == false
+			else { return }
+			_registeredModels.append(model)
+		}
 	}
 
 	/// A generic function to save any context we want (main or background)
