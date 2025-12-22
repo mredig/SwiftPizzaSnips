@@ -9,7 +9,7 @@ struct TypedWrappingErrorTests {
 	// These tests demonstrate the recommended pattern: using enums as TypedWrappingError types.
 	// Enums provide type-safe, structured errors with rich contextual information.
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func enumWrapsGenericErrorsIntoFallbackCase() async throws {
 		// Simplest case: wrap a generic error into a domain-specific enum
 		// Without errorContextualization, falls back to the default wrap(_:) implementation
@@ -31,7 +31,7 @@ struct TypedWrappingErrorTests {
 		#expect(underlying is TestError)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func enumWrapsErrorsWithCallSiteContext() async throws {
 		// Real-world pattern: the calling code knows what operation it was performing
 		// and provides that context when wrapping errors
@@ -62,7 +62,7 @@ struct TypedWrappingErrorTests {
 		#expect(underlying is TestError)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func alreadyWrappedEnumErrorsPassThrough() async throws {
 		let testURL = URL(string: "https://api.example.com/users")!
 
@@ -88,7 +88,7 @@ struct TypedWrappingErrorTests {
 		#expect(underlying is TestError)
 	}
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func enumCasesPreserveAllAssociatedValues() async throws {
 		let testURL = URL(string: "https://api.example.com/endpoint")!
 		let statusCode = 500
@@ -122,7 +122,7 @@ struct TypedWrappingErrorTests {
 
 	// MARK: - Actor Isolation Tests
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func errorsPreserveContextAcrossActorIsolation() async throws {
 		let actor = TestActor()
 
@@ -145,7 +145,7 @@ struct TypedWrappingErrorTests {
 
 	// MARK: - Error Context Preservation Tests
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func contextCanBeComputedFromUnderlyingError() async throws {
 		let actor = TestActor()
 
@@ -171,7 +171,7 @@ struct TypedWrappingErrorTests {
 
 	// MARK: - Edge Cases
 
-	@available(macOS 10.15, iOS 13.0, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 16.0, tvOS 13.0, *)
 	@Test func nestedWrappingWithDifferentErrorTypes() async throws {
 		await #expect(throws: SimpleWrappingError.self) {
 			try await captureAnyError(errorType: SimpleWrappingError.self) {

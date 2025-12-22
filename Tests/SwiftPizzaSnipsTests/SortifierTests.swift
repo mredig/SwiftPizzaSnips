@@ -187,6 +187,7 @@ extension SortifierTests {
 		#expect(decoded == expected)
 	}
 
+	@available(iOS 17, *)
 	@Test func decodeWithConfigurationSimpleDefaultValue() async throws {
 		let inData = Data(##"{"value":"foo"}"##.utf8)
 
@@ -200,6 +201,7 @@ extension SortifierTests {
 		#expect(decoded == expectation)
 	}
 
+	@available(iOS 17, *)
 	@Test func decodeWithConfigurationDerivedDefaultValue() async throws {
 		let inDataA = Data(##"{"value":"foo"}"##.utf8)
 		let inDataB = Data(##"{"value":"bar"}"##.utf8)

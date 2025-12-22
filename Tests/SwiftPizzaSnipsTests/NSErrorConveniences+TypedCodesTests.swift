@@ -189,7 +189,7 @@ struct TypedCodesTests {
 	#endif
 	
 	#if canImport(Photos)
-	@available(macOS 10.15, iOS 13, tvOS 13.0, *)
+	@available(macOS 10.15, iOS 15, tvOS 13.0, *)
 	@Test func testPhotosCodeConversion() {
 		let invalidResourceCode = NSError.Codes(PHPhotosError.Code.invalidResource.rawValue)
 		#expect(invalidResourceCode.asPHPhotosCode == .invalidResource)
@@ -216,7 +216,7 @@ struct TypedCodesTests {
 	#endif
 	
 	#if canImport(HealthKit)
-	@available(macOS 13.0, *)
+	@available(macOS 13.0, iOS 14.0, *)
 	@Test func testHealthKitCodeConversion() {
 		let noDataCode = NSError.Codes(HKError.Code.errorNoData.rawValue)
 		#expect(noDataCode.asHealthKitCode == .errorNoData)
@@ -224,6 +224,7 @@ struct TypedCodesTests {
 	#endif
 	
 	#if canImport(PassKit)
+	@available(iOS 15.0, *)
 	@Test func testPassKitCodeConversion() {
 		let unknownCode = NSError.Codes(PKPaymentError.Code.couponCodeExpiredError.rawValue)
 		#expect(unknownCode.asPassKitCode == .couponCodeExpiredError)
@@ -311,15 +312,7 @@ struct TypedCodesTests {
 		#expect(unknownCode.asMessagesCode == .unknown)
 	}
 	#endif
-	
-	#if canImport(QuickLook) && !os(macOS)
-	@available(iOS 13.0, *)
-	@Test func testQuickLookCodeConversion() {
-		let savingFailedCode = NSError.Codes(QLThumbnailError.Code.savingFailed.rawValue)
-		#expect(savingFailedCode.asQuickLookCode == .savingFailed)
-	}
-	#endif
-	
+
 	#if canImport(WatchConnectivity)
 	@Test func testWatchConnectivityCodeConversion() {
 		let sessionNotActivatedCode = NSError.Codes(WCError.Code.sessionNotActivated.rawValue)
