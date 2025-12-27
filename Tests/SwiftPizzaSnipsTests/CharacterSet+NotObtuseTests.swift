@@ -1,32 +1,34 @@
-import XCTest
+import Foundation
 import SwiftPizzaSnips
+import Testing
 
-final class CharacterSetNotObtuseTests: XCTestCase {
-	func testContainsCharacter() {
+struct CharacterSetNotObtuseTests {
+	@Test
+	func containsCharacter() {
 		let hasAlphanumeric = "aabc123"
 		let hasAlpha = "aslkdfj"
 		let hasNumeric = "13245"
 		let hasSpecialCharacter = "123alksdjf%#*"
 		let specialCharacters = CharacterSet.punctuationCharacters.union(.symbols)
 
-		XCTAssertTrue(hasAlphanumeric.containsCharacter(from: .alphanumerics))
-		XCTAssertTrue(hasAlphanumeric.containsCharacter(from: .lowercaseLetters))
-		XCTAssertTrue(hasAlphanumeric.containsCharacter(from: .decimalDigits))
-		XCTAssertFalse(hasAlphanumeric.containsCharacter(from: specialCharacters))
+		#expect(hasAlphanumeric.containsCharacter(from: .alphanumerics))
+		#expect(hasAlphanumeric.containsCharacter(from: .lowercaseLetters))
+		#expect(hasAlphanumeric.containsCharacter(from: .decimalDigits))
+		#expect(hasAlphanumeric.containsCharacter(from: specialCharacters) == false)
 
-		XCTAssertTrue(hasAlpha.containsCharacter(from: .alphanumerics))
-		XCTAssertTrue(hasAlpha.containsCharacter(from: .lowercaseLetters))
-		XCTAssertFalse(hasAlpha.containsCharacter(from: .decimalDigits))
-		XCTAssertFalse(hasAlpha.containsCharacter(from: specialCharacters))
+		#expect(hasAlpha.containsCharacter(from: .alphanumerics))
+		#expect(hasAlpha.containsCharacter(from: .lowercaseLetters))
+		#expect(hasAlpha.containsCharacter(from: .decimalDigits) == false)
+		#expect(hasAlpha.containsCharacter(from: specialCharacters) == false)
 
-		XCTAssertTrue(hasNumeric.containsCharacter(from: .alphanumerics))
-		XCTAssertFalse(hasNumeric.containsCharacter(from: .lowercaseLetters))
-		XCTAssertTrue(hasNumeric.containsCharacter(from: .decimalDigits))
-		XCTAssertFalse(hasNumeric.containsCharacter(from: specialCharacters))
+		#expect(hasNumeric.containsCharacter(from: .alphanumerics))
+		#expect(hasNumeric.containsCharacter(from: .lowercaseLetters) == false)
+		#expect(hasNumeric.containsCharacter(from: .decimalDigits))
+		#expect(hasNumeric.containsCharacter(from: specialCharacters) == false)
 
-		XCTAssertTrue(hasSpecialCharacter.containsCharacter(from: .alphanumerics))
-		XCTAssertTrue(hasSpecialCharacter.containsCharacter(from: .lowercaseLetters))
-		XCTAssertTrue(hasSpecialCharacter.containsCharacter(from: .decimalDigits))
-		XCTAssertTrue(hasSpecialCharacter.containsCharacter(from: specialCharacters))
+		#expect(hasSpecialCharacter.containsCharacter(from: .alphanumerics))
+		#expect(hasSpecialCharacter.containsCharacter(from: .lowercaseLetters))
+		#expect(hasSpecialCharacter.containsCharacter(from: .decimalDigits))
+		#expect(hasSpecialCharacter.containsCharacter(from: specialCharacters))
 	}
 }
