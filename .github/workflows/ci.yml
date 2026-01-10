@@ -86,7 +86,7 @@ jobs:
         run: swift build -c release ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
 
       - name: Test with Swift (Desktop platforms)
-        if: matrix.platform == 'macOS' || matrix.platform == 'Linux'
+        if: matrix.platform == 'macOS' || contains(matrix.platform, 'Linux')
         continue-on-error: ${{ matrix.platform == 'macOS' }}
         run: swift test ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
 
