@@ -22,6 +22,7 @@ jobs:
           - platform: macOS
             os: macos-26
             xcode: "26.2"
+            destination: "platform=macOS"
 
           # # iOS
           # - platform: iOS
