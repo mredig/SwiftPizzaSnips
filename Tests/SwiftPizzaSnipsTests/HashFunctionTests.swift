@@ -12,7 +12,6 @@ import Crypto
 final class HashFunctionTests: XCTestCase {
 	func testHashTrueBool() throws {
 		let numTrueBool: Bool = true
-		let numFalseBool: Bool = false
 
 		var hasher = PersistentHashable.Hasher()
 		hasher.update(bool: numTrueBool)
