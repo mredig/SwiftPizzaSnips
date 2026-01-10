@@ -8,7 +8,7 @@ struct TimeoutTaskTests {
 	@Test(arguments: [true, false]) func asyncUnawareTimesOutStructured(detached: Bool) async throws {
 		let timerStart = Date()
 		let task = createTask(detached: detached, structured: true, timeout: 0.01) { () async throws(TestingError) -> Bool in
-			usleep(1_000_000)
+			usleep(1_500_000)
 			// It is expected that this will always print, delaying the timeout.
 			print("🤬🤬🤬 (Task.isCancelled was ignored and execution continued (\(#function))")
             throw TestingError.failed
@@ -26,7 +26,7 @@ struct TimeoutTaskTests {
 	@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9, *)
 	@Test(arguments: [true, false]) func asyncUnawareTimesOutUnstructured(detached: Bool) async throws {
 		let task = createTask(detached: false, structured: false, timeout: 0.01) { () async throws(TestingError) -> Bool in
-			usleep(1_000_000)
+			usleep(1_500_000)
 			// It is generally expected that this won't always print out as the timeout should ignore that the code is still
 			// executing and finish. However, if the *overall program* continues long enough for the `usleep` to complete,
 			// the print statement will still execute. Think of the potential secondary side effects that could happen in
