@@ -23,29 +23,29 @@ jobs:
             os: macos-26
             xcode: "26.2"
 
-          # # iOS
-          # - platform: iOS
-          #   os: macos-26
-          #   xcode: "26.2"
-          #   destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2"
+          # iOS
+          - platform: iOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2"
 
-          # # tvOS
-          # - platform: tvOS
-          #   os: macos-26
-          #   xcode: "26.2"
-          #   destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=26.2"
+          # tvOS
+          - platform: tvOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=26.2"
 
-          # # watchOS
-          # - platform: watchOS
-          #   os: macos-26
-          #   xcode: "26.2"
-          #   destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.2"
+          # watchOS
+          - platform: watchOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.2"
 
-          # # visionOS
-          # - platform: visionOS
-          #   os: macos-26
-          #   xcode: "26.2"
-          #   destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
+          # visionOS
+          - platform: visionOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
 
           # Linux
           - platform: Linux
