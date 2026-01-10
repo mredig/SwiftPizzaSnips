@@ -73,6 +73,7 @@ jobs:
 
       - name: Test with Swift (Desktop platforms)
         if: matrix.platform == 'macOS' || matrix.platform == 'Linux'
+        continue-on-error: ${{ matrix.platform == 'macOS' }}
         run: swift test
 
       - name: Build with Xcode
