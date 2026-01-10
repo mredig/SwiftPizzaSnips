@@ -49,9 +49,6 @@ jobs:
 
           # Linux
           - platform: Linux
-            os: ubuntu-22.04
-            container: "swift:5.10-jammy"
-          - platform: Linux
             os: ubuntu-24.04
             container: "swift:6.2.3-noble"
 
