@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.platform }} / Swift ${{ matrix.swift }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS
+          - platform: macOS
+            os: macos-14
+            swift: "5.10"
+            xcode: "15.4"
+          - platform: macOS
+            os: macos-15
+            swift: "6.0"
+            xcode: "16.1"
+
+          # iOS
+          - platform: iOS
+            os: macos-14
+            swift: "5.10"
+            xcode: "15.4"
+            destination: "platform=iOS Simulator,name=iPhone 15,OS=17.5"
+          - platform: iOS
+            os: macos-15
+            swift: "6.0"
+            xcode: "16.1"
+            destination: "platform=iOS Simulator,name=iPhone 16,OS=18.1"
+
+          # tvOS
+          - platform: tvOS
+            os: macos-14
+            swift: "5.10"
+            xcode: "15.4"
+            destination: "platform=tvOS Simulator,name=Apple TV,OS=17.5"
+          - platform: tvOS
+            os: macos-15
+            swift: "6.0"
+            xcode: "16.1"
+            destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=18.1"
+
+          # watchOS
+          - platform: watchOS
+            os: macos-14
+            swift: "5.10"
+            xcode: "15.4"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.5"
+          - platform: watchOS
+            os: macos-15
+            swift: "6.0"
+            xcode: "16.1"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.1"
+
+          # visionOS
+          - platform: visionOS
+            os: macos-14
+            swift: "5.10"
+            xcode: "15.4"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=1.2"
+          - platform: visionOS
+            os: macos-15
+            swift: "6.0"
+            xcode: "16.1"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.1"
+
+          # Linux
+          - platform: Linux
+            os: ubuntu-22.04
+            swift: "5.10"
+            container: "swift:5.10-jammy"
+          - platform: Linux
+            os: ubuntu-24.04
+            swift: "6.0"
+            container: "swift:6.0-noble"
+
+    container: ${{ matrix.container }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        if: runner.os == 'macOS'
+        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Build (macOS/Linux)
+        if: matrix.platform == 'macOS' || matrix.platform == 'Linux'
+        run: swift build
+
+      - name: Test (macOS/Linux)
+        if: matrix.platform == 'macOS' || matrix.platform == 'Linux'
+        run: swift test
+
+      - name: Build (Apple platforms)
+        if: matrix.platform != 'macOS' && matrix.platform != 'Linux'
+        run: |
+          xcodebuild build-for-testing \
+            -scheme SwiftPizzaSnips \
+            -destination "${{ matrix.destination }}" \
+            -enableCodeCoverage YES \
+            | xcpretty
+
+      - name: Test (Apple platforms)
+        if: matrix.platform != 'macOS' && matrix.platform != 'Linux'
+        run: |
+          xcodebuild test-without-building \
+            -scheme SwiftPizzaSnips \
+            -destination "${{ matrix.destination }}" \
+            -enableCodeCoverage YES \
+            | xcpretty
