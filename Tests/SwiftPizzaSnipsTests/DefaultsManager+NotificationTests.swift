@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 import XCTest
 import SwiftPizzaSnips
 
@@ -208,3 +209,4 @@ extension DefaultsManager.KeyWithDefault where Value == Int, StoredValue == Valu
 		DefaultsManagerNotificationTests.testNotificationDefaultValueBKey,
 		defaultValue: 4567)
 }
+#endif

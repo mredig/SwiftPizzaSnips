@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 import XCTest
 import SwiftPizzaSnips
 
@@ -484,3 +485,4 @@ struct TransformableValue: Codable, Hashable {
 	let age: Int
 	let favoriteColor: String
 }
+#endif

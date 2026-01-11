@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 import XCTest
 import SwiftPizzaSnips
 
@@ -96,3 +97,4 @@ final class DefaultsManagerMigrationTests: XCTestCase {
 extension DefaultsManager.Key where Value == String, StoredValue == String {
 	static let stringyValue = Self("com.pizzaSnips.stringyValue")
 }
+#endif
