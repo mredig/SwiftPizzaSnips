@@ -83,11 +83,11 @@ jobs:
         run: swift build ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
 
       - name: Test with Swift (Desktop platforms)
-        if: matrix.platform == 'macOS' || contains(matrix.platform, 'Linux')
+        if: (matrix.platform == 'macOS' || contains(matrix.platform, 'Linux')) && !matrix.swift_sdk
         continue-on-error: ${{ matrix.platform == 'macOS' }}
         run: |
           rm -rf .build
-          swift test -c debug ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
+          swift test -c debug
 
       - name: Build with Swift (Release)
         run: swift build -c release ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
