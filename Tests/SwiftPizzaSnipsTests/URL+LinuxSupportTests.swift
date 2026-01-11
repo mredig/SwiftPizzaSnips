@@ -16,9 +16,17 @@ struct URLLinuxSupportTests {
 		#expect("/bin" == binURL.path())
 		#expect(binURL.hasDirectoryPath == false)
 
+		// Linux Foundation leaves off the trailing `/`, so it fails on linux.
 		binURL = URL(filePath: binPath, directoryHint: .checkFileSystem)
+		#if canImport(FoundationNetworking)
+		withKnownIssue {
+			#expect("/bin/" == binURL.path())
+			#expect(binURL.hasDirectoryPath)
+		}
+		#else
 		#expect("/bin/" == binURL.path())
 		#expect(binURL.hasDirectoryPath)
+		#endif
 
 		binURL = URL(filePath: binPath, directoryHint: .isDirectory)
 		#expect("/bin/" == binURL.path())

@@ -1,3 +1,6 @@
+// UserDefaults is broken on linux.
+// It would be good to create a replacement in this package, but not right NOW
+#if !canImport(FoundationNetworking)
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
@@ -131,7 +134,7 @@ public class DefaultsManager: Withable {
 	public struct Key<Value, StoredValue: PropertyListCodable>: RawRepresentable, KeyProtocol, Withable {
 		public let rawValue: String
 		public var key: String { rawValue }
-		
+
 		internal private(set) var transform: Transform<Value, StoredValue>?
 
 		public init(_ key: String) {
@@ -307,3 +310,4 @@ extension UInt: PropertyListCodable {}
 //extension UInt128: PropertyListCodable {}
 //@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
 //extension Int128: PropertyListCodable {}
+#endif

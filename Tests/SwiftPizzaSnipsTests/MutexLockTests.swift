@@ -10,8 +10,6 @@ struct MutexLockTests {
 		var value = 0
 	}
 
-	/// This only seems to demo itself consistently when it's run individually. That's fine since it's not testing
-	/// functionality of this package, but instead demonstrating that there are race conditions without locking.
 	@Test func baseline() async throws {
 		let liar = UnsafeLiar()
 		DispatchQueue.concurrentPerform(iterations: iterations) { _ in
@@ -21,7 +19,13 @@ struct MutexLockTests {
 		}
 		print("without locking: \(liar.value)")
 
-		#expect(iterations > liar.value, "If these values are identical, there aren't enough iterations to accurately test")
+		let comment = """
+		This only seems to demo itself consistently when it's run individually. That's fine since it's not testing \
+		functionality of this package, but instead demonstrating that there are race conditions without locking.
+		"""
+		withKnownIssue("\(comment)", isIntermittent: true) {
+			#expect(iterations > liar.value, "If these values are identical, there aren't enough iterations to accurately test")
+		}
 	}
 
 	@Test func deferralMethod() async throws {

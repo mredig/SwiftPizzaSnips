@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
@@ -55,3 +56,4 @@ extension DefaultsManager.KeyWithDefault where Value == Int, StoredValue == Int 
 		"com.pizzaSnips.defaultsVersion",
 		defaultValue: -1)
 }
+#endif

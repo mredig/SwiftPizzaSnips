@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.platform }} / Xcode ${{ matrix.xcode || matrix.container }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS
+          - platform: macOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=macOS"
+
+          # iOS
+          - platform: iOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2"
+
+          # tvOS
+          - platform: tvOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=26.2"
+
+          # watchOS
+          - platform: watchOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.2"
+
+          # visionOS
+          - platform: visionOS
+            os: macos-26
+            xcode: "26.2"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
+
+          # Linux
+          - platform: Linux
+            os: ubuntu-24.04
+            container: "swift:6.2.3-noble"
+
+          # Linux (Static SDK)
+          - platform: Linux (Static)
+            os: ubuntu-24.04
+            container: "swift:6.2.3-noble"
+            swift_sdk: "https://download.swift.org/swift-6.2.3-release/static-sdk/swift-6.2.3-RELEASE/swift-6.2.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz"
+            swift_sdk_checksum: "f30ec724d824ef43b5546e02ca06a8682dafab4b26a99fbb0e858c347e507a2c"
+
+    container: ${{ matrix.container }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        if: runner.os == 'macOS'
+        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Install Static SDK
+        if: matrix.swift_sdk
+        run: |
+          swift sdk install ${{ matrix.swift_sdk }} --checksum ${{ matrix.swift_sdk_checksum }}
+          swift sdk list
+
+      - name: Build with Swift (Debug)
+        run: swift build ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
+
+      - name: Test with Swift (Desktop platforms)
+        if: (matrix.platform == 'macOS' || contains(matrix.platform, 'Linux')) && !matrix.swift_sdk
+        continue-on-error: ${{ matrix.platform == 'macOS' }}
+        run: |
+          rm -rf .build
+          swift test -c debug
+
+      - name: Build with Swift (Release)
+        run: swift build -c release ${{ matrix.swift_sdk && '--swift-sdk swift-6.2.3-RELEASE_static-linux-0.0.1' || '' }}
+
+      - name: Build with Xcode (Debug)
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild build-for-testing \
+            -scheme SwiftPizzaSnips \
+            -destination "${{ matrix.destination }}" \
+            -configuration Debug \
+            -enableCodeCoverage YES \
+            | xcpretty
+
+      - name: Test with Xcode (Debug)
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild test-without-building \
+            -scheme SwiftPizzaSnips \
+            -destination "${{ matrix.destination }}" \
+            -configuration Debug \
+            -enableCodeCoverage YES \
+            | xcpretty
+
+      - name: Build with Xcode (Release)
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild build \
+            -scheme SwiftPizzaSnips \
+            -destination "${{ matrix.destination }}" \
+            -configuration Release \
+            | xcpretty

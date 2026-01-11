@@ -1,3 +1,4 @@
+#if !canImport(FoundationNetworking)
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6, *)
@@ -103,3 +104,4 @@ extension DefaultsManager {
 		func performAction(with value: Any)
 	}
 }
+#endif
